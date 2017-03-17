@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://www.ontimize.com/schema/report"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:beans="http://www.springframework.org/schema/beans"
+	targetNamespace="http://www.ontimize.com/schema/report"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<xsd:import namespace="http://www.springframework.org/schema/beans"
+		schemaLocation="http://www.springframework.org/schema/beans/spring-beans-4.3.xsd" />
+
+	<xsd:element name="ontimize-report-configuration">
+		<xsd:annotation>
+			<xsd:documentation>
+				Ontimize report services configuration.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="beans:identifiedType">
+					<!-- <xsd:attribute name="lenient" type="xsd:boolean"/> -->
+					<xsd:choice minOccurs="0" maxOccurs="unbounded">
+						<xsd:element ref="report" minOccurs="1" maxOccurs="1" />
+					</xsd:choice>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+
+	<!-- REPORT -->
+	<xsd:element name="default-report-compiler">
+	</xsd:element>
+
+	<xsd:element name="default-report-filler">
+	</xsd:element>
+
+
+	<xsd:element name="compiler">
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="beans:identifiedType">
+					<xsd:choice minOccurs="1" maxOccurs="unbounded">
+						<xsd:element ref="beans:bean" />
+						<xsd:element ref="beans:ref" />
+						<xsd:element ref="beans:idref" />
+						<xsd:element ref="beans:value" />
+						<xsd:element ref="default-report-compiler" />
+						<!-- <xsd:any minOccurs="0" /> -->
+					</xsd:choice>
+					<xsd:attribute name="scope" type="xsd:string" />
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="filler">
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="beans:identifiedType">
+					<xsd:choice minOccurs="1" maxOccurs="unbounded">
+						<xsd:element ref="beans:bean" />
+						<xsd:element ref="beans:ref" />
+						<xsd:element ref="beans:idref" />
+						<xsd:element ref="beans:value" />
+						<xsd:element ref="default-report-filler" />
+						<!-- <xsd:any minOccurs="0" /> -->
+					</xsd:choice>
+					<xsd:attribute name="scope" type="xsd:string" />
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="report">
+		<xsd:annotation>
+			<xsd:documentation>
+				Configure report store.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="default-report-engine">
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="base-path" minOccurs="1"
+								maxOccurs="1">
+								<xsd:complexType>
+									<xsd:group ref="propertyResolverGroup"></xsd:group>
+								</xsd:complexType>
+							</xsd:element>
+							<xsd:element ref="compiler" maxOccurs="1" minOccurs="0" />
+							<xsd:element ref="filler" maxOccurs="1" minOccurs="0" />
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="database-property">
+		<xsd:annotation>
+			<xsd:documentation>
+				Get a property from database.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="ref-repository" type="xsd:string"
+				use="required" />
+			<xsd:attribute name="value-column-name" type="xsd:string"
+				use="required" />
+			<xsd:attribute name="filter-column-name" type="xsd:string"
+				use="required" />
+			<xsd:attribute name="filter-column-value" type="xsd:string"
+				use="required" />
+			<xsd:attribute name="query-id" type="xsd:string" use="optional" />
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="fixed-property">
+		<xsd:annotation>
+			<xsd:documentation>
+				Establish a fixed property.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="value" type="xsd:string" use="required" />
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:group name="propertyResolverGroup">
+		<xsd:sequence>
+			<xsd:choice minOccurs="1" maxOccurs="unbounded">
+				<xsd:element ref="beans:bean" />
+				<xsd:element ref="beans:ref" />
+				<xsd:element ref="beans:idref" />
+				<xsd:element ref="beans:value" />
+				<xsd:element ref="database-property" />
+				<xsd:element ref="fixed-property" />
+			</xsd:choice>
+		</xsd:sequence>
+	</xsd:group>
+</xsd:schema>

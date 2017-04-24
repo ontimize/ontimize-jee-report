@@ -38,6 +38,7 @@ import com.ontimize.jee.common.services.reportstore.BasicReportDefinition;
 import com.ontimize.jee.common.services.reportstore.IReportDefinition;
 import com.ontimize.jee.common.services.reportstore.ReportOutputType;
 import com.ontimize.jee.common.services.reportstore.ReportStoreException;
+import com.ontimize.jee.common.spring.parser.AbstractPropertyResolver;
 import com.ontimize.jee.common.tools.CheckingTools;
 import com.ontimize.jee.common.tools.MapTools;
 import com.ontimize.jee.common.tools.PathTools;
@@ -120,6 +121,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 
 	/** The base path. */
 	private Path				basePath;
+	protected AbstractPropertyResolver<String>	basePathResolver;
 
 	/** The report compiler. */
 	private IReportCompiler		reportCompiler;
@@ -579,6 +581,17 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 		return reportDefinition;
 	}
 
+	@Override
+	public void updateSettings() {
+		FileReportStoreEngine.logger.debug("Updating settings...");
+		if (this.basePathResolver != null) {
+			CheckingTools.failIfNull(this.basePathResolver, "Report store base path resolver is not configured.");
+			Path resolvedValue = this.getResolverValue(this.basePathResolver);
+			CheckingTools.failIfNull(resolvedValue, "Report store base path is not configured.");
+			this.basePath = resolvedValue;
+		}
+	}
+
 	/**
 	 * Gets the documents base path.
 	 *
@@ -590,13 +603,55 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	}
 
 	/**
+	 * Gets the resolver value.
+	 *
+	 * @param resolver
+	 *            the resolver
+	 * @return the resolver value
+	 */
+	protected Path getResolverValue(AbstractPropertyResolver<String> resolver) {
+		if (resolver != null) {
+			try {
+				return Paths.get(resolver.getValue());
+			} catch (Exception ex) {
+				FileReportStoreEngine.logger.error(null, ex);
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Sets the report store base path.
 	 *
 	 * @param basePath
 	 *            the report store base path
 	 */
-	public void setBasePath(String basePath) {
+	public void setBasePath(final String basePath) {
 		this.basePath = Paths.get(basePath);
+		this.basePathResolver = new AbstractPropertyResolver<String>() {
+			@Override
+			public String getValue() {
+				return basePath;
+			}
+		};
+	}
+
+	/**
+	 *
+	 * @return
+	 */
+	public AbstractPropertyResolver<String> getBasePathResolver() {
+		return this.basePathResolver;
+	}
+
+	/**
+	 * Sets the documents base path resolver.
+	 *
+	 * @param basePathResolver
+	 *            the base path resolver
+	 */
+	public void setBasePathResolver(AbstractPropertyResolver<String> basePathResolver) {
+		this.basePathResolver = basePathResolver;
 	}
 
 	@Override
@@ -625,6 +680,8 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 		if (this.reportFiller instanceof ApplicationContextAware) {
 			((ApplicationContextAware) this.reportFiller).setApplicationContext(this.applicationContext);
 		}
+
+		this.updateSettings();
 	}
 
 }

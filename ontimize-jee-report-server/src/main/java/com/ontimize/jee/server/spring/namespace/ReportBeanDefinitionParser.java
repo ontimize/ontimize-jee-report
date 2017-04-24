@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.xml.DomUtils;
@@ -93,9 +94,14 @@ public class ReportBeanDefinitionParser extends AbstractSingleBeanDefinitionPars
 			if (childElements.size() == 0) {
 				builder.addPropertyValue("basePath", ebasePath.getNodeValue());
 			} else {
-				Object parseNode = DefinitionParserUtil.parseNode(childElements.get(0), ctx, builder.getBeanDefinition(), element.getAttribute("scope"));
-				builder.addPropertyValue("basePath", parseNode);
+				GenericBeanDefinition parseNode = (GenericBeanDefinition) DefinitionParserUtil.parseNode(childElements.get(0), ctx, builder.getBeanDefinition(), element.getAttribute("scope"));
+				builder.addPropertyValue("basePathResolver", parseNode);
+				if (!parseNode.getPropertyValues().contains("useMyselfInSpringContext")) {
+					parseNode.getPropertyValues().add("useMyselfInSpringContext", Boolean.TRUE);
+				}
 			}
+			builder.setDependencyCheck(AbstractBeanDefinition.DEPENDENCY_CHECK_NONE);
+			builder.setLazyInit(true);
 
 			// Parse pther childs
 			final NodeList childNodes = element.getChildNodes();

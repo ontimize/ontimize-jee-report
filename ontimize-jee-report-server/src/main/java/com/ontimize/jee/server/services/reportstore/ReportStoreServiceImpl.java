@@ -4,8 +4,6 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -13,11 +11,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.ontimize.jee.common.services.reportstore.IReportDefinition;
-import com.ontimize.jee.common.services.reportstore.IReportStoreService;
 import com.ontimize.jee.common.services.reportstore.ReportOutputType;
 import com.ontimize.jee.common.services.reportstore.ReportStoreException;
 import com.ontimize.jee.common.tools.CheckingTools;
-import com.ontimize.jee.server.configuration.OntimizeConfiguration;
 import com.ontimize.jee.server.spring.namespace.OntimizeReportConfiguration;
 
 /**
@@ -25,10 +21,7 @@ import com.ontimize.jee.server.spring.namespace.OntimizeReportConfiguration;
  */
 @Service("ReportStoreService")
 @Lazy(value = true)
-public class ReportStoreServiceImpl implements IReportStoreService, ApplicationContextAware {
-
-	/** The Constant logger. */
-	private static final Logger		logger			= LoggerFactory.getLogger(ReportStoreServiceImpl.class);
+public class ReportStoreServiceImpl implements IReportStoreServiceServer, ApplicationContextAware {
 
 	/** The implementation. */
 	protected IReportStoreEngine	implementation	= null;
@@ -163,5 +156,11 @@ public class ReportStoreServiceImpl implements IReportStoreService, ApplicationC
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.implementation = applicationContext.getBean(OntimizeReportConfiguration.class).getReportStoreConfiguration().getEngine();
+	}
+
+	@Override
+	public void updateSettings() {
+		this.getImplementation().updateSettings();
+
 	}
 }

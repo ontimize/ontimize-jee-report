@@ -129,7 +129,7 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
 		Connection con = null;
 		DataSource dataSource = null;
 		try {
-			//Protect invalid input data
+			// Protect invalid input data
 			CheckingTools.failIfNull(reportDefinition, "E_REQUIRED_REPORTDEFINITION", new Object[0]);
 			CheckingTools.failIfNull(outputType, "E_REQUIRED_OUTPUTTYPE", new Object[0]);
 			CheckingTools.failIfNull(compiledReportFolder, "E_REQUIRED_COMPILEDREPORTFOLDER", new Object[0]);
@@ -137,7 +137,7 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
 			reportParameters = reportParameters == null ? new HashMap<String, Object>() : reportParameters;
 
 			if (datasourceName == null) {
-				dataSource = this.applicationContext.getBean(DataSource.class); //TODO be carefull, can exists more than one
+				dataSource = this.applicationContext.getBean(DataSource.class); // TODO be carefull, can exists more than one
 			} else {
 				dataSource = this.applicationContext.getBean(datasourceName, DataSource.class);
 			}
@@ -158,9 +158,7 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
 		} catch (JRException | IOException error) {
 			throw new ReportStoreException(error);
 		} finally {
-			if ((con != null) && (dataSource != null)) {
-				DataSourceUtils.releaseConnection(con, dataSource);
-			}
+			DataSourceUtils.releaseConnection(con, dataSource);
 		}
 	}
 

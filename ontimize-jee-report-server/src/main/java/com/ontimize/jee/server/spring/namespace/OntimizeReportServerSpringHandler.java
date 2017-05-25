@@ -7,8 +7,6 @@ public class OntimizeReportServerSpringHandler extends NamespaceHandlerSupport {
 	@Override
 	public void init() {
 		this.registerBeanDefinitionParser("ontimize-report-configuration", new OntimizeReportConfigurationBeanDefinitionParser());
-		this.registerBeanDefinitionParser("fixed-property", new FixedPropertyBeanDefinitionParser());
-		this.registerBeanDefinitionParser("database-property", new DatabasePropertyBeanDefinitionParser());
 	}
 
 }

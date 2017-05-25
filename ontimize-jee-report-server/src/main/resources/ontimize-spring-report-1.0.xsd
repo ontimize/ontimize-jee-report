@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns="http://www.ontimize.com/schema/report"
-	xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:beans="http://www.springframework.org/schema/beans"
-	targetNamespace="http://www.ontimize.com/schema/report"
-	elementFormDefault="qualified" attributeFormDefault="unqualified">
+<xsd:schema xmlns="http://www.ontimize.com/schema/report" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:beans="http://www.springframework.org/schema/beans" xmlns:oss="http://www.ontimize.com/schema/beans"
+	targetNamespace="http://www.ontimize.com/schema/report" elementFormDefault="qualified" attributeFormDefault="unqualified">
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans"
-		schemaLocation="http://www.springframework.org/schema/beans/spring-beans-4.3.xsd" />
+	<xsd:import namespace="http://www.ontimize.com/schema/beans" schemaLocation="http://www.ontimize.com/schema/beans/ontimize-spring-server.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-4.3.xsd" />
 
 	<xsd:element name="ontimize-report-configuration">
 		<xsd:annotation>
@@ -80,10 +78,9 @@
 				<xsd:element name="default-report-engine">
 					<xsd:complexType>
 						<xsd:sequence>
-							<xsd:element name="base-path" minOccurs="1"
-								maxOccurs="1">
+							<xsd:element name="base-path" minOccurs="1" maxOccurs="1">
 								<xsd:complexType>
-									<xsd:group ref="propertyResolverGroup"></xsd:group>
+									<xsd:group ref="oss:property-resolver-group"></xsd:group>
 								</xsd:complexType>
 							</xsd:element>
 							<xsd:element ref="compiler" maxOccurs="1" minOccurs="0" />
@@ -94,45 +91,4 @@
 			</xsd:sequence>
 		</xsd:complexType>
 	</xsd:element>
-	<xsd:element name="database-property">
-		<xsd:annotation>
-			<xsd:documentation>
-				Get a property from database.
-			</xsd:documentation>
-		</xsd:annotation>
-		<xsd:complexType>
-			<xsd:attribute name="ref-repository" type="xsd:string"
-				use="required" />
-			<xsd:attribute name="value-column-name" type="xsd:string"
-				use="required" />
-			<xsd:attribute name="filter-column-name" type="xsd:string"
-				use="required" />
-			<xsd:attribute name="filter-column-value" type="xsd:string"
-				use="required" />
-			<xsd:attribute name="query-id" type="xsd:string" use="optional" />
-		</xsd:complexType>
-	</xsd:element>
-
-	<xsd:element name="fixed-property">
-		<xsd:annotation>
-			<xsd:documentation>
-				Establish a fixed property.
-			</xsd:documentation>
-		</xsd:annotation>
-		<xsd:complexType>
-			<xsd:attribute name="value" type="xsd:string" use="required" />
-		</xsd:complexType>
-	</xsd:element>
-	<xsd:group name="propertyResolverGroup">
-		<xsd:sequence>
-			<xsd:choice minOccurs="1" maxOccurs="unbounded">
-				<xsd:element ref="beans:bean" />
-				<xsd:element ref="beans:ref" />
-				<xsd:element ref="beans:idref" />
-				<xsd:element ref="beans:value" />
-				<xsd:element ref="database-property" />
-				<xsd:element ref="fixed-property" />
-			</xsd:choice>
-		</xsd:sequence>
-	</xsd:group>
 </xsd:schema>

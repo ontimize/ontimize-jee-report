@@ -45,7 +45,7 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
 		this.name = name;
 		this.description = description;
 		this.type = type;
-		this.otherInfo = new HashMap<String, String>();
+		this.otherInfo = new HashMap<>();
 	}
 
 	/**

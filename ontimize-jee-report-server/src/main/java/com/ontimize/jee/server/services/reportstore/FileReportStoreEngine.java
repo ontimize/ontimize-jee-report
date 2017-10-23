@@ -54,83 +54,83 @@ import net.lingala.zip4j.util.Zip4jConstants;
 public class FileReportStoreEngine implements IReportStoreEngine, ApplicationContextAware, InitializingBean {
 
 	/** The Constant logger. */
-	private static final Logger	logger							= LoggerFactory.getLogger(FileReportStoreEngine.class);
+	private static final Logger					logger							= LoggerFactory.getLogger(FileReportStoreEngine.class);
 
 	/** The Constant ERROR_LISTING_REPORTS. */
-	private static final String	ERROR_LISTING_REPORTS			= "E_LISTING_REPORTS";
+	private static final String					ERROR_LISTING_REPORTS			= "E_LISTING_REPORTS";
 
 	/** The Constant ERROR_GETTING_REPORT_DEFINITION. */
-	private static final String	ERROR_GETTING_REPORT_DEFINITION	= "E_GETTING_REPORT_DEFINITION";
+	private static final String					ERROR_GETTING_REPORT_DEFINITION	= "E_GETTING_REPORT_DEFINITION";
 
 	/** The Constant ERROR_REMOVING_REPORT. */
-	private static final String	ERROR_REMOVING_REPORT			= "E_REMOVING_REPORT";
+	private static final String					ERROR_REMOVING_REPORT			= "E_REMOVING_REPORT";
 
 	/** The Constant ERROR_UPDATING_REPORT. */
-	private static final String	ERROR_UPDATING_REPORT			= "E_UPDATING_REPORT";
+	private static final String					ERROR_UPDATING_REPORT			= "E_UPDATING_REPORT";
 
 	/** The Constant ERROR_ADDING_REPORT. */
-	private static final String	ERROR_ADDING_REPORT				= "E_ADDING_REPORT";
+	private static final String					ERROR_ADDING_REPORT				= "E_ADDING_REPORT";
 
 	/** The Constant ERROR_REPORT_ID_ALREADY_EXISTS. */
-	private static final String	ERROR_REPORT_ID_ALREADY_EXISTS	= "E_REPORT_ID_ALREADY_EXISTS";
+	private static final String					ERROR_REPORT_ID_ALREADY_EXISTS	= "E_REPORT_ID_ALREADY_EXISTS";
 
 	/** The Constant ERROR_NO_REPORT_DEFINITION. */
-	private static final String	ERROR_NO_REPORT_DEFINITION		= "E_NO_REPORT_DEFINITION";
+	private static final String					ERROR_NO_REPORT_DEFINITION		= "E_NO_REPORT_DEFINITION";
 
 	/** The Constant ERROR_GETTING_REPORT_SOURCE. */
-	private static final String	ERROR_GETTING_REPORT_SOURCE		= "E_GETTING_REPORT_SOURCE";
+	private static final String					ERROR_GETTING_REPORT_SOURCE		= "E_GETTING_REPORT_SOURCE";
 
 	/** The Constant ERROR_REPORT_ID_NOT_EXISTS. */
-	private static final String	ERROR_REPORT_ID_NOT_EXISTS		= "E_REPORT_ID_NOT_EXISTS";
+	private static final String					ERROR_REPORT_ID_NOT_EXISTS		= "E_REPORT_ID_NOT_EXISTS";
 
 	/** The Constant ERROR_NO_REPORT_KEY. */
-	private static final String	ERROR_NO_REPORT_KEY				= "E_NO_REPORT_KEY";
+	private static final String					ERROR_NO_REPORT_KEY				= "E_NO_REPORT_KEY";
 
 	/** The Constant PROPERTY_TYPE. */
-	private static final String	PROPERTY_TYPE					= "type";
+	private static final String					PROPERTY_TYPE					= "type";
 
 	/** The Constant PROPERTY_DESCRIPTION. */
-	private static final String	PROPERTY_DESCRIPTION			= "description";
+	private static final String					PROPERTY_DESCRIPTION			= "description";
 
 	/** The Constant PROPERTY_NAME. */
-	private static final String	PROPERTY_NAME					= "name";
+	private static final String					PROPERTY_NAME					= "name";
 
 	/** The Constant PROPERTY_ID. */
-	private static final String	PROPERTY_ID						= "id";
+	private static final String					PROPERTY_ID						= "id";
 
 	/** The Constant PROPERTY_ID. */
-	private static final String	PROPERTY_MAINREPORTFILENAME		= "mainreportfilename";
+	private static final String					PROPERTY_MAINREPORTFILENAME		= "mainreportfilename";
 
 	/** The Constant PROPERTY_EXTRA_PREFIX. */
-	private static final String	PROPERTY_EXTRA_PREFIX			= "extra.";
+	private static final String					PROPERTY_EXTRA_PREFIX			= "extra.";
 
 	/** The Constant ZIP_EXTENSION. */
-	private static final String	ZIP_EXTENSION					= ".zip";
+	private static final String					ZIP_EXTENSION					= ".zip";
 
 	/** The Constant PREFIX. */
-	private static final String	PREFIX							= "rep";
+	private static final String					PREFIX							= "rep";
 
 	/** The Constant PROP_EXTENSION. */
-	private static final String	PROP_EXTENSION					= ".properties";
+	private static final String					PROP_EXTENSION					= ".properties";
 
 	/** The Constant TMP_PREFIX. */
-	private static final String	TMP_PREFIX						= "OJEE_RTMP";
+	private static final String					TMP_PREFIX						= "OJEE_RTMP";
 
 	/** The bundle. */
-	private ResourceBundle		bundle;
+	private ResourceBundle						bundle;
 
 	/** The base path. */
-	private Path				basePath;
+	private Path								basePath;
 	protected AbstractPropertyResolver<String>	basePathResolver;
 
 	/** The report compiler. */
-	private IReportCompiler		reportCompiler;
+	private IReportCompiler						reportCompiler;
 
 	/** The report filler. */
-	private IReportFiller		reportFiller;
+	private IReportFiller						reportFiller;
 
 	/** The application context. */
-	private ApplicationContext	applicationContext;
+	private ApplicationContext					applicationContext;
 
 	/**
 	 * Instantiates a new file report store.
@@ -226,6 +226,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 					Files.move(tempOldReportFile, reportFile);
 				}
 			} catch (IOException e) {
+				FileReportStoreEngine.logger.error(null, e);
 			}
 			throw new ReportStoreException(FileReportStoreEngine.ERROR_UPDATING_REPORT, ex);
 		}
@@ -311,6 +312,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 					sourceFileList.add(path.toFile());
 				}
 			} catch (IOException ex) {
+				FileReportStoreEngine.logger.error(null, ex);
 			}
 
 			zipFile.addFiles(sourceFileList, parameters);
@@ -336,6 +338,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 				return res;
 			}
 			Files.walkFileTree(reportFolder, new SimpleFileVisitor<Path>() {
+
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 					if (file.getFileName().toString().startsWith(FileReportStoreEngine.PREFIX) && file.getFileName().toString().endsWith(FileReportStoreEngine.PROP_EXTENSION)) {
@@ -375,9 +378,9 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	 */
 	@Override
 	public InputStream fillReport(Object reportId, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType)
-			throws ReportStoreException {
+	        throws ReportStoreException {
 		return this.reportFiller.fillReport(this.getReportDefinition(reportId), this.getReportCompiledFolder(reportId), reportParameters, outputType, otherType, this.getBundle(),
-				this.getLocale(), dataSourceName);
+		        this.getLocale(), dataSourceName);
 	}
 
 	/*
@@ -387,10 +390,10 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	 */
 	@Override
 	public InputStream fillReport(Object reportId, String serviceName, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType)
-			throws ReportStoreException {
+	        throws ReportStoreException {
 		IReportAdapter adapter = this.applicationContext.getBean(IReportAdapter.class, serviceName);
 		return this.reportFiller.fillReport(this.getReportDefinition(reportId), this.getReportCompiledFolder(reportId), adapter, reportParameters, outputType, otherType,
-				this.getBundle(), this.getLocale(), dataSourceName);
+		        this.getBundle(), this.getLocale(), dataSourceName);
 	}
 
 	@Override
@@ -568,8 +571,8 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 			prop.load(is);
 		}
 		BasicReportDefinition reportDefinition = new BasicReportDefinition(prop.getProperty(FileReportStoreEngine.PROPERTY_ID),
-				prop.getProperty(FileReportStoreEngine.PROPERTY_NAME), prop.getProperty(FileReportStoreEngine.PROPERTY_DESCRIPTION),
-				prop.getProperty(FileReportStoreEngine.PROPERTY_TYPE));
+		        prop.getProperty(FileReportStoreEngine.PROPERTY_NAME), prop.getProperty(FileReportStoreEngine.PROPERTY_DESCRIPTION),
+		        prop.getProperty(FileReportStoreEngine.PROPERTY_TYPE));
 		reportDefinition.setMainReportFileName(prop.getProperty(FileReportStoreEngine.PROPERTY_MAINREPORTFILENAME));
 		for (Entry<Object, Object> entry : prop.entrySet()) {
 			String key = (String) entry.getKey();
@@ -629,6 +632,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	public void setBasePath(final String basePath) {
 		this.basePath = Paths.get(basePath);
 		this.basePathResolver = new AbstractPropertyResolver<String>() {
+
 			@Override
 			public String getValue() {
 				return basePath;

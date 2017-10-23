@@ -2,7 +2,6 @@ package com.ontimize.jee.common.services.reportstore;
 
 import java.util.Map;
 
-
 /**
  * The Interface IReportDefinition.
  */

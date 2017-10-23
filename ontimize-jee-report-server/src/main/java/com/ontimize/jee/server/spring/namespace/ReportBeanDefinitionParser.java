@@ -94,7 +94,8 @@ public class ReportBeanDefinitionParser extends AbstractSingleBeanDefinitionPars
 			if (childElements.size() == 0) {
 				builder.addPropertyValue("basePath", ebasePath.getNodeValue());
 			} else {
-				GenericBeanDefinition parseNode = (GenericBeanDefinition) DefinitionParserUtil.parseNode(childElements.get(0), ctx, builder.getBeanDefinition(), element.getAttribute("scope"));
+				GenericBeanDefinition parseNode = (GenericBeanDefinition) DefinitionParserUtil.parseNode(childElements.get(0), ctx, builder.getBeanDefinition(),
+				        element.getAttribute("scope"));
 				builder.addPropertyValue("basePathResolver", parseNode);
 				if (!parseNode.getPropertyValues().contains("useMyselfInSpringContext")) {
 					parseNode.getPropertyValues().add("useMyselfInSpringContext", Boolean.TRUE);

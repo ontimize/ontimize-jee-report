@@ -8,7 +8,7 @@ import com.ontimize.jee.common.exceptions.OntimizeJEEException;
 public class ReportStoreException extends OntimizeJEEException {
 
 	/** The Constant serialVersionUID. */
-	private static final long	serialVersionUID	= 1L;
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Instantiates a new report store exception.

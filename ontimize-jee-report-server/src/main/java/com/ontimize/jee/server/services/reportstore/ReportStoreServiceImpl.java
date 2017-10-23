@@ -24,7 +24,7 @@ import com.ontimize.jee.server.spring.namespace.OntimizeReportConfiguration;
 public class ReportStoreServiceImpl implements IReportStoreServiceServer, ApplicationContextAware {
 
 	/** The implementation. */
-	protected IReportStoreEngine	implementation	= null;
+	protected IReportStoreEngine implementation = null;
 
 	/*
 	 * (non-Javadoc)
@@ -114,7 +114,7 @@ public class ReportStoreServiceImpl implements IReportStoreServiceServer, Applic
 	 */
 	@Override
 	public InputStream fillReport(Object reportId, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType)
-			throws ReportStoreException {
+	        throws ReportStoreException {
 		return this.getImplementation().fillReport(reportId, reportParameters, dataSourceName, outputType, otherType);
 	}
 
@@ -125,7 +125,7 @@ public class ReportStoreServiceImpl implements IReportStoreServiceServer, Applic
 	 */
 	@Override
 	public InputStream fillReport(Object reportId, String serviceName, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType)
-			throws ReportStoreException {
+	        throws ReportStoreException {
 		return this.getImplementation().fillReport(reportId, serviceName, reportParameters, dataSourceName, outputType, otherType);
 	}
 

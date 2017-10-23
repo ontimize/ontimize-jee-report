@@ -8,7 +8,7 @@ import com.ontimize.jee.common.tools.CheckingTools;
 public class ReportStoreConfiguration {
 
 	/** The engine. */
-	private IReportStoreEngine	engine;
+	private IReportStoreEngine engine;
 
 	/**
 	 * Gets the engine.

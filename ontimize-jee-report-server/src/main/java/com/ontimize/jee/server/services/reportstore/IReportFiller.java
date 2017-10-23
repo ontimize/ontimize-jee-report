@@ -42,7 +42,7 @@ public interface IReportFiller {
 	 *             the report store exception
 	 */
 	InputStream fillReport(IReportDefinition reportDefinition, Path compiledReportFolder, Map<String, Object> reportParameters, ReportOutputType outputType, String otherType,
-			ResourceBundle bundle, Locale locale, String datasourceName) throws ReportStoreException;
+	        ResourceBundle bundle, Locale locale, String datasourceName) throws ReportStoreException;
 
 	/**
 	 * Fill report.
@@ -69,7 +69,7 @@ public interface IReportFiller {
 	 * @throws ReportStoreException
 	 *             the report store exception
 	 */
-	InputStream fillReport(IReportDefinition reportDefinition, Path compiledReportFolder, IReportAdapter service, Map<String, Object> methodParameters,
-			ReportOutputType outputType, String otherType, ResourceBundle bundle, Locale locale, String datasourceName) throws ReportStoreException;
+	InputStream fillReport(IReportDefinition reportDefinition, Path compiledReportFolder, IReportAdapter service, Map<String, Object> methodParameters, ReportOutputType outputType,
+	        String otherType, ResourceBundle bundle, Locale locale, String datasourceName) throws ReportStoreException;
 
 }

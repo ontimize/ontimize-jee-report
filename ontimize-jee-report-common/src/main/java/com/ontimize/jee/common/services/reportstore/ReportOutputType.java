@@ -3,11 +3,11 @@ package com.ontimize.jee.common.services.reportstore;
 public enum ReportOutputType {
 	PDF("pdf"), JASPER_REPORT("jasperprint", null), DOCX("docx"), XLSX("xlsx"), HTML("html"), OTHER("other", null);
 
-	private String name;
+	private String	name;
 
 	private String	extension;
 
-	private ReportOutputType(String name){
+	private ReportOutputType(String name) {
 		this(name, name);
 	}
 

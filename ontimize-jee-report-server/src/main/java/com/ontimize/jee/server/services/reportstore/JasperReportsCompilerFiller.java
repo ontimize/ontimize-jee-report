@@ -92,6 +92,7 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
 			zipFile.extractAll(temporaryFolder.toString());
 
 			Files.walkFileTree(temporaryFolder, new SimpleFileVisitor<Path>() {
+
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 					if (file.getFileName().toString().endsWith(JasperReportsCompilerFiller.JRXML)) {
@@ -125,7 +126,7 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
 	 */
 	@Override
 	public InputStream fillReport(IReportDefinition reportDefinition, Path compiledReportFolder, Map<String, Object> reportParameters, ReportOutputType outputType,
-			String otherType, ResourceBundle bundle, Locale locale, String datasourceName) throws ReportStoreException {
+	        String otherType, ResourceBundle bundle, Locale locale, String datasourceName) throws ReportStoreException {
 		Connection con = null;
 		DataSource dataSource = null;
 		try {
@@ -170,7 +171,7 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
 	 */
 	@Override
 	public InputStream fillReport(IReportDefinition definition, Path compiledReportFolder, IReportAdapter service, Map<String, Object> parameters, ReportOutputType outputType,
-			String otherType, ResourceBundle bundle, Locale locale, String datasourceName) throws ReportStoreException {
+	        String otherType, ResourceBundle bundle, Locale locale, String datasourceName) throws ReportStoreException {
 		try {
 			service.beforeReportBegins(definition, parameters);
 			return this.fillReport(definition, compiledReportFolder, parameters, outputType, otherType, bundle, locale, datasourceName);
@@ -198,12 +199,13 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
 	 *             the JR exception
 	 */
 	protected InputStream convertReport(final ReportOutputType outputType, final String otherType, final JasperPrint fillReport)
-			throws IOException, JRException, ReportStoreException {
+	        throws IOException, JRException, ReportStoreException {
 		final PipedInputStream in = new PipedInputStream();
 		final PipedOutputStream os = new PipedOutputStream(in);
 
 		// Try to do in another thread, due to PipedStreams may deadlock in same thread when buffer is full
 		Thread thread = new Thread("convertReportThread") {
+
 			@Override
 			public void run() {
 				try {

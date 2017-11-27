@@ -10,7 +10,7 @@ import java.util.Map;
 public class BasicReportDefinition implements IReportDefinition, Serializable {
 
 	/** The id. */
-	private Object				id;
+	private Serializable		id;
 
 	/** The name. */
 	private String				name;
@@ -39,7 +39,7 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
 	 * @param type
 	 *            the type
 	 */
-	public BasicReportDefinition(Object id, String name, String description, String type) {
+	public BasicReportDefinition(Serializable id, String name, String description, String type) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -54,7 +54,7 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
 	 * @return the id
 	 */
 	@Override
-	public Object getId() {
+	public Serializable getId() {
 		return this.id;
 	}
 
@@ -64,7 +64,7 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
 	 * @param id
 	 *            the id to set
 	 */
-	public void setId(Object id) {
+	public void setId(Serializable id) {
 		this.id = id;
 	}
 

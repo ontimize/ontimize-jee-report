@@ -43,7 +43,7 @@ public interface IReportStoreService {
 	 * @throws ReportStoreException
 	 *             the report store exception
 	 */
-	void updateReportSource(Object reportId, InputStream is) throws ReportStoreException;;
+	void updateReportSource(Object reportId, InputStream is) throws ReportStoreException;
 
 	/**
 	 * Removes the report.

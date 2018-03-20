@@ -117,7 +117,6 @@ public class ReportBeanDefinitionParser extends AbstractSingleBeanDefinitionPars
 				}
 			}
 			builder.setLazyInit(true);
-			// builder.setDependencyCheck(AbstractBeanDefinition.DEPENDENCY_CHECK_NONE);
 		}
 
 		protected void doParseCompiler(final Element element, final ParserContext ctx, final BeanDefinitionBuilder builder, final Node item) {

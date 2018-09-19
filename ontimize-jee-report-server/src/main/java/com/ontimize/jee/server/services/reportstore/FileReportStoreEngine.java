@@ -153,7 +153,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 			Path reportFile = this.getReportFile(reportFolder, rDef.getId());
 			CheckingTools.failIf(Files.exists(reportFile), FileReportStoreEngine.ERROR_REPORT_ID_ALREADY_EXISTS);
 
-			Files.createDirectories(reportFolder);
+			this.safeCreateDirectories(reportFolder);
 
 			try (OutputStream os = Files.newOutputStream(reportFile)) {
 				IOUtils.copy(reportSource, os);
@@ -169,6 +169,40 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 			PathTools.deleteFolderSafe(reportFolder);
 			throw new ReportStoreException(FileReportStoreEngine.ERROR_ADDING_REPORT, ex);
 		}
+	}
+
+	private void safeCreateDirectories(Path dirToCreate) throws IOException {
+		try {
+			Files.createDirectories(dirToCreate);
+		} catch (IOException ex) {
+			// Some error in recursive directories creation, try to create one by one
+			FileReportStoreEngine.logger.warn("E_BUILDING_BASE_DIRECTORIES__TRYING_AGAIN_ONE_BY_ONE", ex);
+			List<Path> pathsInOrder = this.getPathsHierarchy(dirToCreate);
+			for (Path path : pathsInOrder) {
+				if (!Files.exists(path)) {
+					try {
+						Files.createDirectory(path);
+					} catch (IOException ex2) {
+						FileReportStoreEngine.logger.warn("E_BUILDING_BASE_DIRECTORY__" + path, ex2);
+					}
+				} else if (!Files.isDirectory(path)) {
+					throw new IOException("E_INVALID_DIRECTORY__" + path);
+				}
+			}
+		}
+		if (!Files.exists(dirToCreate) || !Files.isDirectory(dirToCreate)) {
+			throw new IOException("E_BUILDING_DIRECTORY__" + dirToCreate);
+		}
+	}
+
+	private List<Path> getPathsHierarchy(Path basePath) {
+		List<Path> paths = new ArrayList<>();
+		Path current = basePath;
+		while (current != null) {
+			paths.add(0, current);
+			current = current.getParent();
+		}
+		return paths;
 	}
 
 	/*
@@ -333,7 +367,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	public Collection<IReportDefinition> listAllReports() throws ReportStoreException {
 		try {
 			final Collection<IReportDefinition> res = new ArrayList<>();
-			Path reportFolder = this.basePath;
+			Path reportFolder = this.getBasePath();
 			if (!Files.exists(reportFolder)) {
 				return res;
 			}
@@ -378,9 +412,9 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	 */
 	@Override
 	public InputStream fillReport(Object reportId, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType)
-	        throws ReportStoreException {
+			throws ReportStoreException {
 		return this.reportFiller.fillReport(this.getReportDefinition(reportId), this.getReportCompiledFolder(reportId), reportParameters, outputType, otherType, this.getBundle(),
-		        this.getLocale(), dataSourceName);
+				this.getLocale(), dataSourceName);
 	}
 
 	/*
@@ -390,10 +424,10 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	 */
 	@Override
 	public InputStream fillReport(Object reportId, String serviceName, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType)
-	        throws ReportStoreException {
+			throws ReportStoreException {
 		IReportAdapter adapter = this.applicationContext.getBean(IReportAdapter.class, serviceName);
 		return this.reportFiller.fillReport(this.getReportDefinition(reportId), this.getReportCompiledFolder(reportId), adapter, reportParameters, outputType, otherType,
-		        this.getBundle(), this.getLocale(), dataSourceName);
+				this.getBundle(), this.getLocale(), dataSourceName);
 	}
 
 	@Override
@@ -407,7 +441,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 
 			compileFolder = this.getReportCompiledFolder(reportId);
 			if (!Files.exists(compileFolder)) {
-				Files.createDirectories(compileFolder);
+				this.safeCreateDirectories(compileFolder);
 			} else if (!Files.isDirectory(compileFolder)) {
 				Files.delete(compileFolder);
 			} else {
@@ -429,7 +463,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	 * @return the report folder
 	 */
 	private Path getReportFolder(Object reportId) {
-		return this.basePath.resolve(FileReportStoreEngine.PREFIX + reportId.hashCode());
+		return this.getBasePath().resolve(FileReportStoreEngine.PREFIX + reportId.hashCode());
 	}
 
 	/**
@@ -571,8 +605,8 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 			prop.load(is);
 		}
 		BasicReportDefinition reportDefinition = new BasicReportDefinition(prop.getProperty(FileReportStoreEngine.PROPERTY_ID),
-		        prop.getProperty(FileReportStoreEngine.PROPERTY_NAME), prop.getProperty(FileReportStoreEngine.PROPERTY_DESCRIPTION),
-		        prop.getProperty(FileReportStoreEngine.PROPERTY_TYPE));
+				prop.getProperty(FileReportStoreEngine.PROPERTY_NAME), prop.getProperty(FileReportStoreEngine.PROPERTY_DESCRIPTION),
+				prop.getProperty(FileReportStoreEngine.PROPERTY_TYPE));
 		reportDefinition.setMainReportFileName(prop.getProperty(FileReportStoreEngine.PROPERTY_MAINREPORTFILENAME));
 		for (Entry<Object, Object> entry : prop.entrySet()) {
 			String key = (String) entry.getKey();
@@ -588,10 +622,12 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	public void updateSettings() {
 		FileReportStoreEngine.logger.debug("Updating settings...");
 		if (this.basePathResolver != null) {
-			CheckingTools.failIfNull(this.basePathResolver, "Report store base path resolver is not configured.");
 			Path resolvedValue = this.getResolverValue(this.basePathResolver);
 			CheckingTools.failIfNull(resolvedValue, "Report store base path is not configured.");
+			FileReportStoreEngine.logger.info("Base path changed from \"{}\" to \"{}\"", this.basePath, resolvedValue);
 			this.basePath = resolvedValue;
+		} else {
+			FileReportStoreEngine.logger.warn("Report store base path resolver is not configured.");
 		}
 	}
 
@@ -630,6 +666,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	 *            the report store base path
 	 */
 	public void setBasePath(final String basePath) {
+		FileReportStoreEngine.logger.info("Base path changed from \"{}\" to \"{}\"", this.basePath, basePath);
 		this.basePath = Paths.get(basePath);
 		this.basePathResolver = new AbstractPropertyResolver<String>() {
 

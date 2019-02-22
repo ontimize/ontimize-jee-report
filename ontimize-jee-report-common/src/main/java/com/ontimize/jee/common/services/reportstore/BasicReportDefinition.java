@@ -27,6 +27,10 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
 	/** The other info. */
 	private Map<String, String>	otherInfo;
 
+	public BasicReportDefinition() {
+		super();
+	}
+
 	/**
 	 * Instantiates a new basic report definition.
 	 *

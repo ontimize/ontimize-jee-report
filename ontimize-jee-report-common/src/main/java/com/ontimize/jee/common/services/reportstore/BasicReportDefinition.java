@@ -43,12 +43,14 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
 	 * @param type
 	 *            the type
 	 */
-	public BasicReportDefinition(Serializable id, String name, String description, String type) {
+	public BasicReportDefinition(Serializable id, String name, String description, String type,
+			String mainReportFileName) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.description = description;
 		this.type = type;
+		this.mainReportFileName = mainReportFileName;
 		this.otherInfo = new HashMap<>();
 	}
 

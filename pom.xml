@@ -1,15 +1,18 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ontimize.jee.report</groupId>
 	<artifactId>ontimize-jee-report</artifactId>
-	<parent>
-		<groupId>com.ontimize.jee</groupId>
-		<artifactId>ontimize-jee</artifactId>
-		<version>1.0.3-SNAPSHOT</version>
-	</parent>
+	<version>1.0.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	
+	<properties>
+		<ontimize-jee.version>2.1.3</ontimize-jee.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<spring.version>5.1.3.RELEASE</spring.version>
+	</properties>
+
 
 	<dependencyManagement>
 		<dependencies>
@@ -24,9 +27,39 @@
 				<artifactId>ontimize-jee-report-server</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>com.ontimize.jee</groupId>
+				<artifactId>ontimize-jee-common</artifactId>
+				<version>${ontimize-jee.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.ontimize.jee</groupId>
+				<artifactId>ontimize-jee-server</artifactId>
+				<version>${ontimize-jee.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.sf.jasperreports</groupId>
+				<artifactId>jasperreports</artifactId>
+				<version>6.2.0</version>
+			</dependency>
+			<dependency>
+				<groupId>net.lingala.zip4j</groupId>
+				<artifactId>zip4j</artifactId>
+				<version>1.3.2</version>
+			</dependency>
+			<dependency>
+				<groupId>javax</groupId>
+				<artifactId>javaee-api</artifactId>
+				<version>7.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-jdbc</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	
+
 	<build>
 		<pluginManagement>
 			<plugins>
@@ -46,10 +79,19 @@
 						<failOnError>false</failOnError>
 					</configuration>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.8.1</version>
+					<configuration>
+						<source>${maven.compiler.source}</source>
+						<target>${maven.compiler.target}</target>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
-	
+
 	<profiles>
 		<profile>
 			<id>generate-version</id>
@@ -69,7 +111,7 @@
 			</build>
 		</profile>
 	</profiles>
-	
+
 	<modules>
 		<module>ontimize-jee-report-common</module>
 		<module>ontimize-jee-report-server</module>

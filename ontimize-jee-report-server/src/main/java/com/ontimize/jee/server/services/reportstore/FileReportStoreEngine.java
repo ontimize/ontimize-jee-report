@@ -217,7 +217,6 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 			Path reportFolder = this.getReportFolder(rDef.getId());
 			Path reportPropertiesFile = this.getReportPropertiesFile(reportFolder, rDef.getId());
 			CheckingTools.failIf(!Files.exists(reportPropertiesFile), FileReportStoreEngine.ERROR_REPORT_ID_NOT_EXISTS);
-
 			this.saveReportProperties(reportFolder, rDef);
 		} catch (IOException ex) {
 			throw new ReportStoreException(FileReportStoreEngine.ERROR_UPDATING_REPORT, ex);
@@ -463,7 +462,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	 * @return the report folder
 	 */
 	private Path getReportFolder(Object reportId) {
-		return this.getBasePath().resolve(FileReportStoreEngine.PREFIX + reportId.hashCode());
+		return this.getBasePath().resolve(FileReportStoreEngine.PREFIX + reportId.toString());
 	}
 
 	/**
@@ -476,7 +475,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	 * @return the report properties file
 	 */
 	private Path getReportPropertiesFile(Path reportFolder, Object reportId) {
-		return reportFolder.resolve(FileReportStoreEngine.PREFIX + reportId.hashCode() + FileReportStoreEngine.PROP_EXTENSION);
+		return reportFolder.resolve(FileReportStoreEngine.PREFIX + reportId.toString() + FileReportStoreEngine.PROP_EXTENSION);
 	}
 
 	/**
@@ -489,7 +488,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	 * @return the report file
 	 */
 	private Path getReportFile(Path reportFolder, Object reportId) {
-		return reportFolder.resolve(FileReportStoreEngine.PREFIX + reportId.hashCode() + FileReportStoreEngine.ZIP_EXTENSION);
+		return reportFolder.resolve(FileReportStoreEngine.PREFIX + reportId.toString() + FileReportStoreEngine.ZIP_EXTENSION);
 	}
 
 	/**
@@ -606,7 +605,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 		}
 		BasicReportDefinition reportDefinition = new BasicReportDefinition(prop.getProperty(FileReportStoreEngine.PROPERTY_ID),
 				prop.getProperty(FileReportStoreEngine.PROPERTY_NAME), prop.getProperty(FileReportStoreEngine.PROPERTY_DESCRIPTION),
-				prop.getProperty(FileReportStoreEngine.PROPERTY_TYPE));
+				prop.getProperty(FileReportStoreEngine.PROPERTY_TYPE), prop.getProperty(FileReportStoreEngine.PROPERTY_MAINREPORTFILENAME));
 		reportDefinition.setMainReportFileName(prop.getProperty(FileReportStoreEngine.PROPERTY_MAINREPORTFILENAME));
 		for (Entry<Object, Object> entry : prop.entrySet()) {
 			String key = (String) entry.getKey();

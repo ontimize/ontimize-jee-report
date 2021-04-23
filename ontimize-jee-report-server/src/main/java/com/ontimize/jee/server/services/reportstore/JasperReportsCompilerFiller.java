@@ -148,13 +148,14 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
 			Map<String, Object> params = new HashMap<>();
 			params = (Map) MapTools.union(params, reportDefinition.getOtherInfo());// Default report parameters
 			params = (Map) MapTools.union(params, reportParameters);// Custom invocation parameters
-
+			
 			this.fillParameters(con, bundle, locale, params);// Extra parameters: Connection, bundle, locale...
 
 			// TODO tal vez sea mejor a fichero por temas de memoria si se dispara un informe
 			Path reportCompiled = compiledReportFolder.resolve(reportDefinition.getMainReportFileName() + JasperReportsCompilerFiller.JASPER);
 			CheckingTools.failIf(!Files.exists(reportCompiled), "E_REQUIRED_VALID_COMPILEDREPORTFILE", new Object[0]);
 			JasperPrint fillReport = JasperFillManager.fillReport(reportCompiled.toString(), params);
+			
 			return this.convertReport(outputType, otherType, fillReport);
 		} catch (JRException | IOException error) {
 			throw new ReportStoreException(error);

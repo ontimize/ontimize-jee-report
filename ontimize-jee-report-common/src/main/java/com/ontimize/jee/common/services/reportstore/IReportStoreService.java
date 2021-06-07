@@ -154,5 +154,5 @@ public interface IReportStoreService {
 	 * @throws ReportStoreException
 	 *             when some problems accesing report or during compilation.
 	 */
-	void compileReport(Object reportId) throws ReportStoreException;
+	void compileReport(Object reportId, IReportDefinition rDef) throws ReportStoreException;
 }

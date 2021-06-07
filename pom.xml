@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ontimize.jee.report</groupId>
 	<artifactId>ontimize-jee-report</artifactId>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.3-REST-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<properties>
 		<ontimize-jee.version>2.1.3</ontimize-jee.version>
@@ -115,5 +115,6 @@
 	<modules>
 		<module>ontimize-jee-report-common</module>
 		<module>ontimize-jee-report-server</module>
+		<module>ontimize-jee-report-rest</module>
 	</modules>
 </project>

@@ -37,6 +37,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import com.ontimize.jee.common.services.reportstore.BasicReportDefinition;
 import com.ontimize.jee.common.services.reportstore.IReportDefinition;
 import com.ontimize.jee.common.services.reportstore.ReportOutputType;
+import com.ontimize.jee.common.services.reportstore.ReportParameter;
 import com.ontimize.jee.common.services.reportstore.ReportStoreException;
 import com.ontimize.jee.common.spring.parser.AbstractPropertyResolver;
 import com.ontimize.jee.common.tools.CheckingTools;
@@ -100,6 +101,9 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 
 	/** The Constant PROPERTY_ID. */
 	private static final String					PROPERTY_MAINREPORTFILENAME		= "mainreportfilename";
+	
+	/** The Constant PROPERTY_PARAMETERS. */
+	private static final String					PROPERTY_PARAMETERS				= "parameters";
 
 	/** The Constant PROPERTY_EXTRA_PREFIX. */
 	private static final String					PROPERTY_EXTRA_PREFIX			= "extra.";
@@ -160,13 +164,17 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 			}
 
 			this.saveReportProperties(reportFolder, rDef);
+			this.compileReport(rDef.getId(), rDef);
 
-			this.compileReport(rDef.getId());
 		} catch (ReportStoreException error) {
 			PathTools.deleteFolderSafe(reportFolder);
 			throw error;
 		} catch (Exception ex) {
-			PathTools.deleteFolderSafe(reportFolder);
+			try {
+				PathTools.deleteFolderSafe(reportFolder);
+			} catch (Exception ex2) {
+				logger.warn("", ex2);
+			}
 			throw new ReportStoreException(FileReportStoreEngine.ERROR_ADDING_REPORT, ex);
 		}
 	}
@@ -250,7 +258,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 			PathTools.deleteFileSafe(tempOldReportFile);
 
 			// Recompile new file
-			this.compileReport(reportId);
+			this.compileReport(reportId, null);
 		} catch (IOException ex) {
 			try {
 				// Restore previous version
@@ -430,7 +438,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	}
 
 	@Override
-	public void compileReport(Object reportId) throws ReportStoreException {
+	public void compileReport(Object reportId, IReportDefinition rDef) throws ReportStoreException {
 		Path compileFolder = null;
 		try {
 			Path reportFolder = this.getReportFolder(reportId);
@@ -447,10 +455,15 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 				PathTools.deleteFolderContent(compileFolder);
 			}
 
-			this.reportCompiler.compile(reportFile, compileFolder);
+			rDef = this.reportCompiler.compile(reportFile, compileFolder, rDef);
+			this.updateReportDefinition(rDef);
 		} catch (Exception ex) {
-			PathTools.deleteFolderSafe(compileFolder);
-			throw new ReportStoreCompileException("E_COMPILING_REPORT", ex);
+			try {
+				PathTools.deleteFolderSafe(compileFolder);
+			} catch (Exception ex2) {
+				logger.warn("", ex2);
+			}
+			throw new ReportStoreException(FileReportStoreEngine.ERROR_ADDING_REPORT, ex);
 		}
 	}
 
@@ -563,6 +576,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 		MapTools.safePut(prop, FileReportStoreEngine.PROPERTY_DESCRIPTION, rDef.getDescription());
 		MapTools.safePut(prop, FileReportStoreEngine.PROPERTY_TYPE, rDef.getType());
 		MapTools.safePut(prop, FileReportStoreEngine.PROPERTY_MAINREPORTFILENAME, rDef.getMainReportFileName());
+		MapTools.safePut(prop, FileReportStoreEngine.PROPERTY_PARAMETERS, rDef.getParameters().toString());
 		if (rDef.getOtherInfo() != null) {
 			for (Entry<String, String> entry : rDef.getOtherInfo().entrySet()) {
 				MapTools.safePut(prop, FileReportStoreEngine.PROPERTY_EXTRA_PREFIX + entry.getKey(), entry.getValue());
@@ -603,10 +617,19 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 		try (InputStream is = Files.newInputStream(reportPropertiesFile)) {
 			prop.load(is);
 		}
-		BasicReportDefinition reportDefinition = new BasicReportDefinition(prop.getProperty(FileReportStoreEngine.PROPERTY_ID),
-				prop.getProperty(FileReportStoreEngine.PROPERTY_NAME), prop.getProperty(FileReportStoreEngine.PROPERTY_DESCRIPTION),
-				prop.getProperty(FileReportStoreEngine.PROPERTY_TYPE), prop.getProperty(FileReportStoreEngine.PROPERTY_MAINREPORTFILENAME));
+		
+		String params = prop.getProperty(FileReportStoreEngine.PROPERTY_PARAMETERS);
+		List<ReportParameter> reportParams = this.parseParameters(params);
+		
+		BasicReportDefinition reportDefinition = new BasicReportDefinition(
+				prop.getProperty(FileReportStoreEngine.PROPERTY_ID),
+				prop.getProperty(FileReportStoreEngine.PROPERTY_NAME),
+				prop.getProperty(FileReportStoreEngine.PROPERTY_DESCRIPTION),
+				prop.getProperty(FileReportStoreEngine.PROPERTY_TYPE),
+				prop.getProperty(FileReportStoreEngine.PROPERTY_MAINREPORTFILENAME),
+				reportParams);
 		reportDefinition.setMainReportFileName(prop.getProperty(FileReportStoreEngine.PROPERTY_MAINREPORTFILENAME));
+		
 		for (Entry<Object, Object> entry : prop.entrySet()) {
 			String key = (String) entry.getKey();
 			if (key.startsWith(FileReportStoreEngine.PROPERTY_EXTRA_PREFIX)) {
@@ -722,6 +745,42 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 		}
 
 		this.updateSettings();
+	}
+	
+	private List<ReportParameter> parseParameters(String params) {
+		String name, description, valueClass, type, param; 
+		String [] paramArray;
+		int start, end;
+		List<ReportParameter> paramList = new ArrayList<ReportParameter>();
+		ReportParameter rp;
+		//params = "[ReportParameter [..], ReportParameter [..], ...]"
+		
+		params = params.substring(1, params.length() - 1);
+		//params = "ReportParameter [..], ReportParameter [..], ..."
+		
+		while (params.contains("ReportParameter")) {
+			start = params.indexOf("[");
+			end = params.indexOf("]", start);
+			if (start<0 || end<0)
+				break;
+			param = params.substring(start + 1, end);
+			//param = "name=.., description=.., valueClass=.., type=.."
+			paramArray = param.split("\\,");
+			for (int i=0; i<paramArray.length; i++) {
+				paramArray[i] = paramArray[i].trim();
+			}
+			name = paramArray[0].split("\\=")[1];
+			description = paramArray[1].split("\\=")[1];
+			valueClass = paramArray[2].split("\\=")[1];
+			type = paramArray[3].split("\\=")[1];
+			
+			rp = new ReportParameter(name, description, valueClass, type);
+			paramList.add(rp);
+			
+			params = params.substring(end);
+		}
+		
+		return paramList;
 	}
 
 }

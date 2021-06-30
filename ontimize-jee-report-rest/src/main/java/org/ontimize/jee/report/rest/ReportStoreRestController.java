@@ -98,23 +98,12 @@ public class ReportStoreRestController {
 				for (int i=0; i<reportDefinition.getParameters().size(); i++) {
 					params.put(reportDefinition.getParameters().get(i).getName(), this.parseParameter(reportDefinition, i, values[i]));
 				}	
-//				params.put("id", Integer.parseInt(bodyParams.get("params")));
 			}
 			InputStream is = this.reportStoreService.fillReport(id, params, null, outputType, otherType);
-//			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-//			byte[] buffer = new byte[8 * 1024];
-//		    int bytesRead;
-//		    while ((bytesRead = is.read(buffer)) != -1) {
-////		        os.write(buffer, 0, bytesRead);
-//		        bos.write(buffer, 0, bytesRead);
-//		    }
 			byte[] file = IOUtils.toByteArray(is);
 		    is.close();
-//		    os.close();
 		    Hashtable<String, Object> map = new Hashtable<String, Object>();
-//		    map.put("file", bos.toByteArray());
 		    map.put("file", file);
-//		    bos.close();
 		    res.addRecord(map);
 			res.setCode(EntityResult.OPERATION_SUCCESSFUL);
 		} catch (ReportStoreException e) {
@@ -126,20 +115,6 @@ public class ReportStoreRestController {
 		}		
 		return res;
 	}
-	
-//	@RequestMapping(value = "/compileReport/{id}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-//	public EntityResult compileReport(@PathVariable("id") Integer id) {
-//		EntityResult res = new EntityResult();
-//		try {
-//			this.reportStoreService.compileReport(id);
-//			res.setCode(EntityResult.OPERATION_SUCCESSFUL);
-//		} catch (ReportStoreException e) {
-//			e.printStackTrace();
-//			res.setCode(EntityResult.OPERATION_WRONG);
-//			return res;
-//		}
-//		return res;
-//	}
 	
 	@RequestMapping(value = "/removeReport/{id}", method = RequestMethod.DELETE)
 	public EntityResult removeReport(@PathVariable("id") String id) {

@@ -34,7 +34,11 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.ontimize.db.EntityResult;
+import com.ontimize.db.SQLStatementBuilder.SQLOrder;
+import com.ontimize.jee.common.services.reportstore.AdvancedEntityResultDataSource;
 import com.ontimize.jee.common.services.reportstore.BasicReportDefinition;
+import com.ontimize.jee.common.services.reportstore.EntityResultDataSource;
 import com.ontimize.jee.common.services.reportstore.IReportDefinition;
 import com.ontimize.jee.common.services.reportstore.ReportOutputType;
 import com.ontimize.jee.common.services.reportstore.ReportParameter;
@@ -43,11 +47,18 @@ import com.ontimize.jee.common.spring.parser.AbstractPropertyResolver;
 import com.ontimize.jee.common.tools.CheckingTools;
 import com.ontimize.jee.common.tools.MapTools;
 import com.ontimize.jee.common.tools.PathTools;
+import com.ontimize.jee.common.tools.ReflectionTools;
 import com.ontimize.jee.server.requestfilter.OntimizeServletFilter;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRField;
+import net.sf.jasperreports.engine.JRGroup;
+import net.sf.jasperreports.engine.JRParameter;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.util.JRLoader;
 
 /**
  * The Class FileReportStore.
@@ -300,7 +311,18 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 			CheckingTools.failIfNull(reportId, FileReportStoreEngine.ERROR_NO_REPORT_KEY);
 			Path reportFolder = this.getReportFolder(reportId);
 			CheckingTools.failIf(!Files.exists(reportFolder), FileReportStoreEngine.ERROR_REPORT_ID_NOT_EXISTS);
-			return this.loadReportProperties(reportFolder, reportId);
+			IReportDefinition rDef = this.loadReportProperties(reportFolder, reportId);
+			List<ReportParameter> params = rDef.getParameters();
+			for (int i=0; i<params.size(); i++) {
+				if (params.get(i).getName().equalsIgnoreCase("service") 
+						|| params.get(i).getName().equalsIgnoreCase("entity")
+						|| params.get(i).getName().equalsIgnoreCase("pagesize")) {
+					params.remove(i);
+					i--;
+				}
+			}
+			rDef.setParameters(params);
+			return rDef;
 		} catch (IOException ex) {
 			throw new ReportStoreException(FileReportStoreEngine.ERROR_GETTING_REPORT_DEFINITION, ex);
 		}
@@ -420,8 +442,77 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	@Override
 	public InputStream fillReport(Object reportId, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType)
 			throws ReportStoreException {
-		return this.reportFiller.fillReport(this.getReportDefinition(reportId), this.getReportCompiledFolder(reportId), reportParameters, outputType, otherType, this.getBundle(),
-				this.getLocale(), dataSourceName);
+		String service = null;
+		String entity = null;
+		Integer index;
+		Integer pagesize = null;
+		IReportDefinition rDef = this.getReportDefinition(reportId);
+		Path compiled = this.getReportCompiledFolder(reportId);
+		try {
+			Path compiledReport = compiled.resolve(rDef.getMainReportFileName().concat(".jasper"));
+			InputStream is = Files.newInputStream(compiledReport);
+			JasperReport jasperReport = (JasperReport)JRLoader.loadObject(is);
+			
+			// Check special parameters (service, entity, pagesize)
+			JRParameter[] params = jasperReport.getParameters();
+			for (int i=0; i<params.length; i++) {
+	        	if (params[i].isForPrompting() && !params[i].isSystemDefined()) {
+	        		if (params[i].getName().equalsIgnoreCase("service")) {
+	        			index = params[i].getDefaultValueExpression().getText().length() - 1;
+	    				service = params[i].getDefaultValueExpression().getText().substring(1, index);
+	        		} else if (params[i].getName().equalsIgnoreCase("entity")) {
+	        			index = params[i].getDefaultValueExpression().getText().length() - 1;
+	    				entity = params[i].getDefaultValueExpression().getText().substring(1, index);
+	        		}
+	        		if (params[i].getName().equalsIgnoreCase("pagesize")) {
+	        			index = params[i].getDefaultValueExpression().getText().length() - 1;
+	        			pagesize = Integer.valueOf(params[i].getDefaultValueExpression().getText().substring(1, index));
+	        		}
+	        	}
+	        }
+			
+			// Fill the report
+			if (service == null) {
+				return this.reportFiller.fillReport(this.getReportDefinition(reportId), this.getReportCompiledFolder(reportId), reportParameters, outputType, otherType, this.getBundle(),
+						this.getLocale(), dataSourceName);
+			} else if (entity != null) {
+				StringBuffer buffer = new StringBuffer();
+				List<Object> attributes = new ArrayList<>();
+				for (JRField field : jasperReport.getFields()) {
+					attributes.add(field.getName());
+				}
+				Object bean = this.applicationContext.getBean(service);
+				if (pagesize == null) {
+					buffer.append(entity).append("Query");
+					EntityResult entityResult = (EntityResult) ReflectionTools.invoke(bean, buffer.toString(), reportParameters, attributes);
+					EntityResultDataSource ods = new EntityResultDataSource(entityResult);
+					return this.reportFiller.fillReport(this.getReportDefinition(reportId), jasperReport, reportParameters, outputType, otherType, this.getBundle(),
+							this.getLocale(), ods);
+				} else {
+					buffer.append(entity).append("AdvancedQuery");
+					List<SQLOrder> order = new ArrayList<SQLOrder>();
+					JRGroup[] group = jasperReport.getGroups();
+					if (group != null) {
+						SQLOrder o;
+						for (int i=0; i<group.length; i++) {
+							index = group[i].getExpression().getText().length() - 1;
+							o = new SQLOrder(group[i].getExpression().getText().substring(3, index));
+							order.add(o);
+						}
+					}
+					AdvancedEntityResultDataSource ods = new AdvancedEntityResultDataSource(bean, buffer.toString(), reportParameters,
+							attributes, pagesize, 0, order);
+					return this.reportFiller.fillReport(this.getReportDefinition(reportId), jasperReport, reportParameters, outputType, otherType, this.getBundle(),
+							this.getLocale(), ods);
+				}
+			}
+		} catch (JRException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	/*

@@ -6,11 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.jasperreports.engine.JasperReport;
-
 /**
  * The Class BasicReportDefinition.
  */
+@SuppressWarnings("serial")
 public class BasicReportDefinition implements IReportDefinition, Serializable {
 
 	/** The id. */

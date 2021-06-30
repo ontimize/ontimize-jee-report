@@ -37,7 +37,7 @@ public class ReportParameter {
 	public String getType() {
 		return type;
 	}
-
+	
 	@Override
 	public String toString() {
 		return "ReportParameter [name=" + name + ", description=" + description + ", valueClass=" + valueClass

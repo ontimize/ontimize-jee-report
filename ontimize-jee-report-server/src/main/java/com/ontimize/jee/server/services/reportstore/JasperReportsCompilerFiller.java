@@ -11,8 +11,10 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -29,17 +31,20 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import com.ontimize.jee.common.services.reportstore.IReportDefinition;
 import com.ontimize.jee.common.services.reportstore.ReportOutputType;
+import com.ontimize.jee.common.services.reportstore.ReportParameter;
 import com.ontimize.jee.common.services.reportstore.ReportStoreException;
 import com.ontimize.jee.common.tools.CheckingTools;
 import com.ontimize.jee.common.tools.MapTools;
 import com.ontimize.jee.common.tools.PathTools;
-
 import net.lingala.zip4j.core.ZipFile;
+import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.export.JRHtmlExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
@@ -85,12 +90,12 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
 	 * @see com.ontimize.jee.server.services.reportstore.IReportCompiler#compile(java.nio.file.Path, java.nio.file.Path)
 	 */
 	@Override
-	public void compile(final Path inputZip, final Path outputFolder) throws ReportStoreCompileException {
+	public IReportDefinition compile(final Path inputZip, final Path outputFolder, IReportDefinition rDef) throws ReportStoreCompileException {
 		try {
 			ZipFile zipFile = new ZipFile(inputZip.toFile());
 			final Path temporaryFolder = Files.createTempDirectory(JasperReportsCompilerFiller.TMP_PREFIX);
 			zipFile.extractAll(temporaryFolder.toString());
-
+			
 			Files.walkFileTree(temporaryFolder, new SimpleFileVisitor<Path>() {
 
 				@Override
@@ -98,6 +103,18 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
 					if (file.getFileName().toString().endsWith(JasperReportsCompilerFiller.JRXML)) {
 						try {
 							JasperCompileManager.compileReportToFile(file.toString(), outputFolder.resolve(file.getFileName() + JasperReportsCompilerFiller.JASPER).toString());
+							JasperReport report = JasperCompileManager.compileReport(file.toString());
+							JRParameter [] params = report.getParameters();
+
+							List<ReportParameter> reportParams = new ArrayList<ReportParameter>();
+					        for (int i=0; i<params.length; i++) {
+					        	if (params[i].isForPrompting() && !params[i].isSystemDefined()) {
+					        		reportParams.add(new ReportParameter(params[i].getName(), params[i].getDescription(), 
+					        							params[i].getValueClassName(), params[i].getNestedTypeName()));
+					        	}
+					        }
+					        rDef.setParameters(reportParams);
+					        
 						} catch (JRException e) {
 							throw new IOException(e);
 						}
@@ -114,6 +131,7 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
 			} catch (Exception ex) {
 				JasperReportsCompilerFiller.logger.error("error deleting temporary folder", ex);
 			}
+			return rDef;
 		} catch (Exception error) {
 			throw new ReportStoreCompileException(error);
 		}
@@ -148,13 +166,82 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
 			Map<String, Object> params = new HashMap<>();
 			params = (Map) MapTools.union(params, reportDefinition.getOtherInfo());// Default report parameters
 			params = (Map) MapTools.union(params, reportParameters);// Custom invocation parameters
-
+			
 			this.fillParameters(con, bundle, locale, params);// Extra parameters: Connection, bundle, locale...
 
 			// TODO tal vez sea mejor a fichero por temas de memoria si se dispara un informe
 			Path reportCompiled = compiledReportFolder.resolve(reportDefinition.getMainReportFileName() + JasperReportsCompilerFiller.JASPER);
 			CheckingTools.failIf(!Files.exists(reportCompiled), "E_REQUIRED_VALID_COMPILEDREPORTFILE", new Object[0]);
 			JasperPrint fillReport = JasperFillManager.fillReport(reportCompiled.toString(), params);
+			
+			return this.convertReport(outputType, otherType, fillReport);
+		} catch (JRException | IOException error) {
+			throw new ReportStoreException(error);
+		} finally {
+			DataSourceUtils.releaseConnection(con, dataSource);
+		}
+	}
+	
+	@Override
+	public InputStream fillReport(IReportDefinition reportDefinition, JasperReport compiledReport,
+			Map<String, Object> reportParameters, ReportOutputType outputType, String otherType, ResourceBundle bundle,
+			Locale locale, String dataSourceName) throws ReportStoreException {
+		Connection con = null;
+		DataSource dataSource = null;
+		try {
+			// Protect invalid input data
+			CheckingTools.failIfNull(reportDefinition, "E_REQUIRED_REPORTDEFINITION", new Object[0]);
+			CheckingTools.failIfNull(outputType, "E_REQUIRED_OUTPUTTYPE", new Object[0]);
+			reportParameters = reportParameters == null ? new HashMap<String, Object>() : reportParameters;
+
+			if (dataSourceName == null) {
+				dataSource = this.applicationContext.getBean(DataSource.class); // TODO be carefull, can exists more than one
+			} else {
+				dataSource = this.applicationContext.getBean(dataSourceName, DataSource.class);
+			}
+			if (!reportParameters.containsKey(JasperReportsCompilerFiller.PARAMETER_REPORT_CONNECTION)) {
+				con = DataSourceUtils.getConnection(dataSource);
+			}
+			Map<String, Object> params = new HashMap<>();
+			params = (Map) MapTools.union(params, reportDefinition.getOtherInfo());// Default report parameters
+			params = (Map) MapTools.union(params, reportParameters);// Custom invocation parameters
+			
+			this.fillParameters(con, bundle, locale, params);// Extra parameters: Connection, bundle, locale...
+			
+			JasperPrint fillReport = JasperFillManager.fillReport(compiledReport, params);
+			
+			return this.convertReport(outputType, otherType, fillReport);
+		} catch (JRException | IOException error) {
+			throw new ReportStoreException(error);
+		} finally {
+			DataSourceUtils.releaseConnection(con, dataSource);
+		}
+	}
+	
+	@Override
+	public InputStream fillReport(IReportDefinition reportDefinition, JasperReport compiledReport,
+			Map<String, Object> reportParameters, ReportOutputType outputType, String otherType, ResourceBundle bundle,
+			Locale locale, JRDataSource ods) throws ReportStoreException {
+		Connection con = null;
+		DataSource dataSource = null;
+		try {
+			// Protect invalid input data
+			CheckingTools.failIfNull(reportDefinition, "E_REQUIRED_REPORTDEFINITION", new Object[0]);
+			CheckingTools.failIfNull(outputType, "E_REQUIRED_OUTPUTTYPE", new Object[0]);
+			reportParameters = reportParameters == null ? new HashMap<String, Object>() : reportParameters;
+			dataSource = this.applicationContext.getBean(DataSource.class); // TODO be carefull, can exists more than one
+			
+			if (!reportParameters.containsKey(JasperReportsCompilerFiller.PARAMETER_REPORT_CONNECTION)) {
+				con = DataSourceUtils.getConnection(dataSource);
+			}
+			Map<String, Object> params = new HashMap<>();
+			params = (Map) MapTools.union(params, reportDefinition.getOtherInfo());// Default report parameters
+			params = (Map) MapTools.union(params, reportParameters);// Custom invocation parameters
+			
+			this.fillParameters(con, bundle, locale, params);// Extra parameters: Connection, bundle, locale...
+			
+			JasperPrint fillReport = JasperFillManager.fillReport(compiledReport, params, ods);
+			
 			return this.convertReport(outputType, otherType, fillReport);
 		} catch (JRException | IOException error) {
 			throw new ReportStoreException(error);
@@ -290,4 +377,6 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}
+
+	
 }

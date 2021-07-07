@@ -130,8 +130,8 @@ public class ReportStoreServiceImpl implements IReportStoreServiceServer, Applic
 	}
 
 	@Override
-	public void compileReport(Object reportId) throws ReportStoreException {
-		this.getImplementation().compileReport(reportId);
+	public void compileReport(Object reportId, IReportDefinition rDef) throws ReportStoreException {
+		this.getImplementation().compileReport(reportId, rDef);
 	}
 
 	/**

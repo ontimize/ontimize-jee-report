@@ -1,5 +1,6 @@
 package com.ontimize.jee.common.services.reportstore;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,5 +49,19 @@ public interface IReportDefinition {
 	 * @return the main report file name
 	 */
 	String getMainReportFileName();
+	
+	/**
+	 * Gets the report parameters.
+	 *
+	 * @return the report parameters
+	 */
+	List<ReportParameter> getParameters();
+	
+	/**
+	 * Sets the report parameters.
+	 *
+	 * @return void
+	 */
+	void setParameters(List<ReportParameter> reportParams);
 
 }

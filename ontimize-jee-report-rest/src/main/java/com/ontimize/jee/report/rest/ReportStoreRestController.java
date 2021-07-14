@@ -1,19 +1,14 @@
-package org.ontimize.jee.report.rest;
+package com.ontimize.jee.report.rest;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.text.ParseException;
+import java.sql.Date;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.UUID;
-import java.sql.Date;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ontimize.db.EntityResult;
+import com.ontimize.jee.common.dto.EntityResult;
+import com.ontimize.jee.common.dto.EntityResultMapImpl;
 import com.ontimize.jee.common.services.reportstore.BasicReportDefinition;
 import com.ontimize.jee.common.services.reportstore.IReportDefinition;
 import com.ontimize.jee.common.services.reportstore.IReportStoreService;
@@ -54,7 +50,7 @@ public class ReportStoreRestController {
 			@RequestParam("file") MultipartFile[] files,
 			@RequestParam("data") String data
 			) {
-		EntityResult res = new EntityResult();
+		EntityResult res = new EntityResultMapImpl();
 		try {
 			HashMap<String, Object> extraData = new HashMap<>();
 	        if (data != null) {
@@ -85,10 +81,10 @@ public class ReportStoreRestController {
 	public EntityResult fillReport(@PathVariable("id") String id,
 			@RequestBody (required = true) Map<String, String> bodyParams)
 			{
-		EntityResult res = new EntityResult();
+		EntityResult res = new EntityResultMapImpl();
 		ReportOutputType outputType;
 		String otherType = "pdf";
-		String[] names, values;
+		String[] values;
 		try {
 			outputType = ReportOutputType.fromName("pdf");
 			Map<String, Object> params = new HashMap<String, Object>();
@@ -118,7 +114,7 @@ public class ReportStoreRestController {
 	
 	@RequestMapping(value = "/removeReport/{id}", method = RequestMethod.DELETE)
 	public EntityResult removeReport(@PathVariable("id") String id) {
-		EntityResult res = new EntityResult();
+		EntityResult res = new EntityResultMapImpl();
 		try {
 			this.reportStoreService.removeReport(id);
 			res.setCode(EntityResult.OPERATION_SUCCESSFUL);
@@ -132,14 +128,15 @@ public class ReportStoreRestController {
 	
 	@RequestMapping(value = "/listReports", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
 	public EntityResult listReports() {
-		EntityResult res = new EntityResult();
+		EntityResult res = new EntityResultMapImpl();
 		try {
 			Collection<IReportDefinition> reportCollection = this.reportStoreService.listAllReports();
 			Object[] reportArray = reportCollection.toArray();
 			for (int i=0; i<reportArray.length; i++) {
 				BasicReportDefinition reportDefinition = (BasicReportDefinition) reportArray[i];
-				Hashtable<String, Object> map = this.fillResponse(reportDefinition);
+				HashMap <String, Object> map = this.fillResponse(reportDefinition);
 				res.addRecord(map);
+//				res.putAll(map);
 			}
 			res.setCode(EntityResult.OPERATION_SUCCESSFUL);
 		} catch (ReportStoreException e) {
@@ -152,10 +149,10 @@ public class ReportStoreRestController {
 	
 	@RequestMapping(value = "/getReport/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
 	public EntityResult getReport(@PathVariable("id") String id) {
-		EntityResult res = new EntityResult();
+		EntityResult res = new EntityResultMapImpl();
 		try {
 			IReportDefinition reportDefinition = this.reportStoreService.getReportDefinition(id);
-			Hashtable<String, Object> map = this.fillResponse(reportDefinition);
+			HashMap<String, Object> map = this.fillResponse(reportDefinition);
 			res.addRecord(map);
 			res.setCode(EntityResult.OPERATION_SUCCESSFUL);
 		} catch (ReportStoreException e) {
@@ -169,9 +166,9 @@ public class ReportStoreRestController {
 	@RequestMapping(value = "/updateReport/{id}", method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_VALUE})
 	public EntityResult updateReport(@PathVariable("id") String id,
 			@RequestBody (required = true) Map<String, String> bodyParams) {
-		EntityResult res = new EntityResult();
+		EntityResult res = new EntityResultMapImpl();
 		try {
-			Hashtable<String, Object> params = this.fillResponse(this.reportStoreService.getReportDefinition(id));
+			HashMap<String, Object> params = this.fillResponse(this.reportStoreService.getReportDefinition(id));
 
 			if (bodyParams.containsKey("name"))
 				params.replace("name", bodyParams.get("name"));
@@ -195,8 +192,8 @@ public class ReportStoreRestController {
 		return res;
 	}
 	
-	private Hashtable<String, Object> fillResponse(IReportDefinition reportDefinition){
-		Hashtable<String, Object> map = new Hashtable<String, Object>();
+	private HashMap<String, Object> fillResponse(IReportDefinition reportDefinition){
+		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("id", reportDefinition.getId());
 		map.put("name", reportDefinition.getName());
 		map.put("description", reportDefinition.getDescription());

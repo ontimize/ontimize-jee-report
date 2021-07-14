@@ -7,8 +7,8 @@ import java.util.Vector;
 
 import javax.swing.ImageIcon;
 
-import com.ontimize.db.EntityResult;
-import com.ontimize.util.remote.BytesBlock;
+import com.ontimize.jee.common.dto.EntityResult;
+import com.ontimize.jee.common.util.remote.BytesBlock;
 
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;

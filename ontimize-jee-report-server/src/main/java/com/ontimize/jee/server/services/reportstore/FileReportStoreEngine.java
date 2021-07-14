@@ -34,8 +34,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.ontimize.db.EntityResult;
-import com.ontimize.db.SQLStatementBuilder.SQLOrder;
+import com.ontimize.jee.common.db.SQLStatementBuilder.SQLOrder;
+import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.common.services.reportstore.AdvancedEntityResultDataSource;
 import com.ontimize.jee.common.services.reportstore.BasicReportDefinition;
 import com.ontimize.jee.common.services.reportstore.EntityResultDataSource;

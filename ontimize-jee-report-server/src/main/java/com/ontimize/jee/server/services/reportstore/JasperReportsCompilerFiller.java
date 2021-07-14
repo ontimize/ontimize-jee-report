@@ -45,7 +45,7 @@ import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.export.JRHtmlExporter;
+//import net.sf.jasperreports.engine.export.JRHtmlExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
 import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
@@ -322,12 +322,12 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
 							xlsxExp.setParameter(JRExporterParameter.OUTPUT_STREAM, os);
 							xlsxExp.exportReport();
 							break;
-						case HTML:
-							JRHtmlExporter htmlExp = new JRHtmlExporter();
-							htmlExp.setParameter(JRExporterParameter.JASPER_PRINT_LIST, Arrays.asList(new JasperPrint[] { fillReport }));
-							htmlExp.setParameter(JRExporterParameter.OUTPUT_STREAM, os);
-							htmlExp.exportReport();
-							break;
+//						case HTML:
+//							JRHtmlExporter htmlExp = new JRHtmlExporter();
+//							htmlExp.setParameter(JRExporterParameter.JASPER_PRINT_LIST, Arrays.asList(new JasperPrint[] { fillReport }));
+//							htmlExp.setParameter(JRExporterParameter.OUTPUT_STREAM, os);
+//							htmlExp.exportReport();
+//							break;
 						case OTHER:
 							// TODO
 							break;

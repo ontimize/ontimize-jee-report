@@ -35,8 +35,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.ontimize.db.EntityResult;
-import com.ontimize.db.SQLStatementBuilder.SQLOrder;
+import com.ontimize.jee.common.db.SQLStatementBuilder.SQLOrder;
+import com.ontimize.jee.common.dto.EntityResult;
+import com.ontimize.jee.common.dto.EntityResultMapImpl;
 import com.ontimize.jee.common.services.reportstore.AdvancedEntityResultDataSource;
 import com.ontimize.jee.common.services.reportstore.BasicReportDefinition;
 import com.ontimize.jee.common.services.reportstore.EntityResultDataSource;
@@ -47,11 +48,11 @@ import com.ontimize.jee.common.services.reportstore.ReportStoreException;
 import com.ontimize.jee.common.tools.CheckingTools;
 import com.ontimize.jee.common.tools.PathTools;
 import com.ontimize.jee.common.tools.ReflectionTools;
+import com.ontimize.jee.common.util.remote.BytesBlock;
 import com.ontimize.jee.server.dao.DefaultOntimizeDaoHelper;
 import com.ontimize.jee.server.requestfilter.OntimizeServletFilter;
 import com.ontimize.jee.server.services.reportstore.dao.IReportDao;
 import com.ontimize.jee.server.services.reportstore.dao.IReportParameterDao;
-import com.ontimize.util.remote.BytesBlock;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
@@ -562,7 +563,8 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 			List<String> attrList = new ArrayList<String> ();
 			attrList.add("ID");
 			attrList.add("ZIP");
-			EntityResult res = this.daoHelper.query(this.reportDao, keyMap, attrList);
+			EntityResult res = new EntityResultMapImpl();
+			res = this.daoHelper.query(this.reportDao, keyMap, attrList);
 			keyMap.clear();
 			
 			// Store the report zip folder in temporary folder

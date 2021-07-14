@@ -3,6 +3,7 @@ package com.ontimize.jee.common.services.reportstore;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.JRPropertiesHolder;
 import net.sf.jasperreports.engine.JRPropertiesMap;
+import net.sf.jasperreports.engine.JRPropertyExpression;
 
 public class OntimizeField implements JRField {
 
@@ -113,4 +114,11 @@ public class OntimizeField implements JRField {
     public Object clone() {
         return this;
     }
+
+	@Override
+	public JRPropertyExpression[] getPropertyExpressions() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

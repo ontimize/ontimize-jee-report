@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.ontimize.jee.report</groupId>
 		<artifactId>ontimize-jee-report</artifactId>
-		<version>1.0.3-REST-SNAPSHOT</version>
+		<version>1.0.11-REST-SNAPSHOT</version>
 	</parent>
 	<artifactId>ontimize-jee-report-server</artifactId>
 

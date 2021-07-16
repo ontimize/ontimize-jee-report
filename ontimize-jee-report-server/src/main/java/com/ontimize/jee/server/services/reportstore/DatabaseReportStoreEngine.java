@@ -18,7 +18,7 @@ import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Vector;
+//import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -210,7 +210,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 		keyMap.put("UUID", rDef.getId());
 		attrList.add("ID");
 		EntityResult res = this.daoHelper.query(this.reportDao, keyMap, attrList);
-		Integer id = (Integer) ((Vector<?>) res.get("ID")).get(0);
+		Integer id = (Integer) ((ArrayList<?>) res.get("ID")).get(0);
 		
 		keyMap.clear();
 		keyMap.put("ID", id);
@@ -275,16 +275,16 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 		keyMap.put("UUID", reportId);
 		attrList.add("ID");
 		EntityResult res = this.daoHelper.query(this.reportDao, keyMap, attrList);
-		Integer id = (Integer) ((Vector<?>) res.get("ID")).get(0);
+		Integer id = (Integer) ((ArrayList<?>) res.get("ID")).get(0);
 		
 		// Check if there's parameters for this reportId (FK restriction)
 		keyMap.clear();
 		keyMap.put("REPORT_ID", id);
 		res = this.daoHelper.query(this.reportParameterDao, keyMap, attrList);
 		if (!res.entrySet().isEmpty()) {
-			Integer size = ((Vector<?>) res.get("ID")).size();
+			Integer size = ((ArrayList<?>) res.get("ID")).size();
 			for (int i=0; i<size; i++) {
-				Integer paramId = (Integer) ((Vector<?>) res.get("ID")).get(i);
+				Integer paramId = (Integer) ((ArrayList<?>) res.get("ID")).get(i);
 				keyMap.clear();
 				keyMap.put("ID", paramId);
 				this.daoHelper.delete(this.reportParameterDao, keyMap);
@@ -321,7 +321,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 		IReportDefinition rDef = this.parseReportEntityResult(res).iterator().next();
 		
 		// Retrieve report parameters data
-		Integer id = (Integer) ((Vector<?>) res.get("ID")).get(0);
+		Integer id = (Integer) ((ArrayList<?>) res.get("ID")).get(0);
 		attrList.clear();
 		keyMap.clear();
 		attrList.add("NAME");
@@ -464,7 +464,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 			EntityResult res = this.daoHelper.query(this.reportDao, keyMap, attrList);
 			
 			// Parse the byte array to JasperReport object
-			BytesBlock bytesBlock = (BytesBlock) ((Vector<?>) res.get("COMPILED")).get(0);
+			BytesBlock bytesBlock = (BytesBlock) ((ArrayList<?>) res.get("COMPILED")).get(0);
 			byte[] byteArray = bytesBlock.getBytes();
 			InputStream compiledReport = new ByteArrayInputStream(byteArray);	
 			JasperReport jasperReport = (JasperReport)JRLoader.loadObject(compiledReport);
@@ -568,7 +568,8 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 			keyMap.clear();
 			
 			// Store the report zip folder in temporary folder
-			BytesBlock zipBlock = (BytesBlock) ((Vector<?>) res.get("ZIP")).get(0);
+//			BytesBlock zipBlock = (BytesBlock) ((Vector<?>) res.get("ZIP")).get(0);
+			BytesBlock zipBlock = (BytesBlock) ((ArrayList<?>) res.get("ZIP")).get(0);
 			byte[] zip = zipBlock.getBytes();
 			InputStream is = new ByteArrayInputStream(zip);
 			try (OutputStream os = Files.newOutputStream(reportFile)) {
@@ -591,7 +592,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 			
 			// Store the compiled report in the database (REPORT.COMPILED)
 			Map<String, Object> attrMap = new HashMap<String, Object>();
-			Integer id = (Integer) ((Vector<?>) res.get("ID")).get(0);
+			Integer id = (Integer) ((ArrayList<?>) res.get("ID")).get(0);
 			keyMap.put("ID", id);
 			byte[] compiledReport = Files.readAllBytes(compileFolder.resolve(rDef.getMainReportFileName() + DatabaseReportStoreEngine.JASPER));
 			attrMap.put("COMPILED", compiledReport);
@@ -781,13 +782,13 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 		final Collection<IReportDefinition> reportList = new ArrayList<>();
 		IReportDefinition rDef;
 		String uuid, name, description, type, mainReportFilename;
-		Integer size = ((Vector<?>) res.get("UUID")).size();
+		Integer size = ((ArrayList<?>) res.get("UUID")).size();
 		for (int i=0; i<size; i++) {
-			uuid = (String) ((Vector<?>) res.get("UUID")).get(i);
-			name = (String) ((Vector<?>) res.get("NAME")).get(i);
-			description = (String) ((Vector<?>) res.get("DESCRIPTION")).get(i);
-			type = (String) ((Vector<?>) res.get("REPORT_TYPE")).get(i);
-			mainReportFilename = (String) ((Vector<?>) res.get("MAIN_REPORT_FILENAME")).get(i);
+			uuid = (String) ((ArrayList<?>) res.get("UUID")).get(i);
+			name = (String) ((ArrayList<?>) res.get("NAME")).get(i);
+			description = (String) ((ArrayList<?>) res.get("DESCRIPTION")).get(i);
+			type = (String) ((ArrayList<?>) res.get("REPORT_TYPE")).get(i);
+			mainReportFilename = (String) ((ArrayList<?>) res.get("MAIN_REPORT_FILENAME")).get(i);
 			rDef = new BasicReportDefinition(uuid, name, description, type, mainReportFilename);
 			reportList.add(rDef);
 		}
@@ -805,12 +806,12 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 		final List<ReportParameter> paramList = new ArrayList<>();
 		ReportParameter param;
 		String name, description, nestedType, valueClass;
-		Integer size = ((Vector<?>) res.get("NAME")).size();
+		Integer size = ((ArrayList<?>) res.get("NAME")).size();
 		for (int i=0; i<size; i++) {
-			name = (String) ((Vector<?>) res.get("NAME")).get(i);
-			description = (String) ((Vector<?>) res.get("DESCRIPTION")).get(i);
-			valueClass = (String) ((Vector<?>) res.get("VALUE_CLASS")).get(i);
-			nestedType = (String) ((Vector<?>) res.get("NESTED_TYPE")).get(i);
+			name = (String) ((ArrayList<?>) res.get("NAME")).get(i);
+			description = (String) ((ArrayList<?>) res.get("DESCRIPTION")).get(i);
+			valueClass = (String) ((ArrayList<?>) res.get("VALUE_CLASS")).get(i);
+			nestedType = (String) ((ArrayList<?>) res.get("NESTED_TYPE")).get(i);
 			
 			param = new ReportParameter(name, description, valueClass, nestedType);
 			paramList.add(param);

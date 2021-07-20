@@ -1,7 +1,9 @@
 package com.ontimize.jee.common.services.reportstore;
 
 import java.awt.Image;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -57,10 +59,11 @@ public class AdvancedEntityResultDataSource implements JRDataSource  {
     @Override
     public Object getFieldValue(JRField field) throws JRException {
         Object obj = this.result.get(field.getName());
-        if ((obj == null) || (!(obj instanceof Vector))) {
+        if ((obj == null) || (!(obj instanceof List))) {
             return null;
         }
-        Vector v = (Vector) obj;
+//        Vector v = (Vector) obj;
+        List v = (ArrayList) obj;
 
         Class fieldClass = field.getValueClass();
         int internalIndex = this.index - this.offset;
@@ -68,7 +71,8 @@ public class AdvancedEntityResultDataSource implements JRDataSource  {
 
         if (java.awt.Image.class.equals(fieldClass) && (value instanceof BytesBlock)) {
             Image im = new ImageIcon(((BytesBlock) value).getBytes()).getImage();
-            v.setElementAt(im, internalIndex);
+//            v.setElementAt(im, internalIndex);
+            v.set(this.index, im);
             value = im;
         }
         return value;
@@ -102,7 +106,8 @@ public class AdvancedEntityResultDataSource implements JRDataSource  {
 
     public static JRField[] getFields(EntityResult result) {
         Enumeration keys = result.keys();
-        Vector tmp = new Vector();
+//        Vector tmp = new Vector();
+        List tmp = new ArrayList();
 
         try {
             while (keys.hasMoreElements()) {
@@ -116,7 +121,8 @@ public class AdvancedEntityResultDataSource implements JRDataSource  {
                 Class classClass = TypeMappingsUtils.getClass(type);
                 String className = TypeMappingsUtils.getClassName(type);
 
-                Hashtable m = new Hashtable();
+//                Hashtable m = new Hashtable();
+                Map m = new HashMap();
                 m.put(OntimizeField.NAME_KEY, name);
                 m.put(OntimizeField.VALUE_CLASS_NAME_KEY, className);
                 m.put(OntimizeField.VALUE_CLASS_KEY, classClass);

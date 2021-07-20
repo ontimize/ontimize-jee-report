@@ -489,7 +489,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 					return this.reportFiller.fillReport(this.getReportDefinition(reportId), jasperReport, reportParameters, outputType, otherType, this.getBundle(),
 							this.getLocale(), ods);
 				} else {
-					buffer.append(entity).append("AdvancedQuery");
+					buffer.append(entity).append("PaginationQuery");
 					List<SQLOrder> order = new ArrayList<SQLOrder>();
 					JRGroup[] group = jasperReport.getGroups();
 					if (group != null) {

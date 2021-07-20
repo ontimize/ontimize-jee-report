@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -216,6 +217,8 @@ public class ReportStoreRestController {
 				return Float.parseFloat(value);
 			case "java.sql.Date":
 				return Date.valueOf(value);
+			case "java.sql.Timestamp":
+				return Timestamp.valueOf(value);
 			case "java.lang.String":
 				break;
 		}

@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.ontimize.jee.common.dto.EntityResult;
@@ -33,6 +34,7 @@ import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 
 @Service("DynamicJasperService")
+@Lazy(value = true)
 public class DynamicJasperService extends ReportBase implements IDynamicJasperService {
 
 	@Autowired
@@ -48,11 +50,13 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 	public DynamicReport buildReport(List<String> columns, String title, List<String> groups, String entity,
 			String service) throws Exception {
-		final String pathLogo = System.getProperty("user.dir") + "/src/main/resources/logo.png";
+		// final String pathLogo = System.getProperty("user.dir") +
+		// "/src/main/resources/logo.png";
 		DynamicReportBuilder drb = new DynamicReportBuilder();
 		drb.setTitle(title).setSubtitle("Ha sido generado " + new Date()).setPrintBackgroundOnOddRows(true)
-				.setUseFullPageWidth(true).setUseFullPageWidth(true).setPageSizeAndOrientation(Page.Page_A4_Landscape())
-				.addFirstPageImageBanner(pathLogo, 800, 50, ImageBanner.ALIGN_LEFT);
+				.setUseFullPageWidth(true).setUseFullPageWidth(true)
+				.setPageSizeAndOrientation(Page.Page_A4_Landscape());
+		// .addFirstPageImageBanner(pathLogo, 800, 50, ImageBanner.ALIGN_LEFT);
 
 		Map<String, Object> map = new HashMap<>();
 		Object bean = this.applicationContext.getBean(service.concat("Service"));

@@ -1,6 +1,7 @@
 package com.ontimize.jee.server.services.reportstore;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -50,13 +51,12 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 	public DynamicReport buildReport(List<String> columns, String title, List<String> groups, String entity,
 			String service) throws Exception {
-		// final String pathLogo = System.getProperty("user.dir") +
-		// "/src/main/resources/logo.png";
+		URL url = getClass().getClassLoader().getResource("logo.png");
 		DynamicReportBuilder drb = new DynamicReportBuilder();
 		drb.setTitle(title).setSubtitle("Ha sido generado " + new Date()).setPrintBackgroundOnOddRows(true)
 				.setUseFullPageWidth(true).setUseFullPageWidth(true)
-				.setPageSizeAndOrientation(Page.Page_A4_Landscape());
-		// .addFirstPageImageBanner(pathLogo, 800, 50, ImageBanner.ALIGN_LEFT);
+				.setPageSizeAndOrientation(Page.Page_A4_Landscape())
+		 .addFirstPageImageBanner(url.getPath(), 800, 50, ImageBanner.ALIGN_LEFT);
 
 		Map<String, Object> map = new HashMap<>();
 		Object bean = this.applicationContext.getBean(service.concat("Service"));

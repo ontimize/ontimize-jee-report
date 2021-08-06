@@ -440,14 +440,15 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	 * com.ontimize.jee.server.services.reportstore.ReportOutputType, java.lang.String)
 	 */
 	@Override
-	public InputStream fillReport(Object reportId, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType)
-			throws ReportStoreException {
+	public InputStream fillReport(Object reportId, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType,
+			String otherType, Map<Object, Object> keysValues) throws ReportStoreException {
 		String service = null;
 		String entity = null;
 		Integer index;
 		Integer pagesize = null;
 		IReportDefinition rDef = this.getReportDefinition(reportId);
 		Path compiled = this.getReportCompiledFolder(reportId);
+		EntityResult entityResult;
 		try {
 			Path compiledReport = compiled.resolve(rDef.getMainReportFileName().concat(".jasper"));
 			InputStream is = Files.newInputStream(compiledReport);
@@ -484,7 +485,11 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 				Object bean = this.applicationContext.getBean(service);
 				if (pagesize == null) {
 					buffer.append(entity).append("Query");
-					EntityResult entityResult = (EntityResult) ReflectionTools.invoke(bean, buffer.toString(), reportParameters, attributes);
+					if (!reportParameters.isEmpty()) {
+						entityResult = (EntityResult) ReflectionTools.invoke(bean, buffer.toString(), reportParameters, attributes);
+					} else {
+						entityResult = (EntityResult) ReflectionTools.invoke(bean, buffer.toString(), keysValues, attributes);
+					}
 					EntityResultDataSource ods = new EntityResultDataSource(entityResult);
 					return this.reportFiller.fillReport(this.getReportDefinition(reportId), jasperReport, reportParameters, outputType, otherType, this.getBundle(),
 							this.getLocale(), ods);

@@ -448,12 +448,13 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 	 * com.ontimize.jee.server.services.reportstore.ReportOutputType, java.lang.String)
 	 */
 	@Override
-	public InputStream fillReport(Object reportId, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType)
-			throws ReportStoreException {
+	public InputStream fillReport(Object reportId, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType,
+			String otherType, Map<Object, Object> keysValues) throws ReportStoreException {
 		String service = null;
 		String entity = null;
 		Integer index;
 		Integer pagesize = null;
+		EntityResult entityResult;
 		
 		try {
 			// Retrieve the compiled report from the database (REPORT.COMPILED)
@@ -500,7 +501,11 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 				Object bean = this.applicationContext.getBean(service);
 				if (pagesize == null) {
 					buffer.append(entity).append("Query");
-					EntityResult entityResult = (EntityResult) ReflectionTools.invoke(bean, buffer.toString(), reportParameters, attributes);
+					if (!reportParameters.isEmpty()) {
+						entityResult = (EntityResult) ReflectionTools.invoke(bean, buffer.toString(), reportParameters, attributes);
+					} else {
+						entityResult = (EntityResult) ReflectionTools.invoke(bean, buffer.toString(), keysValues, attributes);
+					}
 					EntityResultDataSource ods = new EntityResultDataSource(entityResult);
 					return this.reportFiller.fillReport(this.getReportDefinition(reportId), jasperReport, reportParameters, outputType, otherType, this.getBundle(),
 							this.getLocale(), ods);
@@ -538,7 +543,8 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 	 * com.ontimize.jee.server.services.reportstore.ReportOutputType, java.lang.String)
 	 */
 	@Override
-	public InputStream fillReport(Object reportId, String serviceName, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType)
+	public InputStream fillReport(Object reportId, String serviceName, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType,
+			String otherType)
 			throws ReportStoreException {
 		IReportAdapter adapter = this.applicationContext.getBean(IReportAdapter.class, serviceName);
 		return this.reportFiller.fillReport(this.getReportDefinition(reportId), this.getReportCompiledFolder(reportId), adapter, reportParameters, outputType, otherType,

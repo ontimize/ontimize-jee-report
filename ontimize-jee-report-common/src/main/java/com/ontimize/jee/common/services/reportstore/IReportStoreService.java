@@ -123,7 +123,8 @@ public interface IReportStoreService {
 	 * @throws ReportStoreException
 	 *             the report store exception
 	 */
-	InputStream fillReport(Object reportId, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType) throws ReportStoreException;
+	InputStream fillReport(Object reportId, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType, Map<Object, Object> keysValues)
+			throws ReportStoreException;
 
 	/**
 	 * Fill report.

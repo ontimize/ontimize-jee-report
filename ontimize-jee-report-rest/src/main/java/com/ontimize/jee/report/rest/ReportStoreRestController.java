@@ -5,10 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
@@ -25,6 +26,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ontimize.jee.common.db.NullValue;
+import com.ontimize.jee.common.db.SQLStatementBuilder;
+import com.ontimize.jee.common.db.SQLStatementBuilder.BasicExpression;
 import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.common.dto.EntityResultMapImpl;
 import com.ontimize.jee.common.services.reportstore.BasicReportDefinition;
@@ -32,6 +36,10 @@ import com.ontimize.jee.common.services.reportstore.IReportDefinition;
 import com.ontimize.jee.common.services.reportstore.IReportStoreService;
 import com.ontimize.jee.common.services.reportstore.ReportOutputType;
 import com.ontimize.jee.common.services.reportstore.ReportStoreException;
+import com.ontimize.jee.server.rest.BasicExpressionProcessor;
+import com.ontimize.jee.server.rest.ORestController;
+import com.ontimize.jee.server.rest.ParseUtilsExt;
+
 
 @RestController
 @RequestMapping("/reportstore")
@@ -53,7 +61,7 @@ public class ReportStoreRestController {
 			) {
 		EntityResult res = new EntityResultMapImpl();
 		try {
-			HashMap<String, Object> extraData = new HashMap<>();
+			Map<String, Object> extraData = new HashMap<>();
 	        if (data != null) {
 	            extraData = new ObjectMapper().readValue(data, HashMap.class);
 	        }
@@ -80,26 +88,33 @@ public class ReportStoreRestController {
 	
 	@RequestMapping(value = "/fillReport/{id}", method = RequestMethod.POST)
 	public EntityResult fillReport(@PathVariable("id") String id,
-			@RequestBody (required = true) Map<String, String> bodyParams)
+			@RequestBody (required = true) Map<String, Object> bodyParams)
 			{
 		EntityResult res = new EntityResultMapImpl();
 		ReportOutputType outputType;
 		String otherType = "pdf";
 		String[] values;
+		Map<Object, Object> filter = ((Map<Object, Object>) bodyParams.get("filter"));
+		Map<Object, Object> keysValues = new HashMap<Object, Object>();
 		try {
 			outputType = ReportOutputType.fromName("pdf");
 			Map<String, Object> params = new HashMap<String, Object>();
-			if (!bodyParams.get("params").isEmpty()) {
+			if (!((String) bodyParams.get("params")).isEmpty()) {
 				IReportDefinition reportDefinition = this.reportStoreService.getReportDefinition(id);
-				values = bodyParams.get("params").split("\\,");
+				values = ((String) bodyParams.get("params")).split("\\,");
 				for (int i=0; i<reportDefinition.getParameters().size(); i++) {
 					params.put(reportDefinition.getParameters().get(i).getName(), this.parseParameter(reportDefinition, i, values[i]));
 				}	
 			}
-			InputStream is = this.reportStoreService.fillReport(id, params, null, outputType, otherType);
+			if (!filter.isEmpty()) {
+				filter = (Map<Object, Object>) filter.get("filter");
+				keysValues = this.createKeysValues(filter, new HashMap<>());
+			}
+			
+			InputStream is = this.reportStoreService.fillReport(id, params, null, outputType, otherType, keysValues);
 			byte[] file = IOUtils.toByteArray(is);
 		    is.close();
-		    Hashtable<String, Object> map = new Hashtable<String, Object>();
+		    Map<String, Object> map = new HashMap<String, Object>();
 		    map.put("file", file);
 		    res.addRecord(map);
 			res.setCode(EntityResult.OPERATION_SUCCESSFUL);
@@ -135,7 +150,7 @@ public class ReportStoreRestController {
 			Object[] reportArray = reportCollection.toArray();
 			for (int i=0; i<reportArray.length; i++) {
 				BasicReportDefinition reportDefinition = (BasicReportDefinition) reportArray[i];
-				HashMap <String, Object> map = this.fillResponse(reportDefinition);
+				Map <String, Object> map = this.fillResponse(reportDefinition);
 				res.addRecord(map);
 //				res.putAll(map);
 			}
@@ -153,7 +168,7 @@ public class ReportStoreRestController {
 		EntityResult res = new EntityResultMapImpl();
 		try {
 			IReportDefinition reportDefinition = this.reportStoreService.getReportDefinition(id);
-			HashMap<String, Object> map = this.fillResponse(reportDefinition);
+			Map<String, Object> map = this.fillResponse(reportDefinition);
 			res.addRecord(map);
 			res.setCode(EntityResult.OPERATION_SUCCESSFUL);
 		} catch (ReportStoreException e) {
@@ -169,7 +184,7 @@ public class ReportStoreRestController {
 			@RequestBody (required = true) Map<String, String> bodyParams) {
 		EntityResult res = new EntityResultMapImpl();
 		try {
-			HashMap<String, Object> params = this.fillResponse(this.reportStoreService.getReportDefinition(id));
+			Map<String, Object> params = this.fillResponse(this.reportStoreService.getReportDefinition(id));
 
 			if (bodyParams.containsKey("name"))
 				params.replace("name", bodyParams.get("name"));
@@ -193,8 +208,8 @@ public class ReportStoreRestController {
 		return res;
 	}
 	
-	private HashMap<String, Object> fillResponse(IReportDefinition reportDefinition){
-		HashMap<String, Object> map = new HashMap<String, Object>();
+	private Map<String, Object> fillResponse(IReportDefinition reportDefinition){
+		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("id", reportDefinition.getId());
 		map.put("name", reportDefinition.getName());
 		map.put("description", reportDefinition.getDescription());
@@ -224,5 +239,61 @@ public class ReportStoreRestController {
 		}
 		return value;
 	}
+	
+	protected Map<Object, Object> createKeysValues(Map<?, ?> kvQueryParam, Map<?, ?> hSqlTypes) {
+        Map<Object, Object> kv = new HashMap<>();
+        if ((kvQueryParam == null) || kvQueryParam.isEmpty()) {
+            return kv;
+        }
+
+        if (kvQueryParam.containsKey(ORestController.BASIC_EXPRESSION)) {
+            Object basicExpressionValue = kvQueryParam.remove(ORestController.BASIC_EXPRESSION);
+            this.processBasicExpression(SQLStatementBuilder.ExtendedSQLConditionValuesProcessor.EXPRESSION_KEY, kv,
+                    basicExpressionValue, hSqlTypes);
+        }
+
+        if (kvQueryParam.containsKey(ORestController.FILTER_EXPRESSION)) {
+            Object basicExpressionValue = kvQueryParam.remove(ORestController.FILTER_EXPRESSION);
+            this.processBasicExpression(SQLStatementBuilder.ExtendedSQLConditionValuesProcessor.FILTER_KEY, kv,
+                    basicExpressionValue, hSqlTypes);
+        }
+
+        for (Entry<?, ?> next : kvQueryParam.entrySet()) {
+            Object key = next.getKey();
+            Object value = next.getValue();
+            if ((hSqlTypes != null) && hSqlTypes.containsKey(key)) {
+                int sqlType = (Integer) hSqlTypes.get(key);
+                value = ParseUtilsExt.getValueForSQLType(value, sqlType);
+                if (value == null) {
+                    if (ParseUtilsExt.BASE64 == sqlType) {
+                        sqlType = Types.BINARY;
+                    }
+                    value = new NullValue(sqlType);
+                }
+            } else if (value == null) {
+                value = new NullValue();
+            }
+            kv.put(key, value);
+        }
+        return kv;
+    }
+	
+	protected void processBasicExpression(String key, Map<?, ?> keysValues, Object basicExpression,
+            Map<?, ?> hSqlTypes) {
+        if (basicExpression instanceof Map) {
+            try {
+                BasicExpression bE = BasicExpressionProcessor.getInstance()
+                    .processBasicEspression(basicExpression, hSqlTypes);
+                ((Map<Object, Object>) keysValues).put(key, bE);
+            } catch (Exception e) {
+            	e.printStackTrace();
+            }
+        }
+
+    }
+
+    protected void processBasicExpression(String key, Map<Object, Object> keysValues, Object basicExpression) {
+        this.processBasicExpression(key, keysValues, basicExpression, new HashMap<>());
+    }
 	
 }

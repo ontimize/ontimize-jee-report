@@ -38,6 +38,11 @@
 				<version>${ontimize-jee.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.ontimize.jee</groupId>
+				<artifactId>ontimize-jee-server-rest</artifactId>
+				<version>${ontimize-jee.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>net.sf.jasperreports</groupId>
 				<artifactId>jasperreports</artifactId>
 				<version>6.16.0</version>

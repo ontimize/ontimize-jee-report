@@ -13,6 +13,9 @@ import com.ontimize.jee.common.services.reportstore.IReportDefinition;
 import com.ontimize.jee.common.services.reportstore.ReportOutputType;
 import com.ontimize.jee.common.services.reportstore.ReportStoreException;
 
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JasperReport;
+
 /**
  * The Interface IReportFiller.
  */
@@ -71,5 +74,13 @@ public interface IReportFiller {
 	 */
 	InputStream fillReport(IReportDefinition reportDefinition, Path compiledReportFolder, IReportAdapter service, Map<String, Object> methodParameters, ReportOutputType outputType,
 	        String otherType, ResourceBundle bundle, Locale locale, String datasourceName) throws ReportStoreException;
+
+	InputStream fillReport(IReportDefinition reportDefinition, JasperReport compiledReport,
+			Map<String, Object> reportParameters, ReportOutputType outputType, String otherType, ResourceBundle bundle,
+			Locale locale, String dataSourceName) throws ReportStoreException;
+
+	InputStream fillReport(IReportDefinition reportDefinition, JasperReport compiledReport,
+			Map<String, Object> reportParameters, ReportOutputType outputType, String otherType, ResourceBundle bundle,
+			Locale locale, JRDataSource ods) throws ReportStoreException;
 
 }

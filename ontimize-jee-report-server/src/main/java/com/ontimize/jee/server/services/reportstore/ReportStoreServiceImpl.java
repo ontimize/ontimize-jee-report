@@ -113,9 +113,9 @@ public class ReportStoreServiceImpl implements IReportStoreServiceServer, Applic
 	 * java.lang.String)
 	 */
 	@Override
-	public InputStream fillReport(Object reportId, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType)
+	public InputStream fillReport(Object reportId, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType, Map<Object, Object> keysValues)
 	        throws ReportStoreException {
-		return this.getImplementation().fillReport(reportId, reportParameters, dataSourceName, outputType, otherType);
+		return this.getImplementation().fillReport(reportId, reportParameters, dataSourceName, outputType, otherType, keysValues);
 	}
 
 	/*
@@ -130,8 +130,8 @@ public class ReportStoreServiceImpl implements IReportStoreServiceServer, Applic
 	}
 
 	@Override
-	public void compileReport(Object reportId) throws ReportStoreException {
-		this.getImplementation().compileReport(reportId);
+	public void compileReport(Object reportId, IReportDefinition rDef) throws ReportStoreException {
+		this.getImplementation().compileReport(reportId, rDef);
 	}
 
 	/**

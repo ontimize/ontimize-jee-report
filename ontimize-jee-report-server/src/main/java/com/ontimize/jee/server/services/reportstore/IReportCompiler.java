@@ -3,6 +3,8 @@ package com.ontimize.jee.server.services.reportstore;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import com.ontimize.jee.common.services.reportstore.IReportDefinition;
+
 import net.lingala.zip4j.exception.ZipException;
 
 /**
@@ -21,5 +23,5 @@ public interface IReportCompiler {
 	 * @throws ZipException
 	 * @throws IOException
 	 */
-	void compile(Path inputZip, Path outputFolder) throws ReportStoreCompileException;
+	IReportDefinition compile(Path inputZip, Path outputFolder, IReportDefinition rDef) throws ReportStoreCompileException;
 }

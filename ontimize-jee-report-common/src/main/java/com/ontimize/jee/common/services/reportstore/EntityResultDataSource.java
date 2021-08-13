@@ -4,19 +4,18 @@ import java.awt.Image;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.swing.ImageIcon;
 
 import com.ontimize.jee.common.dto.EntityResult;
-import com.ontimize.jee.common.util.remote.BytesBlock;
 
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
+
+import com.ontimize.jee.common.util.remote.BytesBlock;
 
 public class EntityResultDataSource implements JRDataSource {
 

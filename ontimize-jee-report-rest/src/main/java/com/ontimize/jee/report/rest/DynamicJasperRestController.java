@@ -1,7 +1,9 @@
 package com.ontimize.jee.report.rest;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.common.dto.EntityResultMapImpl;
 import com.ontimize.jee.common.services.reportstore.IDynamicJasperService;
+import com.ontimize.jee.report.rest.dtos.FunctionParamsDto;
 import com.ontimize.jee.report.rest.dtos.ReportParamsDto;
 
 @RestController
@@ -36,11 +39,24 @@ public class DynamicJasperRestController {
 
 		EntityResult res = new EntityResultMapImpl();
 		InputStream is = service.createReport(param.getColumns(), param.getTitle(), param.getGroups(),
-				param.getEntity(), param.getService());
+				param.getEntity(), param.getService(), param.getOrientation(), param.getFunctions(),
+				param.getStyleFunctions(), param.getSubtitle(), param.getColumnStyle());
 		byte[] file = IOUtils.toByteArray(is);
 		is.close();
 		Hashtable map = new Hashtable<String, Object>();
 		map.put("file", file);
+		res.addRecord(map);
+		return res;
+	}
+
+	@RequestMapping(value = "/functions", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public EntityResult getFunctions(@RequestBody FunctionParamsDto params) throws Exception {
+		EntityResult res = new EntityResultMapImpl();
+		List<String> list = new ArrayList<>();
+		list = service.getFunctions(params.getEntity(), params.getService(), params.getColumns());
+		list.add("NÚMERO DE APARICIONES");
+		Hashtable map = new Hashtable<String, Object>();
+		map.put("list", list);
 		res.addRecord(map);
 		return res;
 	}

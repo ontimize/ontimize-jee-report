@@ -34,15 +34,18 @@ public abstract class ReportBase {
 	protected DynamicReport dr;
 
 	public abstract DynamicReport buildReport(List<String> colums, String title, List<String> groups, String entity,
-			String service) throws Exception;
+			String service, String orientation, List<String> functions, List<String> styleFunctions, String subtitle,
+			List<ColumnStyleParamsDto> columnStyle) throws Exception;
 
 	public abstract JRDataSource getDataSource(List<String> columns, String entity, String service)
 			throws JRException, NoSuchFieldException, SecurityException, ClassNotFoundException;
 
 	public InputStream generateReport(List<String> columns, String title, List<String> groups, String entity,
-			String service) throws Exception {
+			String service, String orientation, List<String> functions, List<String> styleFunctions, String subtitle,
+			List<ColumnStyleParamsDto> columnStyle) throws Exception {
 
-		dr = buildReport(columns, title, groups, entity, service);
+		dr = buildReport(columns, title, groups, entity, service, orientation, functions, styleFunctions, subtitle,
+				columnStyle);
 
 		/**
 		 * Ontenemos la fuente de datos en base a una colleccion de objetos
@@ -79,7 +82,6 @@ public abstract class ReportBase {
 	protected LayoutManager getLayoutManager() {
 		return new ClassicLayoutManager();
 	}
-
 
 	protected InputStream convertReport(final JasperPrint fillReport)
 			throws IOException, JRException, ReportStoreException {

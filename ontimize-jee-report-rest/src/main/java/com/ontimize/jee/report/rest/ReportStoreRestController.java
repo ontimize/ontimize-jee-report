@@ -15,7 +15,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.UUID;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.ComponentScan;
@@ -116,19 +115,9 @@ public class ReportStoreRestController {
 				keysValues = this.createKeysValues(filter, new HashMap<>());
 			}
 			
-			CompletableFuture<InputStream> future = this.reportStoreService.fillReport(id, params, null, outputType, otherType, keysValues);
-			InputStream is = future.get();
-			byte[] file = IOUtils.toByteArray(is);
-		    is.close();
-		    
-		    Map<String, Object> map = new HashMap<String, Object>();
-		    map.put("file", file);
-		    res.addRecord(map);
-			res.setCode(EntityResult.OPERATION_SUCCESSFUL);
+			CompletableFuture<EntityResult> future = this.reportStoreService.fillReport(id, params, null, outputType, otherType, keysValues);
+			res = future.get();
 		} catch (ReportStoreException e) {
-			e.printStackTrace();
-			res.setCode(EntityResult.OPERATION_WRONG);
-		} catch (IOException e) {
 			e.printStackTrace();
 			res.setCode(EntityResult.OPERATION_WRONG);
 		} catch (InterruptedException e) {

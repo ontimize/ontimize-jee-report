@@ -80,7 +80,7 @@ public class ReportStoreServiceImpl implements IReportStoreServiceServer, Applic
 	 */	
 	@Override
 	@Async("ReportExecutor")
-	public CompletableFuture<InputStream> fillReport(Object reportId, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType, Map<Object, Object> keysValues)
+	public CompletableFuture<EntityResult> fillReport(Object reportId, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType, Map<Object, Object> keysValues)
 	        throws ReportStoreException {
 		return this.getImplementation().fillReport(reportId, reportParameters, dataSourceName, outputType, otherType, keysValues);
 	}
@@ -92,7 +92,7 @@ public class ReportStoreServiceImpl implements IReportStoreServiceServer, Applic
 	 */
 	@Override
 	@Async("ReportExecutor")
-	public CompletableFuture<InputStream> fillReport(Object reportId, String serviceName, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType)
+	public CompletableFuture<EntityResult> fillReport(Object reportId, String serviceName, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType)
 	        throws ReportStoreException {
 		return this.getImplementation().fillReport(reportId, serviceName, reportParameters, dataSourceName, outputType, otherType);
 	}

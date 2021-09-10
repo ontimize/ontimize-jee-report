@@ -80,7 +80,7 @@ public interface IReportStoreService {
 	 * @throws ReportStoreException
 	 *             the report store exception
 	 */
-	CompletableFuture<InputStream> fillReport(Object reportId, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType, Map<Object, Object> keysValues)
+	CompletableFuture<EntityResult> fillReport(Object reportId, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType, Map<Object, Object> keysValues)
 			throws ReportStoreException;
 
 	/**
@@ -102,7 +102,7 @@ public interface IReportStoreService {
 	 * @throws ReportStoreException
 	 *             the report store exception
 	 */
-	CompletableFuture<InputStream> fillReport(Object reportId, String serviceName, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType)
+	CompletableFuture<EntityResult> fillReport(Object reportId, String serviceName, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType)
 	        throws ReportStoreException;
 
 }

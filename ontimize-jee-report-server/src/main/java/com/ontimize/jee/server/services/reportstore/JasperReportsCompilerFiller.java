@@ -55,6 +55,7 @@ import net.sf.jasperreports.engine.util.JRSaver;
 /**
  * The Class JasperReportsCompilerFiller.
  */
+@SuppressWarnings("deprecation")
 public class JasperReportsCompilerFiller implements IReportCompiler, IReportFiller, ApplicationContextAware {
 
 	private static final Logger	logger								= LoggerFactory.getLogger(JasperReportsCompilerFiller.class);
@@ -142,6 +143,7 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
 	 * @see com.ontimize.jee.server.services.reportstore.IReportFiller#fillReport(com.ontimize.jee.common.services.reportstore.IReportDefinition, java.nio.file.Path, java.util.Map,
 	 * com.ontimize.jee.server.services.reportstore.ReportOutputType, java.lang.String, java.util.ResourceBundle, java.util.Locale)
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public InputStream fillReport(IReportDefinition reportDefinition, Path compiledReportFolder, Map<String, Object> reportParameters, ReportOutputType outputType,
 	        String otherType, ResourceBundle bundle, Locale locale, String datasourceName) throws ReportStoreException {
@@ -182,6 +184,7 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
 		}
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public InputStream fillReport(IReportDefinition reportDefinition, JasperReport compiledReport,
 			Map<String, Object> reportParameters, ReportOutputType outputType, String otherType, ResourceBundle bundle,
@@ -218,6 +221,7 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
 		}
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public InputStream fillReport(IReportDefinition reportDefinition, JasperReport compiledReport,
 			Map<String, Object> reportParameters, ReportOutputType outputType, String otherType, ResourceBundle bundle,
@@ -293,6 +297,7 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
 		// Try to do in another thread, due to PipedStreams may deadlock in same thread when buffer is full
 		Thread thread = new Thread("convertReportThread") {
 
+			@SuppressWarnings("incomplete-switch")
 			@Override
 			public void run() {
 				try {

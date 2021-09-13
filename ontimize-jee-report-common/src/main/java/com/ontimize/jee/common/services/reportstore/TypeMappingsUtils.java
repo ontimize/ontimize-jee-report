@@ -24,7 +24,8 @@ public class TypeMappingsUtils {
             DATE_PATH = "java.util.Date",
             INTEGER_PATH = "java.lang.Integer";
 
-    public static Class getClass(int type) {
+    @SuppressWarnings("rawtypes")
+	public static Class getClass(int type) {
         switch (type) {
             case Types.VARCHAR:
             case Types.LONGVARCHAR:
@@ -64,7 +65,8 @@ public class TypeMappingsUtils {
         return Object.class;
     }
 
-    public static Class getClass(String type) {
+    @SuppressWarnings("rawtypes")
+	public static Class getClass(String type) {
         return getClass(getSQLType(type));
     }
 
@@ -135,7 +137,8 @@ public class TypeMappingsUtils {
     /**
      * Transforms current Map with SQL types as strings in a new Map with SQL types as integers.
      */
-    public static Map convertStrSQLMap2IntSQLMap(Map m) {
+    @SuppressWarnings({ "rawtypes", "deprecation", "unchecked" })
+	public static Map convertStrSQLMap2IntSQLMap(Map m) {
         HashMap newMap = new HashMap(m.size());
 
         Set k = m.keySet();

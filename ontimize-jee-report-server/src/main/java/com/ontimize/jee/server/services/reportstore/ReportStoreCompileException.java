@@ -2,6 +2,7 @@ package com.ontimize.jee.server.services.reportstore;
 
 import com.ontimize.jee.common.services.reportstore.ReportStoreException;
 
+@SuppressWarnings("serial")
 public class ReportStoreCompileException extends ReportStoreException {
 
 	public ReportStoreCompileException(String reason) {

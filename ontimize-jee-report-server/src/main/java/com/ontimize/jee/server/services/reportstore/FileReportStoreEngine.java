@@ -1,28 +1,24 @@
 package com.ontimize.jee.server.services.reportstore;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
 import java.util.Properties;
 import java.util.ResourceBundle;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -31,11 +27,10 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.ontimize.jee.common.db.SQLStatementBuilder.SQLOrder;
 import com.ontimize.jee.common.dto.EntityResult;
+import com.ontimize.jee.common.dto.EntityResultMapImpl;
 import com.ontimize.jee.common.services.reportstore.AdvancedEntityResultDataSource;
 import com.ontimize.jee.common.services.reportstore.BasicReportDefinition;
 import com.ontimize.jee.common.services.reportstore.EntityResultDataSource;
@@ -48,11 +43,7 @@ import com.ontimize.jee.common.tools.CheckingTools;
 import com.ontimize.jee.common.tools.MapTools;
 import com.ontimize.jee.common.tools.PathTools;
 import com.ontimize.jee.common.tools.ReflectionTools;
-import com.ontimize.jee.server.requestfilter.OntimizeServletFilter;
 
-import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.util.Zip4jConstants;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.JRGroup;
@@ -89,8 +80,8 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	/** The Constant ERROR_NO_REPORT_DEFINITION. */
 	private static final String					ERROR_NO_REPORT_DEFINITION		= "E_NO_REPORT_DEFINITION";
 
-	/** The Constant ERROR_GETTING_REPORT_SOURCE. */
-	private static final String					ERROR_GETTING_REPORT_SOURCE		= "E_GETTING_REPORT_SOURCE";
+//	/** The Constant ERROR_GETTING_REPORT_SOURCE. */
+//	private static final String					ERROR_GETTING_REPORT_SOURCE		= "E_GETTING_REPORT_SOURCE";
 
 	/** The Constant ERROR_REPORT_ID_NOT_EXISTS. */
 	private static final String					ERROR_REPORT_ID_NOT_EXISTS		= "E_REPORT_ID_NOT_EXISTS";
@@ -128,9 +119,6 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	/** The Constant PROP_EXTENSION. */
 	private static final String					PROP_EXTENSION					= ".properties";
 
-	/** The Constant TMP_PREFIX. */
-	private static final String					TMP_PREFIX						= "OJEE_RTMP";
-
 	/** The bundle. */
 	private ResourceBundle						bundle;
 
@@ -159,7 +147,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	 * @see com.ontimize.jee.server.services.reportstore.IReportStoreService#addReport(com.ontimize.jee.common.services.reportstore.IReportDefinition, java.io.InputStream)
 	 */
 	@Override
-	public void addReport(IReportDefinition rDef, InputStream reportSource) throws ReportStoreException {
+	public EntityResult addReport(IReportDefinition rDef, InputStream reportSource) throws ReportStoreException {
 		Path reportFolder = null;
 		try {
 			CheckingTools.failIfNull(rDef, FileReportStoreEngine.ERROR_NO_REPORT_DEFINITION);
@@ -176,7 +164,11 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 
 			this.saveReportProperties(reportFolder, rDef);
 			this.compileReport(rDef.getId(), rDef);
-
+			
+			EntityResult res = new EntityResultMapImpl();
+			res.setCode(0);
+			res.put("id", rDef.getId());
+			return res;
 		} catch (ReportStoreException error) {
 			PathTools.deleteFolderSafe(reportFolder);
 			throw error;
@@ -229,7 +221,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	 * @see com.ontimize.jee.server.services.reportstore.IReportStoreService#updateReportDefinition(com.ontimize.jee.common.services.reportstore. IReportDefinition)
 	 */
 	@Override
-	public void updateReportDefinition(IReportDefinition rDef) throws ReportStoreException {
+	public EntityResult updateReportDefinition(IReportDefinition rDef) throws ReportStoreException {
 		try {
 			CheckingTools.failIfNull(rDef, FileReportStoreEngine.ERROR_NO_REPORT_DEFINITION);
 			CheckingTools.failIfNull(rDef.getId(), FileReportStoreEngine.ERROR_NO_REPORT_KEY);
@@ -237,49 +229,12 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 			Path reportPropertiesFile = this.getReportPropertiesFile(reportFolder, rDef.getId());
 			CheckingTools.failIf(!Files.exists(reportPropertiesFile), FileReportStoreEngine.ERROR_REPORT_ID_NOT_EXISTS);
 			this.saveReportProperties(reportFolder, rDef);
+			
+			EntityResult res = new EntityResultMapImpl();
+			res.setCode(0);
+			res.addRecord(this.fillResponse(rDef));
+			return res;
 		} catch (IOException ex) {
-			throw new ReportStoreException(FileReportStoreEngine.ERROR_UPDATING_REPORT, ex);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.ontimize.jee.server.services.reportstore.IReportStoreService#updateReportSource(java.lang.Object, java.io.InputStream)
-	 */
-	@Override
-	public void updateReportSource(Object reportId, InputStream reportSource) throws ReportStoreException {
-		// To ensure to save previous version until be sure this oepration finish successfully
-		Path reportFile = null;
-		Path tempOldReportFile = null;
-		try {
-			CheckingTools.failIfNull(reportId, FileReportStoreEngine.ERROR_NO_REPORT_KEY);
-
-			// Delete old files
-			Path reportFolder = this.getReportFolder(reportId);
-			reportFile = this.getReportFile(reportFolder, reportId);
-			CheckingTools.failIf(!Files.exists(reportFolder), FileReportStoreEngine.ERROR_REPORT_ID_NOT_EXISTS);
-			tempOldReportFile = reportFile.resolveSibling(reportFile.getFileName() + "_old");
-			Files.move(reportFile, tempOldReportFile);
-
-			// Put new file
-			try (OutputStream os = Files.newOutputStream(reportFile)) {
-				IOUtils.copy(reportSource, os);
-			}
-
-			PathTools.deleteFileSafe(tempOldReportFile);
-
-			// Recompile new file
-			this.compileReport(reportId, null);
-		} catch (IOException ex) {
-			try {
-				// Restore previous version
-				if ((reportFile != null) && (tempOldReportFile != null)) {
-					PathTools.deleteFileSafe(reportFile);
-					Files.move(tempOldReportFile, reportFile);
-				}
-			} catch (IOException e) {
-				FileReportStoreEngine.logger.error(null, e);
-			}
 			throw new ReportStoreException(FileReportStoreEngine.ERROR_UPDATING_REPORT, ex);
 		}
 	}
@@ -289,12 +244,17 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	 * @see com.ontimize.jee.server.services.reportstore.IReportStoreService#removeReport(java.lang.Object)
 	 */
 	@Override
-	public void removeReport(Object reportId) throws ReportStoreException {
+	public EntityResult removeReport(Object reportId) throws ReportStoreException {
 		try {
 			CheckingTools.failIfNull(reportId, FileReportStoreEngine.ERROR_NO_REPORT_KEY);
 			Path reportFolder = this.getReportFolder(reportId);
 			CheckingTools.failIf(!Files.exists(reportFolder), FileReportStoreEngine.ERROR_REPORT_ID_NOT_EXISTS);
 			PathTools.deleteFolder(reportFolder);
+			
+			EntityResult res = new EntityResultMapImpl();
+			res.setCode(0);
+			res.put("id", reportId);
+			return res;
 		} catch (IOException ex) {
 			throw new ReportStoreException(FileReportStoreEngine.ERROR_REMOVING_REPORT, ex);
 		}
@@ -306,7 +266,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	 * @see com.ontimize.jee.server.services.reportstore.IReportStoreService#getReportDefinition(java.lang.Object)
 	 */
 	@Override
-	public IReportDefinition getReportDefinition(Object reportId) throws ReportStoreException {
+	public EntityResult getReportDefinition(Object reportId) throws ReportStoreException {
 		try {
 			CheckingTools.failIfNull(reportId, FileReportStoreEngine.ERROR_NO_REPORT_KEY);
 			Path reportFolder = this.getReportFolder(reportId);
@@ -322,7 +282,11 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 				}
 			}
 			rDef.setParameters(params);
-			return rDef;
+			
+			EntityResult res = new EntityResultMapImpl();
+			res.setCode(0);
+			res.addRecord(this.fillResponse(rDef));
+			return res;
 		} catch (IOException ex) {
 			throw new ReportStoreException(FileReportStoreEngine.ERROR_GETTING_REPORT_DEFINITION, ex);
 		}
@@ -330,75 +294,15 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 
 	/*
 	 * (non-Javadoc)
-	 * @see com.ontimize.jee.server.services.reportstore.IReportStoreService#getReportSource(java.lang.Object)
-	 */
-	@Override
-	public InputStream getReportSource(Object reportId) throws ReportStoreException {
-		try {
-			CheckingTools.failIfNull(reportId, FileReportStoreEngine.ERROR_NO_REPORT_KEY);
-			Path reportFolder = this.getReportFolder(reportId);
-			Path reportFile = this.getReportFile(reportFolder, reportId);
-			CheckingTools.failIf(!Files.exists(reportFile), FileReportStoreEngine.ERROR_REPORT_ID_NOT_EXISTS);
-			return Files.newInputStream(reportFile);
-		} catch (IOException ex) {
-			throw new ReportStoreException(FileReportStoreEngine.ERROR_GETTING_REPORT_SOURCE, ex);
-		}
-	}
-
-	/**
-	 * Gets the report compiled.
-	 *
-	 * @param reportId
-	 *            the report id
-	 * @return the report compiled in zip format
-	 * @throws ReportStoreException
-	 *             the report store exception
-	 */
-	@Override
-	public InputStream getReportCompiled(Object reportId) throws ReportStoreException {
-		try {
-			// ensure everything is ok
-			this.getReportDefinition(reportId);
-
-			Path reportCompiledFolder = this.getReportCompiledFolder(reportId);
-
-			final Path temporaryFile = Files.createTempFile(FileReportStoreEngine.TMP_PREFIX, FileReportStoreEngine.ZIP_EXTENSION);
-			ZipFile zipFile = new ZipFile(temporaryFile.toFile());
-			ZipParameters parameters = new ZipParameters();
-			// set compression method to store compression
-			parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
-			// Set the compression level
-			parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
-			final ArrayList<File> sourceFileList = new ArrayList<>();
-			try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(reportCompiledFolder)) {
-				for (Path path : directoryStream) {
-					sourceFileList.add(path.toFile());
-				}
-			} catch (IOException ex) {
-				FileReportStoreEngine.logger.error(null, ex);
-			}
-
-			zipFile.addFiles(sourceFileList, parameters);
-			return Files.newInputStream(temporaryFile, StandardOpenOption.DELETE_ON_CLOSE);
-		} catch (ReportStoreException error) {
-			throw error;
-		} catch (Exception ex) {
-			throw new ReportStoreException(ex);
-		}
-
-	}
-
-	/*
-	 * (non-Javadoc)
 	 * @see com.ontimize.jee.server.services.reportstore.IReportStoreService#listAllReports()
 	 */
 	@Override
-	public Collection<IReportDefinition> listAllReports() throws ReportStoreException {
+	public EntityResult listAllReports() throws ReportStoreException {
 		try {
-			final Collection<IReportDefinition> res = new ArrayList<>();
+			final Collection<IReportDefinition> reports = new ArrayList<>();
 			Path reportFolder = this.getBasePath();
 			if (!Files.exists(reportFolder)) {
-				return res;
+				return new EntityResultMapImpl();
 			}
 			Files.walkFileTree(reportFolder, new SimpleFileVisitor<Path>() {
 
@@ -406,11 +310,19 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 					if (file.getFileName().toString().startsWith(FileReportStoreEngine.PREFIX) && file.getFileName().toString().endsWith(FileReportStoreEngine.PROP_EXTENSION)) {
 						IReportDefinition rDef = FileReportStoreEngine.this.loadReportProperties(file);
-						res.add(rDef);
+						reports.add(rDef);
 					}
 					return FileVisitResult.CONTINUE;
 				}
 			});
+			EntityResult res = new EntityResultMapImpl();
+			Object[] reportArray = reports.toArray();
+			for (int i=0; i<reportArray.length; i++) {
+				IReportDefinition rDef = (IReportDefinition) reportArray[i];
+				Map <String, Object> map = this.fillResponse(rDef);
+				res.addRecord(map);
+			}
+			res.setCode(0);
 			return res;
 		} catch (IOException ex) {
 			throw new ReportStoreException(FileReportStoreEngine.ERROR_LISTING_REPORTS, ex);
@@ -419,40 +331,23 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 
 	/*
 	 * (non-Javadoc)
-	 * @see com.ontimize.jee.server.services.reportstore.IReportStoreService#listReportsOfType(java.lang.String)
-	 */
-	@Override
-	public Collection<IReportDefinition> listReportsOfType(String type) throws ReportStoreException {
-		List<IReportDefinition> reports = new ArrayList<>(this.listAllReports());
-		ListIterator<IReportDefinition> listIterator = reports.listIterator();
-		while (listIterator.hasNext()) {
-			IReportDefinition current = listIterator.next();
-			if (!type.equals(current.getType())) {
-				listIterator.remove();
-			}
-		}
-		return reports;
-	}
-
-	/*
-	 * (non-Javadoc)
 	 * @see com.ontimize.jee.server.services.reportstore.IReportStoreService#fillReport(java.lang.Object, java.util.Map,
 	 * com.ontimize.jee.server.services.reportstore.ReportOutputType, java.lang.String)
 	 */
 	@Override
-	public InputStream fillReport(Object reportId, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType,
+	public CompletableFuture<EntityResult> fillReport(Object reportId, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType,
 			String otherType, Map<Object, Object> keysValues) throws ReportStoreException {
 		String service = null;
 		String entity = null;
 		Integer index;
 		Integer pagesize = null;
-		IReportDefinition rDef = this.getReportDefinition(reportId);
+		IReportDefinition rDef = this.parseReportEntityResult(this.getReportDefinition(reportId));
 		Path compiled = this.getReportCompiledFolder(reportId);
 		EntityResult entityResult;
 		try {
 			Path compiledReport = compiled.resolve(rDef.getMainReportFileName().concat(".jasper"));
-			InputStream is = Files.newInputStream(compiledReport);
-			JasperReport jasperReport = (JasperReport)JRLoader.loadObject(is);
+			InputStream stream = Files.newInputStream(compiledReport);
+			JasperReport jasperReport = (JasperReport)JRLoader.loadObject(stream);
 			
 			// Check special parameters (service, entity, pagesize)
 			JRParameter[] params = jasperReport.getParameters();
@@ -474,8 +369,17 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 			
 			// Fill the report
 			if (service == null) {
-				return this.reportFiller.fillReport(this.getReportDefinition(reportId), this.getReportCompiledFolder(reportId), reportParameters, outputType, otherType, this.getBundle(),
+				InputStream is = this.reportFiller.fillReport(rDef, this.getReportCompiledFolder(reportId), reportParameters, outputType, otherType, this.getBundle(),
 						this.getLocale(), dataSourceName);
+				byte[] file = IOUtils.toByteArray(is);
+				is.close();
+			    Map<String, Object> map = new HashMap<String, Object>();
+			    map.put("file", file);
+			    
+			    EntityResult res = new EntityResultMapImpl();
+			    res.addRecord(map);
+				res.setCode(EntityResult.OPERATION_SUCCESSFUL);
+				return CompletableFuture.completedFuture(res);
 			} else if (entity != null) {
 				StringBuffer buffer = new StringBuffer();
 				List<Object> attributes = new ArrayList<>();
@@ -491,8 +395,17 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 						entityResult = (EntityResult) ReflectionTools.invoke(bean, buffer.toString(), keysValues, attributes);
 					}
 					EntityResultDataSource ods = new EntityResultDataSource(entityResult);
-					return this.reportFiller.fillReport(this.getReportDefinition(reportId), jasperReport, reportParameters, outputType, otherType, this.getBundle(),
+					InputStream is = this.reportFiller.fillReport(rDef, jasperReport, reportParameters, outputType, otherType, this.getBundle(),
 							this.getLocale(), ods);
+					byte[] file = IOUtils.toByteArray(is);
+					is.close();
+				    Map<String, Object> map = new HashMap<String, Object>();
+				    map.put("file", file);
+				    
+				    EntityResult res = new EntityResultMapImpl();
+				    res.addRecord(map);
+					res.setCode(EntityResult.OPERATION_SUCCESSFUL);
+					return CompletableFuture.completedFuture(res);
 				} else {
 					buffer.append(entity).append("PaginationQuery");
 					List<SQLOrder> order = new ArrayList<SQLOrder>();
@@ -507,8 +420,17 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 					}
 					AdvancedEntityResultDataSource ods = new AdvancedEntityResultDataSource(bean, buffer.toString(), reportParameters,
 							attributes, pagesize, 0, order);
-					return this.reportFiller.fillReport(this.getReportDefinition(reportId), jasperReport, reportParameters, outputType, otherType, this.getBundle(),
+					InputStream is = this.reportFiller.fillReport(rDef, jasperReport, reportParameters, outputType, otherType, this.getBundle(),
 							this.getLocale(), ods);
+					byte[] file = IOUtils.toByteArray(is);
+					is.close();
+				    Map<String, Object> map = new HashMap<String, Object>();
+				    map.put("file", file);
+				    
+				    EntityResult res = new EntityResultMapImpl();
+				    res.addRecord(map);
+					res.setCode(EntityResult.OPERATION_SUCCESSFUL);
+					return CompletableFuture.completedFuture(res);
 				}
 			}
 		} catch (JRException e) {
@@ -526,15 +448,30 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	 * com.ontimize.jee.server.services.reportstore.ReportOutputType, java.lang.String)
 	 */
 	@Override
-	public InputStream fillReport(Object reportId, String serviceName, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType)
+	public CompletableFuture<EntityResult> fillReport(Object reportId, String serviceName, Map<String, Object> reportParameters, String dataSourceName, ReportOutputType outputType, String otherType)
 			throws ReportStoreException {
-		IReportAdapter adapter = this.applicationContext.getBean(IReportAdapter.class, serviceName);
-		return this.reportFiller.fillReport(this.getReportDefinition(reportId), this.getReportCompiledFolder(reportId), adapter, reportParameters, outputType, otherType,
-				this.getBundle(), this.getLocale(), dataSourceName);
+		EntityResult res = new EntityResultMapImpl();
+		try {
+			IReportDefinition rDef = this.parseReportEntityResult(this.getReportDefinition(reportId));
+			IReportAdapter adapter = this.applicationContext.getBean(IReportAdapter.class, serviceName);
+			InputStream is = this.reportFiller.fillReport(rDef, this.getReportCompiledFolder(reportId), adapter, reportParameters, outputType, otherType,
+					this.getBundle(), this.getLocale(), dataSourceName);
+			byte[] file = IOUtils.toByteArray(is);
+			is.close();
+		    Map<String, Object> map = new HashMap<String, Object>();
+		    map.put("file", file);
+		    
+		    res.addRecord(map);
+			res.setCode(EntityResult.OPERATION_SUCCESSFUL);
+			return CompletableFuture.completedFuture(res);
+		} catch (IOException e) {
+			res.setCode(1);
+		}
+		
+		return CompletableFuture.completedFuture(res);
 	}
 
-	@Override
-	public void compileReport(Object reportId, IReportDefinition rDef) throws ReportStoreException {
+	private void compileReport(Object reportId, IReportDefinition rDef) throws ReportStoreException {
 		Path compileFolder = null;
 		try {
 			Path reportFolder = this.getReportFolder(reportId);
@@ -646,12 +583,13 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 	 * @return the locale
 	 */
 	private Locale getLocale() {
-		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-		Locale locale = (Locale) request.getAttribute(OntimizeServletFilter.LOCALE);
-		if (locale == null) {
-			return Locale.getDefault();
-		}
-		return locale;
+//		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+//		Locale locale = (Locale) request.getAttribute(OntimizeServletFilter.LOCALE);
+//		if (locale == null) {
+//			return Locale.getDefault();
+//		}
+//		return locale;
+		return Locale.getDefault();
 	}
 
 	/**
@@ -843,6 +781,13 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 		this.updateSettings();
 	}
 	
+	/**
+	 * Parses the parameters string to a list of parameter definition objects.
+	 *
+	 * @param params
+	 *            the report parameters in string format
+	 * @return the parameter definition object list
+	 */
 	private List<ReportParameter> parseParameters(String params) {
 		String name, description, valueClass, type, param; 
 		String [] paramArray;
@@ -877,6 +822,44 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 		}
 		
 		return paramList;
+	}
+	
+	/**
+	 * Parses the result to a report definition object.
+	 *
+	 * @param res
+	 *            the report EntityResult
+	 * @return the report definition object
+	 */
+	private IReportDefinition parseReportEntityResult(EntityResult res) {
+		IReportDefinition rDef;
+		String uuid, name, description, type, mainReportFilename;
+		uuid = (String) ((ArrayList<?>) res.get("UUID")).get(0);
+		name = (String) ((ArrayList<?>) res.get("NAME")).get(0);
+		description = (String) ((ArrayList<?>) res.get("DESCRIPTION")).get(0);
+		type = (String) ((ArrayList<?>) res.get("REPORT_TYPE")).get(0);
+		mainReportFilename = (String) ((ArrayList<?>) res.get("MAIN_REPORT_FILENAME")).get(0);
+		rDef = new BasicReportDefinition(uuid, name, description, type, mainReportFilename);
+		return rDef;
+	}
+	
+	
+	/**
+	 * Parses the report attributes to a Map (with parameters).
+	 *
+	 * @param rDef
+	 *            the report definition object
+	 * @return the report attributes map (key, value)
+	 */
+	private Map<String, Object> fillResponse(IReportDefinition rDef){
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("UUID", rDef.getId());
+		map.put("NAME", rDef.getName());
+		map.put("DESCRIPTION", rDef.getDescription());
+		map.put("MAIN_REPORT_FILENAME", rDef.getMainReportFileName());
+		map.put("REPORT_TYPE", rDef.getType());
+		map.put("PARAMETERS", rDef.getParameters());
+		return map;
 	}
 
 }

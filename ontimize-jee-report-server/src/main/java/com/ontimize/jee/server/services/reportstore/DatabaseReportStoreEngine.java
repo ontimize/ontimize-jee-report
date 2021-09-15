@@ -356,8 +356,6 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 	        		}
 	        	}
 	        }
-			
-			Thread.sleep(10000);
 						
 			// Fill the report
 			if (service == null) {

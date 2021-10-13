@@ -199,14 +199,16 @@ public class ReportStoreRestController {
 	private IReportDefinition parseReportEntityResult(EntityResult res) {
 		IReportDefinition rDef;
 		String uuid, name, description, type, mainReportFilename;
-		uuid = (String) ((ArrayList<?>) res.get("UUID")).get(0);
-		name = (String) ((ArrayList<?>) res.get("NAME")).get(0);
-		description = (String) ((ArrayList<?>) res.get("DESCRIPTION")).get(0);
-		type = (String) ((ArrayList<?>) res.get("REPORT_TYPE")).get(0);
-		mainReportFilename = (String) ((ArrayList<?>) res.get("MAIN_REPORT_FILENAME")).get(0);
+		
+		Map<?, ?> resData = res.getRecordValues(0);
+		uuid = (String) resData.get("UUID");
+		name = (String) resData.get("NAME");
+		description = (String) resData.get("DESCRIPTION");
+		type = (String) resData.get("REPORT_TYPE");
+		mainReportFilename = (String) resData.get("MAIN_REPORT_FILENAME");
 		
 		rDef = new BasicReportDefinition(uuid, name, description, type, mainReportFilename);
-		rDef.setParameters((List<ReportParameter>) ((ArrayList<?>) res.get("PARAMETERS")).get(0));
+		rDef.setParameters((List<ReportParameter>) resData.get("PARAMETERS"));
 		
 		return rDef;
 	}

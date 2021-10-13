@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.xml.DomUtils;
@@ -12,7 +11,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.ontimize.jee.common.spring.parser.DefinitionParserUtil;
 import com.ontimize.jee.server.services.reportstore.FileReportStoreEngine;
 import com.ontimize.jee.server.services.reportstore.JasperReportsCompilerFiller;
 import com.ontimize.jee.server.services.reportstore.ReportStoreConfiguration;
@@ -23,6 +21,7 @@ import com.ontimize.jee.server.services.reportstore.ReportStoreConfiguration;
 public class ReportBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	/** The Constant SCOPE. */
+	@SuppressWarnings("unused")
 	private static final String SCOPE = "scope";
 
 	/*
@@ -54,7 +53,7 @@ public class ReportBeanDefinitionParser extends AbstractSingleBeanDefinitionPars
 			((AbstractBeanDefinition) engine).setDependencyCheck(AbstractBeanDefinition.DEPENDENCY_CHECK_NONE);
 		} else {
 			// construimos el bean que nos venga que deberia ser un IReportStoreEngine
-			engine = DefinitionParserUtil.parseNode(child, ctx, builder.getBeanDefinition(), element.getAttribute(ReportBeanDefinitionParser.SCOPE), false);
+			//engine = DefinitionParserUtil.parseNode(child, ctx, builder.getBeanDefinition(), element.getAttribute(ReportBeanDefinitionParser.SCOPE), false);
 		}
 		builder.addPropertyValue("engine", engine);
 		builder.setLazyInit(true);
@@ -94,12 +93,12 @@ public class ReportBeanDefinitionParser extends AbstractSingleBeanDefinitionPars
 			if (childElements.size() == 0) {
 				builder.addPropertyValue("basePath", ebasePath.getNodeValue());
 			} else {
-				GenericBeanDefinition parseNode = (GenericBeanDefinition) DefinitionParserUtil.parseNode(childElements.get(0), ctx, builder.getBeanDefinition(),
-				        element.getAttribute("scope"));
-				builder.addPropertyValue("basePathResolver", parseNode);
-				if (!parseNode.getPropertyValues().contains("useMyselfInSpringContext")) {
-					parseNode.getPropertyValues().add("useMyselfInSpringContext", Boolean.TRUE);
-				}
+//				GenericBeanDefinition parseNode = (GenericBeanDefinition) DefinitionParserUtil.parseNode(childElements.get(0), ctx, builder.getBeanDefinition(),
+//				        element.getAttribute("scope"));
+//				builder.addPropertyValue("basePathResolver", parseNode);
+//				if (!parseNode.getPropertyValues().contains("useMyselfInSpringContext")) {
+//					parseNode.getPropertyValues().add("useMyselfInSpringContext", Boolean.TRUE);
+//				}
 			}
 			builder.setDependencyCheck(AbstractBeanDefinition.DEPENDENCY_CHECK_NONE);
 			builder.setLazyInit(true);
@@ -127,7 +126,7 @@ public class ReportBeanDefinitionParser extends AbstractSingleBeanDefinitionPars
 				compiler = new ReportCompilerParser().parse(child, nestedCtx);
 			} else {
 				// construimos el bean que nos venga que deberia ser un IReportCompiler
-				compiler = DefinitionParserUtil.parseNode(child, ctx, builder.getBeanDefinition(), element.getAttribute(ReportBeanDefinitionParser.SCOPE), false);
+//				compiler = DefinitionParserUtil.parseNode(child, ctx, builder.getBeanDefinition(), element.getAttribute(ReportBeanDefinitionParser.SCOPE), false);
 			}
 			builder.addPropertyValue("reportCompiler", compiler);
 			builder.setLazyInit(true);
@@ -141,7 +140,7 @@ public class ReportBeanDefinitionParser extends AbstractSingleBeanDefinitionPars
 				filler = new ReportFillerParser().parse(child, nestedCtx);
 			} else {
 				// construimos el bean que nos venga que deberia ser un IReportFiller
-				filler = DefinitionParserUtil.parseNode(child, ctx, builder.getBeanDefinition(), element.getAttribute(ReportBeanDefinitionParser.SCOPE), false);
+//				filler = DefinitionParserUtil.parseNode(child, ctx, builder.getBeanDefinition(), element.getAttribute(ReportBeanDefinitionParser.SCOPE), false);
 			}
 			builder.addPropertyValue("reportFiller", filler);
 			builder.setLazyInit(true);

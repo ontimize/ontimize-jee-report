@@ -9,6 +9,7 @@ import org.w3c.dom.Element;
 public class OntimizeReportConfigurationBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 
 	/** The Constant SCOPE. */
+	@SuppressWarnings("unused")
 	private static final String SCOPE = "scope";
 
 	@Override

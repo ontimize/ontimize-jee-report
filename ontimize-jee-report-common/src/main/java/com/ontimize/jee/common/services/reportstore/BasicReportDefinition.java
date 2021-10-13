@@ -1,28 +1,34 @@
 package com.ontimize.jee.common.services.reportstore;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * The Class BasicReportDefinition.
  */
+@SuppressWarnings("serial")
 public class BasicReportDefinition implements IReportDefinition, Serializable {
 
 	/** The id. */
-	private Serializable		id;
+	private Serializable id;
 
 	/** The name. */
-	private String				name;
+	private String name;
 
 	/** The description. */
-	private String				description;
+	private String description;
 
 	/** The type. */
-	private String				type;
+	private String type;
 
 	/** The main report file name. */
-	private String				mainReportFileName;
+	private String mainReportFileName;
+	
+	/** The report parameters. */
+	private List<ReportParameter> parameters;
 
 	/** The other info. */
 	private Map<String, String>	otherInfo;
@@ -43,12 +49,27 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
 	 * @param type
 	 *            the type
 	 */
-	public BasicReportDefinition(Serializable id, String name, String description, String type) {
+	public BasicReportDefinition(Serializable id, String name, String description, String type,
+			String mainReportFileName) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.description = description;
 		this.type = type;
+		this.mainReportFileName = mainReportFileName;
+		this.parameters = new ArrayList<ReportParameter>();
+		this.otherInfo = new HashMap<>();
+	}
+	
+	public BasicReportDefinition(Serializable id, String name, String description, String type,
+			String mainReportFileName, List<ReportParameter> parameters) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.description = description;
+		this.type = type;
+		this.mainReportFileName = mainReportFileName;
+		this.parameters = parameters;
 		this.otherInfo = new HashMap<>();
 	}
 
@@ -185,14 +206,37 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
 		}
 		this.otherInfo.put(key, value);
 	}
+	
+	/**
+	 * Gets the report parameters.
+	 *
+	 * @return the parameters
+	 */
+	@Override
+	public List<ReportParameter> getParameters() {
+		return parameters;
+	}
+
+	/**
+	 * Sets the main report file name.
+	 *
+	 * @param mainReportFileName
+	 *            the new main report file name
+	 */
+	@Override
+	public void setParameters(List<ReportParameter> parameters) {
+		this.parameters = parameters;
+	}
+
+	@Override
+	public String toString() {
+		return "BasicReportDefinition [id=" + id + ", name=" + name + ", description=" + description + ", type=" + type
+				+ ", mainReportFileName=" + mainReportFileName + ", parameters=" + parameters + "]";
+	}
 
 	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
-	@Override
-	public String toString() {
-		return String.format("id: %s, name: %s, description: %s", this.id, this.name, this.description);
-	}
-
+	
 }

@@ -13,7 +13,6 @@ import javax.swing.ImageIcon;
 import com.ontimize.jee.common.db.AdvancedEntityResult;
 import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.common.tools.ReflectionTools;
-import com.ontimize.jee.common.util.remote.BytesBlock;
 
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
@@ -63,28 +62,19 @@ public class AdvancedEntityResultDataSource implements JRDataSource  {
         if ((obj == null) || (!(obj instanceof List))) {
             return null;
         }
-//        Vector v = (Vector) obj;
+        
         List v = (ArrayList) obj;
-
         Class fieldClass = field.getValueClass();
         int internalIndex = this.index - this.offset;
         Object value = (internalIndex >= 0) && (internalIndex < this.size) ? v.get(internalIndex) : null;
 
-//        if (java.awt.Image.class.equals(fieldClass) && (value instanceof BytesBlock)) {
-//            Image im = new ImageIcon(((BytesBlock) value).getBytes()).getImage();
-////            v.setElementAt(im, internalIndex);
-//            v.set(this.index, im);
-//            value = im;
-//        }
         if (java.awt.Image.class.equals(fieldClass)) {
-        	if (value instanceof BytesBlock) {
-        		Image im = new ImageIcon(((BytesBlock) value).getBytes()).getImage();
-//              v.setElementAt(im, this.index);
+        	if (value instanceof byte[]) {
+        		Image im = new ImageIcon((byte[]) value).getImage();
 	            v.set(this.index, im);
 	            value = im;
         	} else if (value instanceof String) {
         		Image im = new ImageIcon(Base64.getDecoder().decode((String) value)).getImage();
-//              v.setElementAt(im, this.index);
         		v.set(this.index, im);
         		value = im;
         	}
@@ -125,7 +115,6 @@ public class AdvancedEntityResultDataSource implements JRDataSource  {
     @SuppressWarnings({ "rawtypes", "unchecked" })
 	public static JRField[] getFields(EntityResult result) {
         Enumeration keys = result.keys();
-//        Vector tmp = new Vector();
         List tmp = new ArrayList();
 
         try {
@@ -140,7 +129,6 @@ public class AdvancedEntityResultDataSource implements JRDataSource  {
                 Class classClass = TypeMappingsUtils.getClass(type);
                 String className = TypeMappingsUtils.getClassName(type);
 
-//                Hashtable m = new Hashtable();
                 Map m = new HashMap();
                 m.put(OntimizeField.NAME_KEY, name);
                 m.put(OntimizeField.VALUE_CLASS_NAME_KEY, className);

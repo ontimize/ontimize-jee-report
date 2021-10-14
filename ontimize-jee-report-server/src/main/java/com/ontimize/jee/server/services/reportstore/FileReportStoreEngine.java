@@ -344,6 +344,8 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 		IReportDefinition rDef = this.parseReportEntityResult(this.getReportDefinition(reportId));
 		Path compiled = this.getReportCompiledFolder(reportId);
 		EntityResult entityResult;
+		InputStream is = null;
+		
 		try {
 			Path compiledReport = compiled.resolve(rDef.getMainReportFileName().concat(".jasper"));
 			InputStream stream = Files.newInputStream(compiledReport);
@@ -369,18 +371,12 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 			
 			// Fill the report
 			if (service == null) {
-				InputStream is = this.reportFiller.fillReport(rDef, this.getReportCompiledFolder(reportId), reportParameters, outputType, otherType, this.getBundle(),
+				// DB DataSource
+				is = this.reportFiller.fillReport(rDef, this.getReportCompiledFolder(reportId), reportParameters, outputType, otherType, this.getBundle(),
 						this.getLocale(), dataSourceName);
-				byte[] file = IOUtils.toByteArray(is);
-				is.close();
-			    Map<String, Object> map = new HashMap<String, Object>();
-			    map.put("file", file);
-			    
-			    EntityResult res = new EntityResultMapImpl();
-			    res.addRecord(map);
-				res.setCode(EntityResult.OPERATION_SUCCESSFUL);
-				return CompletableFuture.completedFuture(res);
+
 			} else if (entity != null) {
+				// Ontimize DataSource
 				StringBuffer buffer = new StringBuffer();
 				List<Object> attributes = new ArrayList<>();
 				for (JRField field : jasperReport.getFields()) {
@@ -388,6 +384,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 				}
 				Object bean = this.applicationContext.getBean(service);
 				if (pagesize == null) {
+					// No pagination (EntityResultDataSource)
 					buffer.append(entity).append("Query");
 					if (!reportParameters.isEmpty()) {
 						entityResult = (EntityResult) ReflectionTools.invoke(bean, buffer.toString(), reportParameters, attributes);
@@ -395,18 +392,11 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 						entityResult = (EntityResult) ReflectionTools.invoke(bean, buffer.toString(), keysValues, attributes);
 					}
 					EntityResultDataSource ods = new EntityResultDataSource(entityResult);
-					InputStream is = this.reportFiller.fillReport(rDef, jasperReport, reportParameters, outputType, otherType, this.getBundle(),
+					is = this.reportFiller.fillReport(rDef, jasperReport, reportParameters, outputType, otherType, this.getBundle(),
 							this.getLocale(), ods);
-					byte[] file = IOUtils.toByteArray(is);
-					is.close();
-				    Map<String, Object> map = new HashMap<String, Object>();
-				    map.put("file", file);
-				    
-				    EntityResult res = new EntityResultMapImpl();
-				    res.addRecord(map);
-					res.setCode(EntityResult.OPERATION_SUCCESSFUL);
-					return CompletableFuture.completedFuture(res);
+
 				} else {
+					// Pagination (AdvancedEntityResultDataSource)
 					buffer.append(entity).append("PaginationQuery");
 					List<SQLOrder> order = new ArrayList<SQLOrder>();
 					JRGroup[] group = jasperReport.getGroups();
@@ -420,26 +410,26 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
 					}
 					AdvancedEntityResultDataSource ods = new AdvancedEntityResultDataSource(bean, buffer.toString(), reportParameters,
 							attributes, pagesize, 0, order);
-					InputStream is = this.reportFiller.fillReport(rDef, jasperReport, reportParameters, outputType, otherType, this.getBundle(),
+					is = this.reportFiller.fillReport(rDef, jasperReport, reportParameters, outputType, otherType, this.getBundle(),
 							this.getLocale(), ods);
-					byte[] file = IOUtils.toByteArray(is);
-					is.close();
-				    Map<String, Object> map = new HashMap<String, Object>();
-				    map.put("file", file);
-				    
-				    EntityResult res = new EntityResultMapImpl();
-				    res.addRecord(map);
-					res.setCode(EntityResult.OPERATION_SUCCESSFUL);
-					return CompletableFuture.completedFuture(res);
 				}
 			}
+			
+			byte[] file = IOUtils.toByteArray(is);
+		    is.close();
+		    
+		    Map<String, Object> map = new HashMap<String, Object>();
+		    map.put("file", file);
+		    EntityResult res = new EntityResultMapImpl();
+		    res.addRecord(map);
+			res.setCode(EntityResult.OPERATION_SUCCESSFUL);
+			return CompletableFuture.completedFuture(res);
+			
 		} catch (JRException e) {
-			e.printStackTrace();
+			throw new ReportStoreException(e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new ReportStoreException(e);
 		}
-		return null;
 	}
 
 	/*

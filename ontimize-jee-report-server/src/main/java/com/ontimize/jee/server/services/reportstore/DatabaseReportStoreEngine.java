@@ -328,6 +328,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 		Integer index;
 		Integer pagesize = null;
 		EntityResult entityResult;
+		InputStream is = null;
 		
 		try {
 			// Retrieve the compiled report from the database (REPORT.COMPILED)
@@ -364,26 +365,22 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 						
 			// Fill the report
 			if (service == null) {
+				// DB DataSource
 				IReportDefinition rDef = this.parseReportEntityResult(this.getReportDefinition(reportId));
-				InputStream is = this.reportFiller.fillReport(rDef, jasperReport, reportParameters, outputType, otherType, this.getBundle(),
+				is = this.reportFiller.fillReport(rDef, jasperReport, reportParameters, outputType, otherType, this.getBundle(),
 					this.getLocale(), dataSourceName);
-				byte[] file = IOUtils.toByteArray(is);
-			    is.close();
-			    
-			    Map<String, Object> map = new HashMap<String, Object>();
-			    map.put("file", file);
-			    res.clear();
-			    res.addRecord(map);
-				res.setCode(EntityResult.OPERATION_SUCCESSFUL);
-				return CompletableFuture.completedFuture(res);
+				
 			} else if (entity != null) {
+				// Ontimize DataSource
 				StringBuffer buffer = new StringBuffer();
 				List<Object> attributes = new ArrayList<>();
 				for (JRField field : jasperReport.getFields()) {
 					attributes.add(field.getName());
 				}
 				Object bean = this.applicationContext.getBean(service);
+				
 				if (pagesize == null) {
+					// No pagination (EntityResultDataSource)
 					buffer.append(entity).append("Query");
 					if (!reportParameters.isEmpty()) {
 						entityResult = (EntityResult) ReflectionTools.invoke(bean, buffer.toString(), reportParameters, attributes);
@@ -392,18 +389,11 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 					}
 					EntityResultDataSource ods = new EntityResultDataSource(entityResult);
 					IReportDefinition rDef = this.parseReportEntityResult(this.getReportDefinition(reportId));
-					InputStream is = this.reportFiller.fillReport(rDef, jasperReport, reportParameters, outputType, otherType, this.getBundle(),
+					is = this.reportFiller.fillReport(rDef, jasperReport, reportParameters, outputType, otherType, this.getBundle(),
 							this.getLocale(), ods);
-					byte[] file = IOUtils.toByteArray(is);
-				    is.close();
-				    
-				    Map<String, Object> map = new HashMap<String, Object>();
-				    map.put("file", file);
-				    res.clear();
-				    res.addRecord(map);
-					res.setCode(EntityResult.OPERATION_SUCCESSFUL);
-					return CompletableFuture.completedFuture(res);
+					
 				} else {
+					// Pagination (AdvancedEntityResultDataSource)
 					buffer.append(entity).append("PaginationQuery");
 					List<SQLOrder> order = new ArrayList<SQLOrder>();
 					JRGroup[] group = jasperReport.getGroups();
@@ -418,26 +408,26 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 					AdvancedEntityResultDataSource ods = new AdvancedEntityResultDataSource(bean, buffer.toString(), reportParameters,
 							attributes, pagesize, 0, order);
 					IReportDefinition rDef = this.parseReportEntityResult(this.getReportDefinition(reportId));
-					InputStream is = this.reportFiller.fillReport(rDef, jasperReport, reportParameters, outputType, otherType, this.getBundle(),
+					is = this.reportFiller.fillReport(rDef, jasperReport, reportParameters, outputType, otherType, this.getBundle(),
 							this.getLocale(), ods);
-					byte[] file = IOUtils.toByteArray(is);
-				    is.close();
-				    
-				    Map<String, Object> map = new HashMap<String, Object>();
-				    map.put("file", file);
-				    res.clear();
-				    res.addRecord(map);
-					res.setCode(EntityResult.OPERATION_SUCCESSFUL);
-					return CompletableFuture.completedFuture(res);
 				}
 			}
+			
+			byte[] file = IOUtils.toByteArray(is);
+		    is.close();
+		    
+		    Map<String, Object> map = new HashMap<String, Object>();
+		    map.put("file", file);
+		    res.clear();
+		    res.addRecord(map);
+			res.setCode(EntityResult.OPERATION_SUCCESSFUL);
+			return CompletableFuture.completedFuture(res);
 			
 		} catch (ReportStoreException error) {
 			throw error;
 		} catch (Exception ex) {
 			throw new ReportStoreException(ex);
 		}
-		return null;
 			
 	}
 

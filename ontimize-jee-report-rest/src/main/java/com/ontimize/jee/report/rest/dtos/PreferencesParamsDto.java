@@ -77,4 +77,11 @@ public class PreferencesParamsDto {
 		this.styleFunctions = styleFunctions;
 	}
 
+	@Override
+	public String toString() {
+		return "[vertical=" + vertical + ", title=" + title + ", subtitle=" + subtitle
+				+ ", columns=" + columns + ", groups=" + groups + ", functions=" + functions + ", styleFunctions="
+				+ styleFunctions + "]";
+	}
+
 }

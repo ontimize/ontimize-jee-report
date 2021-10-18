@@ -31,7 +31,7 @@ public class PreferencesRestController {
 	}
 
 	@RequestMapping(value = "/save", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public void savePreferences(@RequestBody PreferencesParamsDto param) throws Exception {
+	public String savePreferences(@RequestBody PreferencesParamsDto param) throws Exception {
 		Map<String, Object> attrMap = new HashMap<>();
 		attrMap.put("NAME", param.getName());
 		attrMap.put("ORIENTATION", param.isVertical());
@@ -41,7 +41,10 @@ public class PreferencesRestController {
 		attrMap.put("GROUPS", param.getGroups().toString());
 		attrMap.put("FUNCTIONS", param.getFunctions().toString());
 		attrMap.put("STYLEFUNCTIONS", param.getStyleFunctions().toString());
+
 		preferencesService.preferenceInsert(attrMap);
+
+		return param.toString();
 	}
 
 	@RequestMapping(value = "/preferences", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

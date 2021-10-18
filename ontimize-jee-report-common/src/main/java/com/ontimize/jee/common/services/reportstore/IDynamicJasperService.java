@@ -16,4 +16,5 @@ public interface IDynamicJasperService {
 			List<ColumnStyleParamsDto> columnStyle) throws Exception;
 
 	public List<String> getFunctions(String entity, String service, List<String> columns);
+	public List<String> getFunctionsName(String entity, String service, List<String> columns);
 }

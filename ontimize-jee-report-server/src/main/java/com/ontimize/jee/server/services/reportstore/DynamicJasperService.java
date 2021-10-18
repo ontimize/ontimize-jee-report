@@ -83,6 +83,26 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		return functions;
 	}
 
+	@Override
+	public List<String> getFunctionsName(String entity, String service, List<String> columns) {
+		List<String> functions = new ArrayList<>();
+		Map<String, Object> map = new HashMap<>();
+		Object bean = this.applicationContext.getBean(service.concat("Service"));
+		EntityResult e = (EntityResult) ReflectionTools.invoke(bean, entity.toLowerCase().concat("Query"), map,
+				columns);
+		for (int i = 0; i < columns.size(); i++) {
+
+			int type = e.getColumnSQLType(columns.get(i));
+
+			String className = TypeMappingsUtils.getClassName(type);
+			if (className.equals("java.lang.Integer")) {
+				functions.add(columns.get(i));
+
+			}
+		}
+		return functions;
+	}
+
 	public DynamicReport buildReport(List<String> columns, String title, List<String> groups, String entity,
 			String service, String orientation, List<String> functions, List<String> styleFunctions, String subtitle,
 			List<ColumnStyleParamsDto> columnStyle) throws Exception {
@@ -90,6 +110,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		String name = "";
 		int width;
 		URL url = getClass().getClassLoader().getResource("logo.png");
+		URL urlTemplate = getClass().getClassLoader().getResource("template.jrxml");
 		DynamicReportBuilder drb = new DynamicReportBuilder();
 		drb.setTitle(title).setSubtitle(subtitle).setPrintBackgroundOnOddRows(true).setUseFullPageWidth(true)
 				.setUseFullPageWidth(true).addFirstPageImageBanner(url.getPath(), 800, 50, ImageBanner.ALIGN_LEFT);
@@ -158,6 +179,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 							columnDataStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
 							headerStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
 							break;
+
 						}
 					}
 				}
@@ -176,7 +198,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 			column.setStyle(columnDataStyle);
 
-			if (i == 0 && functions.contains("NÚMERO DE APARICIONES")) {
+			if (i == 0 && (functions.contains("NÚMERO DE APARICIONES") || functions.contains("TOTAL"))) {
 				drb.addGlobalFooterVariable(column, DJCalculation.COUNT, footerStyle, getValueFormatter("TOTAL"))
 						.setGrandTotalLegend("");
 
@@ -209,7 +231,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 				if (styleFunctions.contains("hideGroupDetails")) {
 					gb1.setGroupLayout(GroupLayout.EMPTY);
 				} else {
-					gb1.setGroupLayout(GroupLayout.DEFAULT_WITH_HEADER);
+					gb1.setGroupLayout(GroupLayout.VALUE_IN_HEADER);
 				}
 
 				if (styleFunctions.contains("groupNewPage")) {
@@ -223,6 +245,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 		drb.addAutoText(AutoText.AUTOTEXT_PAGE_X_OF_Y, AutoText.POSITION_FOOTER, AutoText.ALIGNMENT_CENTER);
 		drb.setUseFullPageWidth(true);
+		// drb.setTemplateFile(urlTemplate.toString());
 		DynamicReport dr = drb.build();
 		return dr;
 	}

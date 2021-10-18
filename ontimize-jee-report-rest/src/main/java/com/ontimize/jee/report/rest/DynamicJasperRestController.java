@@ -60,5 +60,16 @@ public class DynamicJasperRestController {
 		res.addRecord(map);
 		return res;
 	}
+	@RequestMapping(value = "/functionsName", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public EntityResult getFunctionsName(@RequestBody FunctionParamsDto params) throws Exception {
+		EntityResult res = new EntityResultMapImpl();
+		List<String> list = new ArrayList<>();
+		list = service.getFunctionsName(params.getEntity(), params.getService(), params.getColumns());
+		list.add("TOTAL");
+		Hashtable map = new Hashtable<String, Object>();
+		map.put("list", list);
+		res.addRecord(map);
+		return res;
+	}
 
 }

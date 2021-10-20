@@ -18,6 +18,8 @@ import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.common.services.reportstore.IPreferencesService;
 import com.ontimize.jee.report.rest.dtos.PreferencesParamsDto;
 
+import util.JsonServicePreferencesDtoConversor;
+
 @RestController
 @RequestMapping("/preferences")
 @ComponentScan(basePackageClasses = { com.ontimize.jee.common.services.reportstore.IPreferencesService.class })
@@ -30,17 +32,16 @@ public class PreferencesRestController {
 		return this.preferencesService;
 	}
 
+	@Autowired
+	private JsonServicePreferencesDtoConversor conversor;
+
 	@RequestMapping(value = "/save", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String savePreferences(@RequestBody PreferencesParamsDto param) throws Exception {
+
 		Map<String, Object> attrMap = new HashMap<>();
 		attrMap.put("NAME", param.getName());
-		attrMap.put("ORIENTATION", param.isVertical());
-		attrMap.put("TITLE", param.getTitle());
-		attrMap.put("SUBTITLE", param.getSubtitle());
-		attrMap.put("COLUMNS", param.getColumns());
-		attrMap.put("GROUPS", param.getGroups().toString());
-		attrMap.put("FUNCTIONS", param.getFunctions().toString());
-		attrMap.put("STYLEFUNCTIONS", param.getStyleFunctions().toString());
+		attrMap.put("DESCRIPTION", param.getDescription());
+		attrMap.put("PREFERENCES", conversor.toObjectNode(param));
 
 		preferencesService.preferenceInsert(attrMap);
 
@@ -53,13 +54,8 @@ public class PreferencesRestController {
 		List<String> attrList = new ArrayList<>();
 		attrList.add("ID");
 		attrList.add("NAME");
-		attrList.add("ORIENTATION");
-		attrList.add("TITLE");
-		attrList.add("SUBTITLE");
-		attrList.add("COLUMNS");
-		attrList.add("GROUPS");
-		attrList.add("FUNCTIONS");
-		attrList.add("STYLEFUNCTIONS");
+		attrList.add("DESCRIPTION");
+		attrList.add("PREFERENCES");
 		return preferencesService.preferenceQuery(map, attrList);
 	}
 

@@ -5,6 +5,7 @@ import java.util.List;
 public class PreferencesParamsDto {
 
 	private String name;
+	private String description;
 	public boolean vertical;
 	private String title;
 	private String subtitle;
@@ -19,6 +20,14 @@ public class PreferencesParamsDto {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public boolean isVertical() {
@@ -79,9 +88,8 @@ public class PreferencesParamsDto {
 
 	@Override
 	public String toString() {
-		return "[vertical=" + vertical + ", title=" + title + ", subtitle=" + subtitle
-				+ ", columns=" + columns + ", groups=" + groups + ", functions=" + functions + ", styleFunctions="
-				+ styleFunctions + "]";
+		return "[vertical=" + vertical + ", title=" + title + ", subtitle=" + subtitle + ", columns=" + columns
+				+ ", groups=" + groups + ", functions=" + functions + ", styleFunctions=" + styleFunctions + "]";
 	}
 
 }

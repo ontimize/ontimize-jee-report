@@ -75,8 +75,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 			if (className.equals("java.lang.Integer")) {
 				functions.add(columns.get(i) + "-SUMA");
 				functions.add(columns.get(i) + "-MEDIA");
-				functions.add(columns.get(i) + "-M√ÅXIMO");
-				functions.add(columns.get(i) + "-M√çNIMO");
+				functions.add(columns.get(i) + "-M¡XIMO");
+				functions.add(columns.get(i) + "-MÕNIMO");
 
 			}
 		}
@@ -198,7 +198,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 			column.setStyle(columnDataStyle);
 
-			if (i == 0 && (functions.contains("N√öMERO DE APARICIONES") || functions.contains("TOTAL"))) {
+			if (i == 0 && (functions.contains("N⁄MERO DE APARICIONES") || functions.contains("TOTAL"))) {
 				drb.addGlobalFooterVariable(column, DJCalculation.COUNT, footerStyle, getValueFormatter("TOTAL"))
 						.setGrandTotalLegend("");
 
@@ -211,12 +211,12 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 					} else if (functions.get(z).endsWith("MEDIA")) {
 						drb.addGlobalFooterVariable(column, DJCalculation.AVERAGE, footerStyle,
 								getValueFormatter("MEDIA")).setGrandTotalLegend("");
-					} else if (functions.get(z).endsWith("M√ÅXIMO")) {
+					} else if (functions.get(z).endsWith("M¡XIMO")) {
 						drb.addGlobalFooterVariable(column, DJCalculation.HIGHEST, footerStyle,
-								getValueFormatter("M√ÅXIMO")).setGrandTotalLegend("");
-					} else if (functions.get(z).endsWith("M√çNIMO")) {
+								getValueFormatter("MAXIMO")).setGrandTotalLegend("");
+					} else if (functions.get(z).endsWith("MÕNIMO")) {
 						drb.addGlobalFooterVariable(column, DJCalculation.LOWEST, footerStyle,
-								getValueFormatter("M√çNIMO")).setGrandTotalLegend("");
+								getValueFormatter("MÕNIMO")).setGrandTotalLegend("");
 
 					}
 				}
@@ -262,14 +262,14 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 				case "MEDIA":
 					valor = "Media: " + value;
 					break;
-				case "M√ÅXIMO":
-					valor = "M√°ximo: " + value;
+				case "M¡XIMO":
+					valor = "M·ximo: " + value;
 					break;
-				case "M√çNIMO":
-					valor = "M√≠nimo: " + value;
+				case "MÕNIMO":
+					valor = "MÌnimo: " + value;
 					break;
 				case "TOTAL":
-					valor = "N√∫mero total de apariciones: " + value;
+					valor = "N˙mero total de apariciones: " + value;
 					break;
 				}
 				return valor;

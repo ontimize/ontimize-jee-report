@@ -13,6 +13,7 @@ public class PreferencesParamsDto {
 	private List<String> groups;
 	private List<String> functions;
 	private List<String> styleFunctions;
+	private String entity;
 
 	public String getName() {
 		return name;
@@ -86,10 +87,35 @@ public class PreferencesParamsDto {
 		this.styleFunctions = styleFunctions;
 	}
 
+	public String getEntity() {
+		return entity;
+	}
+
+	public void setEntity(String entity) {
+		this.entity = entity;
+	}
+
+	public PreferencesParamsDto(String name, String description, boolean vertical, String title, String subtitle,
+			List<String> columns, List<String> groups, List<String> functions, List<String> styleFunctions,
+			String entity) {
+		this.name = name;
+		this.description = description;
+		this.vertical = vertical;
+		this.title = title;
+		this.subtitle = subtitle;
+		this.columns = columns;
+		this.groups = groups;
+		this.functions = functions;
+		this.styleFunctions = styleFunctions;
+		this.entity = entity;
+	}
+
+	public PreferencesParamsDto() {
+	}
+
 	@Override
 	public String toString() {
 		return "[vertical=" + vertical + ", title=" + title + ", subtitle=" + subtitle + ", columns=" + columns
 				+ ", groups=" + groups + ", functions=" + functions + ", styleFunctions=" + styleFunctions + "]";
 	}
-
 }

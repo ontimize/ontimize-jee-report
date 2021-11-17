@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ontimize.jee.report</groupId>
 	<artifactId>ontimize-jee-report</artifactId>
-	<version>1.0.11-REST-SNAPSHOT</version>
+	<version>1.0.11-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<properties>
 		<ontimize-jee.version>5.5.0</ontimize-jee.version>

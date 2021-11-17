@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.ComponentScan;
@@ -24,8 +23,7 @@ import com.ontimize.jee.report.rest.dtos.PreferencesParamsDto;
 import util.JsonServicePreferencesDtoConversor;
 
 @RestController
-@RequestMapping("/preferences")
-@ComponentScan(basePackageClasses = { com.ontimize.jee.common.services.reportstore.IPreferencesService.class })
+@RequestMapping("${ontimize.report.preferences.url:/preferences}")
 public class PreferencesRestController {
 	@Qualifier("PreferencesService")
 	@Autowired
@@ -53,7 +51,7 @@ public class PreferencesRestController {
 	}
 
 	@RequestMapping(value = "/preferences", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public EntityResult getPreferences() throws ParseException {
+	public EntityResult getPreferences() {
 		List<String> columns = new ArrayList<>();
 		Map<String, Object> map = new HashMap<>();
 		List<String> attrList = new ArrayList<>();

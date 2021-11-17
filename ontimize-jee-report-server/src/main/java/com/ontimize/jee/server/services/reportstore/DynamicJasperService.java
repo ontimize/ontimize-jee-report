@@ -46,6 +46,26 @@ import net.sf.jasperreports.engine.JRException;
 @Service("DynamicJasperService")
 @Lazy(value = true)
 public class DynamicJasperService extends ReportBase implements IDynamicJasperService {
+	/** The Constant MAX. */
+	private static final String MAX = "MAXIMO";
+	/** The Constant MIN. */
+	private static final String MIN = "MINIMO";
+	/** The Constant SUM. */
+	private static final String SUM = "SUMA";
+	/** The Constant AVERAGE. */
+	private static final String AVERAGE = "MEDIA";
+	/** The Constant TOTAL. */
+	private static final String TOTAL = "TOTAL";
+	/** The Constant MAX_text. */
+	private static final String MAX_text = "Maximo";
+	/** The Constant MIN_text. */
+	private static final String MIN_text = "Minimo";
+	/** The Constant SUM_text. */
+	private static final String SUM_text = "Suma";
+	/** The Constant AVERAGE_text. */
+	private static final String AVERAGE_text = "Media";
+	/** The Constant TOTAL_text. */
+	private static final String TOTAL_text = "NUMERO DE APARICIONES";
 
 	@Autowired
 	private ApplicationContext applicationContext;
@@ -56,7 +76,6 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 			List<ColumnStyleParamsDto> columnStyle) throws Exception {
 		return this.generateReport(columns, title, groups, entity, service, orientation, functions, styleFunctions,
 				subtitle, columnStyle);
-		// this.exportToJRXML();
 
 	}
 
@@ -73,10 +92,10 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 			String className = TypeMappingsUtils.getClassName(type);
 			if (className.equals("java.lang.Integer")) {
-				functions.add(columns.get(i) + "-SUMA");
-				functions.add(columns.get(i) + "-MEDIA");
-				functions.add(columns.get(i) + "-MÁXIMO");
-				functions.add(columns.get(i) + "-MÍNIMO");
+				functions.add(columns.get(i) + SUM);
+				functions.add(columns.get(i) + AVERAGE);
+				functions.add(columns.get(i) + MAX);
+				functions.add(columns.get(i) + MIN);
 
 			}
 		}
@@ -198,25 +217,25 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 			column.setStyle(columnDataStyle);
 
-			if (i == 0 && (functions.contains("NÚMERO DE APARICIONES") || functions.contains("TOTAL"))) {
-				drb.addGlobalFooterVariable(column, DJCalculation.COUNT, footerStyle, getValueFormatter("TOTAL"))
+			if (i == 0 && (functions.contains(TOTAL_text) || functions.contains(TOTAL))) {
+				drb.addGlobalFooterVariable(column, DJCalculation.COUNT, footerStyle, getValueFormatter(TOTAL))
 						.setGrandTotalLegend("");
 
 			}
 			for (int z = 0; z < functions.size(); z++) {
 				if (functions.get(z).startsWith(columns.get(i))) {
-					if (functions.get(z).endsWith("SUMA")) {
-						drb.addGlobalFooterVariable(column, DJCalculation.SUM, footerStyle, getValueFormatter("SUMA"))
+					if (functions.get(z).endsWith(SUM)) {
+						drb.addGlobalFooterVariable(column, DJCalculation.SUM, footerStyle, getValueFormatter(SUM))
 								.setGrandTotalLegend("");
-					} else if (functions.get(z).endsWith("MEDIA")) {
+					} else if (functions.get(z).endsWith(AVERAGE)) {
 						drb.addGlobalFooterVariable(column, DJCalculation.AVERAGE, footerStyle,
-								getValueFormatter("MEDIA")).setGrandTotalLegend("");
-					} else if (functions.get(z).endsWith("MÁXIMO")) {
-						drb.addGlobalFooterVariable(column, DJCalculation.HIGHEST, footerStyle,
-								getValueFormatter("MAXIMO")).setGrandTotalLegend("");
-					} else if (functions.get(z).endsWith("MÍNIMO")) {
-						drb.addGlobalFooterVariable(column, DJCalculation.LOWEST, footerStyle,
-								getValueFormatter("MÍNIMO")).setGrandTotalLegend("");
+								getValueFormatter(AVERAGE)).setGrandTotalLegend("");
+					} else if (functions.get(z).endsWith(MAX)) {
+						drb.addGlobalFooterVariable(column, DJCalculation.HIGHEST, footerStyle, getValueFormatter(MAX))
+								.setGrandTotalLegend("");
+					} else if (functions.get(z).endsWith(MIN)) {
+						drb.addGlobalFooterVariable(column, DJCalculation.LOWEST, footerStyle, getValueFormatter(MIN))
+								.setGrandTotalLegend("");
 
 					}
 				}
@@ -256,20 +275,20 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 			public Object evaluate(Object value, Map fields, Map variables, Map parameters) {
 				String valor = "";
 				switch (type) {
-				case "SUMA":
-					valor = "Suma: " + value;
+				case SUM:
+					valor = SUM_text + " : " + value;
 					break;
-				case "MEDIA":
-					valor = "Media: " + value;
+				case AVERAGE:
+					valor = AVERAGE_text + " : " + value;
 					break;
-				case "MÁXIMO":
-					valor = "Máximo: " + value;
+				case MAX:
+					valor = MAX_text + " : " + value;
 					break;
-				case "MÍNIMO":
-					valor = "Mínimo: " + value;
+				case MIN:
+					valor = MIN_text + " : " + value;
 					break;
-				case "TOTAL":
-					valor = "Número total de apariciones: " + value;
+				case TOTAL:
+					valor = TOTAL_text + " : " + value;
 					break;
 				}
 				return valor;

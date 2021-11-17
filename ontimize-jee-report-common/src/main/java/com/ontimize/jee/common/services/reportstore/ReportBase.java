@@ -48,20 +48,20 @@ public abstract class ReportBase {
 				columnStyle);
 
 		/**
-		 * Ontenemos la fuente de datos en base a una colleccion de objetos
+		 * We obtain the data source based on a collection of objects
 		 */
 		JRDataSource ds = getDataSource(columns, entity, service);
 
 		/**
-		 * Creamos el objeto JasperReport que pasamos como parametro a
-		 * DynamicReport,junto con una nueva instancia de ClassicLayoutManager y el
-		 * JRDataSource
+		* We create the JasperReport object that we pass as a parameter to
+		* DynamicReport, along with a new instance of ClassicLayoutManager and the
+		* JRDataSource
 		 */
 		jr = DynamicJasperHelper.generateJasperReport(dr, getLayoutManager(), params);
 
 		/**
-		 * Creamos el objeto que imprimiremos pasando como parametro el JasperReport
-		 * object, y el JRDataSource
+		 * We create the object that we will print passing as a parameter the JasperReport
+		 * object, and the JRDataSource
 		 */
 		log.debug("Filling the report");
 		if (ds != null) {

@@ -6,7 +6,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -56,17 +58,9 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 	private static final String AVERAGE = "MEDIA";
 	/** The Constant TOTAL. */
 	private static final String TOTAL = "TOTAL";
-	/** The Constant MAX_text. */
-	private static final String MAX_text = "Maximo";
-	/** The Constant MIN_text. */
-	private static final String MIN_text = "Minimo";
-	/** The Constant SUM_text. */
-	private static final String SUM_text = "Suma";
-	/** The Constant AVERAGE_text. */
-	private static final String AVERAGE_text = "Media";
-	/** The Constant TOTAL_text. */
-	private static final String TOTAL_text = "NUMERO DE APARICIONES";
 
+	Locale locale;
+	ResourceBundle bundle = ResourceBundle.getBundle("bundle/bundle", locale);
 	@Autowired
 	private ApplicationContext applicationContext;
 
@@ -80,7 +74,16 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 	}
 
 	@Override
-	public List<String> getFunctions(String entity, String service, List<String> columns) {
+	public List<String> getFunctions(String entity, String service, List<String> columns, String language) {
+		switch (language) {
+		case "en":
+			locale = new Locale("en", "US");
+		case "es":
+			locale = new Locale("es", "ES");
+		case "gl":
+			locale = new Locale("gl", "ES");
+		}
+
 		List<String> functions = new ArrayList<>();
 		Map<String, Object> map = new HashMap<>();
 		Object bean = this.applicationContext.getBean(service.concat("Service"));
@@ -92,10 +95,10 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 			String className = TypeMappingsUtils.getClassName(type);
 			if (className.equals("java.lang.Integer")) {
-				functions.add(columns.get(i) + SUM);
-				functions.add(columns.get(i) + AVERAGE);
-				functions.add(columns.get(i) + MAX);
-				functions.add(columns.get(i) + MIN);
+				functions.add(columns.get(i) + bundle.getString("sum"));
+				functions.add(columns.get(i) + bundle.getString("average"));
+				functions.add(columns.get(i) + bundle.getString("max"));
+				functions.add(columns.get(i) + bundle.getString("min"));
 
 			}
 		}
@@ -217,23 +220,24 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 			column.setStyle(columnDataStyle);
 
-			if (i == 0 && (functions.contains(TOTAL_text) || functions.contains(TOTAL))) {
+			if (i == 0 && (functions.contains(bundle.getString("total_text"))
+					|| functions.contains(bundle.getString("total")))) {
 				drb.addGlobalFooterVariable(column, DJCalculation.COUNT, footerStyle, getValueFormatter(TOTAL))
 						.setGrandTotalLegend("");
 
 			}
 			for (int z = 0; z < functions.size(); z++) {
 				if (functions.get(z).startsWith(columns.get(i))) {
-					if (functions.get(z).endsWith(SUM)) {
+					if (functions.get(z).endsWith(bundle.getString("sum"))) {
 						drb.addGlobalFooterVariable(column, DJCalculation.SUM, footerStyle, getValueFormatter(SUM))
 								.setGrandTotalLegend("");
-					} else if (functions.get(z).endsWith(AVERAGE)) {
+					} else if (functions.get(z).endsWith(bundle.getString("average"))) {
 						drb.addGlobalFooterVariable(column, DJCalculation.AVERAGE, footerStyle,
 								getValueFormatter(AVERAGE)).setGrandTotalLegend("");
-					} else if (functions.get(z).endsWith(MAX)) {
+					} else if (functions.get(z).endsWith(bundle.getString("max"))) {
 						drb.addGlobalFooterVariable(column, DJCalculation.HIGHEST, footerStyle, getValueFormatter(MAX))
 								.setGrandTotalLegend("");
-					} else if (functions.get(z).endsWith(MIN)) {
+					} else if (functions.get(z).endsWith(bundle.getString("min"))) {
 						drb.addGlobalFooterVariable(column, DJCalculation.LOWEST, footerStyle, getValueFormatter(MIN))
 								.setGrandTotalLegend("");
 
@@ -276,19 +280,19 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 				String valor = "";
 				switch (type) {
 				case SUM:
-					valor = SUM_text + " : " + value;
+					valor = bundle.getString("sum_text") + " : " + value;
 					break;
 				case AVERAGE:
-					valor = AVERAGE_text + " : " + value;
+					valor = bundle.getString("average_text") + " : " + value;
 					break;
 				case MAX:
-					valor = MAX_text + " : " + value;
+					valor = bundle.getString("max_text") + " : " + value;
 					break;
 				case MIN:
-					valor = MIN_text + " : " + value;
+					valor = bundle.getString("min_text") + " : " + value;
 					break;
 				case TOTAL:
-					valor = TOTAL_text + " : " + value;
+					valor = bundle.getString("total_text") + " : " + value;
 					break;
 				}
 				return valor;

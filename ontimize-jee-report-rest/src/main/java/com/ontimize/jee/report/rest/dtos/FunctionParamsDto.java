@@ -9,6 +9,7 @@ public class FunctionParamsDto {
 	private List<String> columns;
 	private String entity;
 	private String service;
+	private String language;
 
 	public List<String> getColumns() {
 		return columns;
@@ -32,6 +33,14 @@ public class FunctionParamsDto {
 
 	public void setService(String service) {
 		this.service = service;
+	}
+
+	public String getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(String language) {
+		this.language = language;
 	}
 
 }

@@ -55,7 +55,7 @@ public class DynamicJasperRestController {
 	public EntityResult getFunctionsName(@RequestBody FunctionParamsDto params) throws Exception {
 		EntityResult res = new EntityResultMapImpl();
 		List<String> list = new ArrayList<>();
-		list = service.getFunctionsName(params.getEntity(), params.getService(), params.getColumns());
+		list = service.getFunctions(params.getEntity(), params.getService(), params.getColumns(), params.getLanguage());
 		list.add(TOTAL);
 		Hashtable map = new Hashtable<String, Object>();
 		map.put("list", list);

@@ -76,12 +76,12 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 	@Override
 	public List<String> getFunctions(String entity, String service, List<String> columns, String language) {
 		switch (language) {
-		case "en":
-			locale = new Locale("en", "US");
 		case "es":
 			locale = new Locale("es", "ES");
 		case "gl":
 			locale = new Locale("gl", "ES");
+		default:
+			locale = new Locale("en", "US");
 		}
 
 		List<String> functions = new ArrayList<>();

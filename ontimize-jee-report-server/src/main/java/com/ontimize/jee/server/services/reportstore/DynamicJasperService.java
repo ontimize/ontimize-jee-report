@@ -59,8 +59,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 	/** The Constant TOTAL. */
 	private static final String TOTAL = "TOTAL";
 
-	Locale locale;
-	ResourceBundle bundle = ResourceBundle.getBundle("bundle/bundle", locale);
+	private Locale locale;
+	private ResourceBundle bundle;
 	@Autowired
 	private ApplicationContext applicationContext;
 
@@ -78,12 +78,15 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		switch (language) {
 		case "es":
 			locale = new Locale("es", "ES");
+			break;
 		case "gl":
 			locale = new Locale("gl", "ES");
+			break;
 		default:
 			locale = new Locale("en", "US");
+			break;
 		}
-
+		bundle = ResourceBundle.getBundle("bundle/bundle", locale);
 		List<String> functions = new ArrayList<>();
 		Map<String, Object> map = new HashMap<>();
 		Object bean = this.applicationContext.getBean(service.concat("Service"));
@@ -95,10 +98,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 			String className = TypeMappingsUtils.getClassName(type);
 			if (className.equals("java.lang.Integer")) {
-				functions.add(columns.get(i) + bundle.getString("sum"));
-				functions.add(columns.get(i) + bundle.getString("average"));
-				functions.add(columns.get(i) + bundle.getString("max"));
-				functions.add(columns.get(i) + bundle.getString("min"));
+				functions.add(columns.get(i));
 
 			}
 		}

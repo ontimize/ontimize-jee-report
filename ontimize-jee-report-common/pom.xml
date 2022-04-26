@@ -25,6 +25,18 @@
 			<organizationUrl>http://imatia.com</organizationUrl>
 		</developer>
 		<developer>
+			<name>Enrique Álvarez Pereira</name>
+			<email>enrique.alvarez@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Faustino Lage Rego</name>
+			<email>faustino.lage@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
 			<name>Joaquín Romero Riveiro</name>
 			<email>joaquin.romero@imatia.com</email>
 			<organization>Imatia Innovation</organization>
@@ -33,6 +45,18 @@
 		<developer>
 			<name>Jorge Díaz Seijo</name>
 			<email>jorge.diaz@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Pablo Martínez Kirsten</name>
+			<email>pablo.martinez@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Tomás Fuentes Facal</name>
+			<email>tomas.fuentes@imatia.com</email>
 			<organization>Imatia Innovation</organization>
 			<organizationUrl>http://imatia.com</organizationUrl>
 		</developer>
@@ -71,6 +95,17 @@
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ar.com.fdvs</groupId>
+			<artifactId>DynamicJasper</artifactId>
+			<version>5.3.2</version>
+			<exclusions>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 </project>

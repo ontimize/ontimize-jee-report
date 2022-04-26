@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -25,6 +26,18 @@
 			<organizationUrl>http://imatia.com</organizationUrl>
 		</developer>
 		<developer>
+			<name>Enrique Álvarez Pereira</name>
+			<email>enrique.alvarez@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Faustino Lage Rego</name>
+			<email>faustino.lage@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
 			<name>Joaquín Romero Riveiro</name>
 			<email>joaquin.romero@imatia.com</email>
 			<organization>Imatia Innovation</organization>
@@ -33,6 +46,18 @@
 		<developer>
 			<name>Jorge Díaz Seijo</name>
 			<email>jorge.diaz@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Pablo Martínez Kirsten</name>
+			<email>pablo.martinez@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Tomás Fuentes Facal</name>
+			<email>tomas.fuentes@imatia.com</email>
 			<organization>Imatia Innovation</organization>
 			<organizationUrl>http://imatia.com</organizationUrl>
 		</developer>
@@ -95,5 +120,7 @@
 			<groupId>net.lingala.zip4j</groupId>
 			<artifactId>zip4j</artifactId>
 		</dependency>
+
+
 	</dependencies>
 </project>

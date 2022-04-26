@@ -303,5 +303,4 @@ public class ReportStoreRestController {
     protected void processBasicExpression(String key, Map<Object, Object> keysValues, Object basicExpression) {
         this.processBasicExpression(key, keysValues, basicExpression, new HashMap<>());
     }
-	
 }

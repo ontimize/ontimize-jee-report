@@ -15,25 +15,27 @@ public class OntimizeField implements JRField {
 
     private static final String MSG_NAME_NULL = "Parameter name must be exits";
 
-    private static final String MSG_DESCRIPTION_DEFAULT = "OntimizeField -> Default description.";
-
-    private static final String MSG_CLASS_DEFAULT = "OntimizeField -> Default class.";
-
-    private static final String MSG_CLASS_NAME_DEFAULT = "OntimizeField -> Default class name.";
-
-    private static final String MSG_PROPERTIES_DEFAULT = "OntimizeField -> Default properties map.";
+//    private static final String MSG_DESCRIPTION_DEFAULT = "OntimizeField -> Default description.";
+//
+//    private static final String MSG_CLASS_DEFAULT = "OntimizeField -> Default class.";
+//
+//    private static final String MSG_CLASS_NAME_DEFAULT = "OntimizeField -> Default class name.";
+//
+//    private static final String MSG_PROPERTIES_DEFAULT = "OntimizeField -> Default properties map.";
 
     protected String name;
 
     protected String description;
 
-    protected Class valueClass;
+    @SuppressWarnings("rawtypes")
+	protected Class valueClass;
 
     protected String valueClassName;
 
     protected JRPropertiesMap propertiesMap;
 
-    public OntimizeField(java.util.Map m) throws IllegalArgumentException {
+    @SuppressWarnings("rawtypes")
+	public OntimizeField(java.util.Map m) throws IllegalArgumentException {
         Object o = m.get(NAME_KEY);
         if (o == null || o instanceof String == false) {
             throw new IllegalArgumentException(MSG_NAME_NULL);
@@ -77,7 +79,8 @@ public class OntimizeField implements JRField {
         return name;
     }
 
-    public Class getValueClass() {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public Class getValueClass() {
         return valueClass;
     }
 

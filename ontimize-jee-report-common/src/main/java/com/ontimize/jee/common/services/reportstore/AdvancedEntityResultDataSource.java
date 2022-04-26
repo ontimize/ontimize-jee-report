@@ -2,19 +2,17 @@ package com.ontimize.jee.common.services.reportstore;
 
 import java.awt.Image;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.swing.ImageIcon;
 
 import com.ontimize.jee.common.db.AdvancedEntityResult;
 import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.common.tools.ReflectionTools;
-import com.ontimize.jee.common.util.remote.BytesBlock;
 
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
@@ -38,7 +36,8 @@ public class AdvancedEntityResultDataSource implements JRDataSource  {
     private List<Object> attributes;
     private List<?> order;
 
-    public AdvancedEntityResultDataSource(Object bean, String method, Map<String, Object> reportParameters,
+    @SuppressWarnings("static-access")
+	public AdvancedEntityResultDataSource(Object bean, String method, Map<String, Object> reportParameters,
     		List<Object> attributes, int pagesize, int offset, List<?> order) {
     	this.bean = bean;
     	this.method = method;
@@ -56,29 +55,36 @@ public class AdvancedEntityResultDataSource implements JRDataSource  {
         this.index = -1;
     }
 
-    @Override
+    @SuppressWarnings({ "rawtypes", "static-access", "unchecked" })
+	@Override
     public Object getFieldValue(JRField field) throws JRException {
-        Object obj = this.result.get(field.getName());
+		Object obj = this.result.get(field.getName());
         if ((obj == null) || (!(obj instanceof List))) {
             return null;
         }
-//        Vector v = (Vector) obj;
+        
         List v = (ArrayList) obj;
-
         Class fieldClass = field.getValueClass();
         int internalIndex = this.index - this.offset;
         Object value = (internalIndex >= 0) && (internalIndex < this.size) ? v.get(internalIndex) : null;
 
-        if (java.awt.Image.class.equals(fieldClass) && (value instanceof BytesBlock)) {
-            Image im = new ImageIcon(((BytesBlock) value).getBytes()).getImage();
-//            v.setElementAt(im, internalIndex);
-            v.set(this.index, im);
-            value = im;
+        if (java.awt.Image.class.equals(fieldClass)) {
+        	if (value instanceof byte[]) {
+        		Image im = new ImageIcon((byte[]) value).getImage();
+	            v.set(this.index, im);
+	            value = im;
+        	} else if (value instanceof String) {
+        		Image im = new ImageIcon(Base64.getDecoder().decode((String) value)).getImage();
+        		v.set(this.index, im);
+        		value = im;
+        	}
         }
+        
         return value;
     }
 
-    @Override
+    @SuppressWarnings("static-access")
+	@Override
     public boolean next() throws JRException {
         this.index++;
         if (this.index >= this.totalSize) {
@@ -96,17 +102,19 @@ public class AdvancedEntityResultDataSource implements JRDataSource  {
         this.index = -1;
     }
 
-    public EntityResult getEntityResult() {
+    @SuppressWarnings("static-access")
+	public EntityResult getEntityResult() {
         return this.result;
     }
 
-    public JRField[] getFields() {
+    @SuppressWarnings("static-access")
+	public JRField[] getFields() {
         return EntityResultDataSource.getFields(this.result);
     }
 
-    public static JRField[] getFields(EntityResult result) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public static JRField[] getFields(EntityResult result) {
         Enumeration keys = result.keys();
-//        Vector tmp = new Vector();
         List tmp = new ArrayList();
 
         try {
@@ -121,7 +129,6 @@ public class AdvancedEntityResultDataSource implements JRDataSource  {
                 Class classClass = TypeMappingsUtils.getClass(type);
                 String className = TypeMappingsUtils.getClassName(type);
 
-//                Hashtable m = new Hashtable();
                 Map m = new HashMap();
                 m.put(OntimizeField.NAME_KEY, name);
                 m.put(OntimizeField.VALUE_CLASS_NAME_KEY, className);

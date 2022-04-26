@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.xml.DomUtils;
@@ -12,7 +11,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.ontimize.jee.common.spring.parser.DefinitionParserUtil;
 import com.ontimize.jee.server.services.reportstore.FileReportStoreEngine;
 import com.ontimize.jee.server.services.reportstore.JasperReportsCompilerFiller;
 import com.ontimize.jee.server.services.reportstore.ReportStoreConfiguration;
@@ -23,6 +21,7 @@ import com.ontimize.jee.server.services.reportstore.ReportStoreConfiguration;
 public class ReportBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	/** The Constant SCOPE. */
+	@SuppressWarnings("unused")
 	private static final String SCOPE = "scope";
 
 	/*

@@ -49,13 +49,13 @@ import net.sf.jasperreports.engine.JRException;
 @Lazy(value = true)
 public class DynamicJasperService extends ReportBase implements IDynamicJasperService {
 	/** The Constant MAX. */
-	private static final String MAX = "MAXIMO";
+	private static final String MAX = "MAX";
 	/** The Constant MIN. */
-	private static final String MIN = "MINIMO";
+	private static final String MIN = "MIN";
 	/** The Constant SUM. */
-	private static final String SUM = "SUMA";
+	private static final String SUM = "SUM";
 	/** The Constant AVERAGE. */
-	private static final String AVERAGE = "MEDIA";
+	private static final String AVERAGE = "AVERAGE";
 	/** The Constant TOTAL. */
 	private static final String TOTAL = "TOTAL";
 

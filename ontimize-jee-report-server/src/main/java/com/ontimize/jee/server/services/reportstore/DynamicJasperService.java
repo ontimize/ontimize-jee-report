@@ -131,11 +131,10 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		int numberGroups = 0;
 		String name = "";
 		int width;
-		URL url = getClass().getClassLoader().getResource("logo.png");
 		URL urlTemplate = getClass().getClassLoader().getResource("template.jrxml");
 		DynamicReportBuilder drb = new DynamicReportBuilder();
 		drb.setTitle(title).setSubtitle(subtitle).setPrintBackgroundOnOddRows(true).setUseFullPageWidth(true)
-				.setUseFullPageWidth(true).addFirstPageImageBanner(url.getPath(), 800, 50, ImageBanner.ALIGN_LEFT);
+				.setUseFullPageWidth(true);
 		if (orientation.equals("horizontal")) {
 			drb.setPageSizeAndOrientation(Page.Page_A4_Landscape());
 		} else

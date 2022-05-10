@@ -1,6 +1,9 @@
 package com.ontimize.jee.report.rest.dtos;
 
 import java.util.List;
+import java.util.Objects;
+
+import com.ontimize.jee.common.services.reportstore.ColumnStyleParamsDto;
 
 public class PreferencesParamsDto {
 
@@ -13,6 +16,7 @@ public class PreferencesParamsDto {
 	private List<String> groups;
 	private List<String> functions;
 	private List<String> styleFunctions;
+	private List<ColumnStyleParamsDto> columnsStyle;
 	private String entity;
 
 	public String getName() {
@@ -95,19 +99,12 @@ public class PreferencesParamsDto {
 		this.entity = entity;
 	}
 
-	public PreferencesParamsDto(String name, String description, boolean vertical, String title, String subtitle,
-			List<String> columns, List<String> groups, List<String> functions, List<String> styleFunctions,
-			String entity) {
-		this.name = name;
-		this.description = description;
-		this.vertical = vertical;
-		this.title = title;
-		this.subtitle = subtitle;
-		this.columns = columns;
-		this.groups = groups;
-		this.functions = functions;
-		this.styleFunctions = styleFunctions;
-		this.entity = entity;
+	public List<ColumnStyleParamsDto> getColumnsStyle() {
+		return columnsStyle;
+	}
+
+	public void setColumnsStyle(List<ColumnStyleParamsDto> columnsStyle) {
+		this.columnsStyle = columnsStyle;
 	}
 
 	public PreferencesParamsDto() {
@@ -115,7 +112,33 @@ public class PreferencesParamsDto {
 
 	@Override
 	public String toString() {
-		return "[vertical=" + vertical + ", title=" + title + ", subtitle=" + subtitle + ", columns=" + columns
-				+ ", groups=" + groups + ", functions=" + functions + ", styleFunctions=" + styleFunctions + "]";
+		return "PreferencesParamsDto [name=" + name + ", description=" + description + ", vertical=" + vertical
+				+ ", title=" + title + ", subtitle=" + subtitle + ", columns=" + columns + ", groups=" + groups
+				+ ", functions=" + functions + ", styleFunctions=" + styleFunctions + ", columnsStyle=" + columnsStyle
+				+ ", entity=" + entity + "]";
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(columns, columnsStyle, description, entity, functions, groups, name, styleFunctions,
+				subtitle, title, vertical);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PreferencesParamsDto other = (PreferencesParamsDto) obj;
+		return Objects.equals(columns, other.columns) && Objects.equals(columnsStyle, other.columnsStyle)
+				&& Objects.equals(description, other.description) && Objects.equals(entity, other.entity)
+				&& Objects.equals(functions, other.functions) && Objects.equals(groups, other.groups)
+				&& Objects.equals(name, other.name) && Objects.equals(styleFunctions, other.styleFunctions)
+				&& Objects.equals(subtitle, other.subtitle) && Objects.equals(title, other.title)
+				&& vertical == other.vertical;
+	}
+
 }

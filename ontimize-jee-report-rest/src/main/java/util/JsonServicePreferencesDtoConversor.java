@@ -13,6 +13,7 @@ public class JsonServicePreferencesDtoConversor {
 				.put("subtitle", preferences.getSubtitle()).put("columns", preferences.getColumns().toString())
 				.put("groups", preferences.getGroups().toString())
 				.put("functions", preferences.getFunctions().toString())
+				.put("columnsStyle", preferences.getColumnsStyle().toString())
 				.put("styleFunctions", preferences.getStyleFunctions().toString());
 
 		return preferencesObject;

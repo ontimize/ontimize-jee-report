@@ -3,6 +3,8 @@ package com.ontimize.jee.report.rest.dtos;
 import java.util.List;
 import java.util.Objects;
 
+import com.ontimize.jee.common.services.reportstore.ColumnStyleParamsDto;
+
 public class PreferencesParamsDto {
 
 	private String name;
@@ -14,7 +16,7 @@ public class PreferencesParamsDto {
 	private List<String> groups;
 	private List<String> functions;
 	private List<String> styleFunctions;
-	private List<ColumnsStyleDto> columnsStyle;
+	private List<ColumnStyleParamsDto> columnsStyle;
 	private String entity;
 
 	public String getName() {
@@ -97,11 +99,11 @@ public class PreferencesParamsDto {
 		this.entity = entity;
 	}
 
-	public List<ColumnsStyleDto> getColumnsStyle() {
+	public List<ColumnStyleParamsDto> getColumnsStyle() {
 		return columnsStyle;
 	}
 
-	public void setColumnsStyle(List<ColumnsStyleDto> columnsStyle) {
+	public void setColumnsStyle(List<ColumnStyleParamsDto> columnsStyle) {
 		this.columnsStyle = columnsStyle;
 	}
 

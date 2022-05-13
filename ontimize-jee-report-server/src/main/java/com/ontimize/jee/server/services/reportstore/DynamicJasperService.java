@@ -34,6 +34,7 @@ import ar.com.fdvs.dj.domain.builders.ColumnBuilder;
 import ar.com.fdvs.dj.domain.builders.DynamicReportBuilder;
 import ar.com.fdvs.dj.domain.builders.GroupBuilder;
 import ar.com.fdvs.dj.domain.constants.Border;
+import ar.com.fdvs.dj.domain.constants.Font;
 import ar.com.fdvs.dj.domain.constants.GroupLayout;
 import ar.com.fdvs.dj.domain.constants.HorizontalAlign;
 import ar.com.fdvs.dj.domain.constants.Page;
@@ -130,11 +131,22 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 			List<ColumnStyleParamsDto> columnStyle) throws Exception {
 		int numberGroups = 0;
 		String name = "";
+		String id = "";
 		int width;
 		URL urlTemplate = getClass().getClassLoader().getResource("template.jrxml");
 		DynamicReportBuilder drb = new DynamicReportBuilder();
-		drb.setTitle(title).setSubtitle(subtitle).setPrintBackgroundOnOddRows(true).setUseFullPageWidth(true)
-				.setUseFullPageWidth(true);
+		Style titleStyle = new Style();
+		Style subtitleStyle = new Style();
+		Font titleFont = new Font().ARIAL_BIG_BOLD;
+		titleFont.setFontSize(20);
+		Font subtitleFont = new Font().ARIAL_MEDIUM_BOLD;
+		subtitleFont.setFontSize(14);
+		titleStyle.setBackgroundColor(new Color(255, 255, 255));
+		titleStyle.setTextColor(Color.BLACK);
+		titleStyle.setFont(titleFont);
+		subtitleStyle.setFont(subtitleFont);
+		drb.setTitle(title).setSubtitle(subtitle).setPrintBackgroundOnOddRows(false).setUseFullPageWidth(true)
+				.setUseFullPageWidth(true).setTitleStyle(titleStyle).setSubtitleStyle(subtitleStyle);
 		if (orientation.equals("horizontal")) {
 			drb.setPageSizeAndOrientation(Page.Page_A4_Landscape());
 		} else
@@ -144,6 +156,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		EntityResult e = (EntityResult) ReflectionTools.invoke(bean, entity.toLowerCase().concat("Query"), map,
 				columns);
 		Style columnDataStyle = new Style();
+		columnDataStyle.setTransparent(false);
+		columnDataStyle.setBackgroundColor(new Color(255, 255, 255));
 		Style headerStyle = new Style();
 		if (styleFunctions.contains("grid")) {
 
@@ -169,47 +183,41 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		footerStyle.setHorizontalAlign(HorizontalAlign.JUSTIFY);
 		footerStyle.setTransparency(Transparency.OPAQUE);
 		footerStyle.setBorderTop(Border.NO_BORDER());
-		for (int i = 0; i < columns.size(); i++) {
+		for (int i = 0; i < columnStyle.size(); i++) {
 			AbstractColumn column;
 
-			int type = e.getColumnSQLType(columns.get(i));
+			int type = e.getColumnSQLType(columnStyle.get(i).getId());
 
 			String className = TypeMappingsUtils.getClassName(type);
-			name = columns.get(i);
-			width = 85;
-			if (columnStyle != null) {
-				for (int j = 0; j < columnStyle.size(); j++) {
-					columnDataStyle.setHorizontalAlign(HorizontalAlign.CENTER);
-					headerStyle.setHorizontalAlign(HorizontalAlign.CENTER);
-					if (columnStyle.get(j).getId().equals(columns.get(i))) {
-						name = columnStyle.get(j).getName();
-						width = columnStyle.get(j).getWidth();
-						switch (columnStyle.get(j).getAlignment()) {
-						case "center":
+			id = columnStyle.get(i).getId();
+			name = columnStyle.get(i).getName();
+			width = columnStyle.get(i).getWidth();
 
-							columnDataStyle.setHorizontalAlign(HorizontalAlign.CENTER);
-							headerStyle.setHorizontalAlign(HorizontalAlign.CENTER);
-							break;
+			switch (columnStyle.get(i).getAlignment()) {
+			case "center":
 
-						case "left":
+				columnDataStyle.setHorizontalAlign(HorizontalAlign.CENTER);
+				headerStyle.setHorizontalAlign(HorizontalAlign.CENTER);
+				break;
 
-							columnDataStyle.setHorizontalAlign(HorizontalAlign.LEFT);
-							headerStyle.setHorizontalAlign(HorizontalAlign.LEFT);
-							break;
-						case "right":
-							columnDataStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
-							headerStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
-							break;
+			case "left":
 
-						}
-					}
-				}
+				columnDataStyle.setHorizontalAlign(HorizontalAlign.LEFT);
+				headerStyle.setHorizontalAlign(HorizontalAlign.LEFT);
+				break;
+			case "right":
+				columnDataStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
+				headerStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
+				break;
+
 			}
+
 			columnDataStyle.setVerticalAlign(VerticalAlign.MIDDLE);
 			headerStyle.setVerticalAlign(VerticalAlign.MIDDLE);
 
-			column = ColumnBuilder.getNew().setColumnProperty(columns.get(i), className).setTitle(name)
-					.setWidth(new Integer(width)).setHeaderStyle(headerStyle).build();
+			column = ColumnBuilder.getNew().setColumnProperty(columns.get(i), className).setTitle(name).setWidth(width)
+					.setHeaderStyle(headerStyle).build();
+			column.setName(id);
 			if (styleFunctions.contains("columnName")) {
 				drb.setPrintColumnNames(true);
 			} else {
@@ -244,30 +252,46 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 				}
 			}
 			drb.addColumn(column);
-			if (groups.contains(columns.get(i))) {
-				GroupBuilder gb1 = new GroupBuilder();
-				DJGroup g1 = gb1.setCriteriaColumn((PropertyColumn) column).build();
-				if (numberGroups == 0 && styleFunctions.contains("firstGroupNewPage")) {
-					g1.setStartInNewPage(true);
-				}
-				if (styleFunctions.contains("hideGroupDetails")) {
-					gb1.setGroupLayout(GroupLayout.EMPTY);
-				} else {
-					gb1.setGroupLayout(GroupLayout.VALUE_IN_HEADER);
-				}
 
-				if (styleFunctions.contains("groupNewPage")) {
-					g1.setStartInNewPage(true);
+		}
+		for (int z = 0; z < groups.size(); z++) {
+			for (int i = 0; i < drb.getColumns().size(); i++) {
+				if (groups.get(z).compareTo(drb.getColumn(i).getName()) == 0) {
+					GroupBuilder gb1 = new GroupBuilder();
+					DJGroup g1 = gb1.setCriteriaColumn((PropertyColumn) drb.getColumn(i)).build();
+					if (numberGroups == 0 && styleFunctions.contains("firstGroupNewPage")) {
+						g1.setStartInNewPage(true);
+					}
+					if (styleFunctions.contains("hideGroupDetails")) {
+						gb1.setGroupLayout(GroupLayout.EMPTY);
+
+					} else {
+						gb1.setGroupLayout(GroupLayout.VALUE_IN_HEADER);
+					}
+
+					if (styleFunctions.contains("groupNewPage")) {
+						g1.setStartInNewPage(true);
+					}
+					Style groupStyle = new Style();
+					groupStyle.setPaddingLeft(numberGroups * 20);
+					groupStyle.setTransparent(false);
+					if (numberGroups < 3) {
+						groupStyle.setBackgroundColor(new Color(178 + (numberGroups * 26), 178 + (numberGroups * 26),
+								178 + (numberGroups * 26)));
+					} else if (numberGroups == 3) {
+						groupStyle.setBackgroundColor(new Color(249, 249, 249));
+					} else {
+						groupStyle.setBackgroundColor(new Color(255, 255, 255));
+					}
+					drb.getColumn(i).setStyle(groupStyle);
+					drb.addGroup(g1);
+					numberGroups += 1;
 				}
-				drb.addGroup(g1);
-				numberGroups += 1;
 			}
 
 		}
-
 		drb.addAutoText(AutoText.AUTOTEXT_PAGE_X_OF_Y, AutoText.POSITION_FOOTER, AutoText.ALIGNMENT_CENTER);
 		drb.setUseFullPageWidth(true);
-		// drb.setTemplateFile(urlTemplate.toString());
 		DynamicReport dr = drb.build();
 		return dr;
 	}
@@ -324,6 +348,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		Object bean = this.applicationContext.getBean(service.concat("Service"));
 		EntityResult e = (EntityResult) ReflectionTools.invoke(bean, entity.toLowerCase().concat("Query"), map,
 				columns);
+
 		EntityResultDataSource er = new EntityResultDataSource(e);
 		return er;
 

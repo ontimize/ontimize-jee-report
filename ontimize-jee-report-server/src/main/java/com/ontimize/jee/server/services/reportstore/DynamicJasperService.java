@@ -175,6 +175,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		if (styleFunctions.contains("rowNumber")) {
 			AbstractColumn numbers = ColumnBuilder.getInstance().setCustomExpression(getExpression()).build();
 			numbers.setStyle(columnDataStyle);
+			numbers.setName("numbers");
 			drb.addColumn(numbers);
 		}
 		Style footerStyle = new Style();

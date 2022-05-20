@@ -33,6 +33,7 @@ import ar.com.fdvs.dj.domain.builders.ColumnBuilder;
 import ar.com.fdvs.dj.domain.builders.DynamicReportBuilder;
 import ar.com.fdvs.dj.domain.builders.GroupBuilder;
 import ar.com.fdvs.dj.domain.constants.Border;
+import ar.com.fdvs.dj.domain.constants.Font;
 import ar.com.fdvs.dj.domain.constants.GroupLayout;
 import ar.com.fdvs.dj.domain.constants.HorizontalAlign;
 import ar.com.fdvs.dj.domain.constants.Page;
@@ -133,10 +134,17 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		int width;
 		URL urlTemplate = getClass().getClassLoader().getResource("template.jrxml");
 		DynamicReportBuilder drb = new DynamicReportBuilder();
+		drb.setProperty("net.sf.jasperreports.awt.ignore.missing.font", "true");
 		Style titleStyle = new Style();
 		Style subtitleStyle = new Style();
+		Font titleFont = new Font();
+		titleFont.setFontSize(20);
+		Font subtitleFont = new Font();
+		subtitleFont.setFontSize(14);
 		titleStyle.setBackgroundColor(new Color(255, 255, 255));
 		titleStyle.setTextColor(Color.BLACK);
+		titleStyle.setFont(titleFont);
+		subtitleStyle.setFont(subtitleFont);
 		drb.setTitle(title).setSubtitle(subtitle).setPrintBackgroundOnOddRows(false).setUseFullPageWidth(true)
 				.setUseFullPageWidth(true).setTitleStyle(titleStyle).setSubtitleStyle(subtitleStyle);
 		if (orientation.equals("horizontal")) {

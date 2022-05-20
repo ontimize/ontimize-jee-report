@@ -87,6 +87,10 @@
 
 	<properties>
 		<ontimize-jee.version>5.5.0</ontimize-jee.version>
+		<lingala.version>1.3.2</lingala.version>
+		<jasperreports.version>6.17.0</jasperreports.version>
+		<jasperreports-fonts.version>6.17.0</jasperreports-fonts.version>
+		<javax.version>7.0</javax.version>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 		<spring.version>5.1.3.RELEASE</spring.version>
@@ -129,17 +133,22 @@
 			<dependency>
 				<groupId>net.sf.jasperreports</groupId>
 				<artifactId>jasperreports</artifactId>
-				<version>6.17.0</version>
+				<version>${jasperreports.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.sf.jasperreports</groupId>
+				<artifactId>jasperreports-fonts</artifactId>
+				<version>${jasperreports-fonts.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.lingala.zip4j</groupId>
 				<artifactId>zip4j</artifactId>
-				<version>1.3.2</version>
+				<version>${lingala.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax</groupId>
 				<artifactId>javaee-api</artifactId>
-				<version>7.0</version>
+				<version>${javax.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>

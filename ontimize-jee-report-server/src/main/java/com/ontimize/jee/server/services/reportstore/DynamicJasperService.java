@@ -59,7 +59,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 	/** The Constant TOTAL. */
 	private static final String TOTAL = "TOTAL";
 
-	private Locale locale;
+	private Locale locale = new Locale("en", "US");;
 	private ResourceBundle bundle;
 	@Autowired
 	private ApplicationContext applicationContext;
@@ -132,9 +132,9 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		String name = "";
 		String id = "";
 		int width;
+		this.bundle = getBundle();
 		URL urlTemplate = getClass().getClassLoader().getResource("template.jrxml");
 		DynamicReportBuilder drb = new DynamicReportBuilder();
-		drb.setProperty("net.sf.jasperreports.awt.ignore.missing.font", "true");
 		Style titleStyle = new Style();
 		Style subtitleStyle = new Style();
 		Font titleFont = new Font();
@@ -353,6 +353,13 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		EntityResultDataSource er = new EntityResultDataSource(e);
 		return er;
 
+	}
+
+	protected ResourceBundle getBundle() {
+		if (this.bundle == null) {
+			bundle = ResourceBundle.getBundle("bundle/bundle", locale);
+		}
+		return this.bundle;
 	}
 
 }

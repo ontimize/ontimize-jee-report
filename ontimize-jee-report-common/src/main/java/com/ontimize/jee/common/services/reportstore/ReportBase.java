@@ -43,7 +43,7 @@ public abstract class ReportBase {
 	public InputStream generateReport(List<String> columns, String title, List<String> groups, String entity,
 			String service, String orientation, List<String> functions, List<String> styleFunctions, String subtitle,
 			List<ColumnStyleParamsDto> columnStyle) throws Exception {
-		dr.setProperty("net.sf.jasperreports.awt.ignore.missing.font", "true");
+
 		dr = buildReport(columns, title, groups, entity, service, orientation, functions, styleFunctions, subtitle,
 				columnStyle);
 

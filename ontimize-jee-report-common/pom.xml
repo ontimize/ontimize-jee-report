@@ -103,7 +103,6 @@
 		<dependency>
 			<groupId>com.mpobjects.jasperreports.font</groupId>
 			<artifactId>jasperreports-fonts-liberation</artifactId>
-			<version>2.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>ar.com.fdvs</groupId>

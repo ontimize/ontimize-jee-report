@@ -53,15 +53,15 @@ public abstract class ReportBase {
 		JRDataSource ds = getDataSource(columns, entity, service);
 
 		/**
-		* We create the JasperReport object that we pass as a parameter to
-		* DynamicReport, along with a new instance of ClassicLayoutManager and the
-		* JRDataSource
+		 * We create the JasperReport object that we pass as a parameter to
+		 * DynamicReport, along with a new instance of ClassicLayoutManager and the
+		 * JRDataSource
 		 */
 		jr = DynamicJasperHelper.generateJasperReport(dr, getLayoutManager(), params);
 
 		/**
-		 * We create the object that we will print passing as a parameter the JasperReport
-		 * object, and the JRDataSource
+		 * We create the object that we will print passing as a parameter the
+		 * JasperReport object, and the JRDataSource
 		 */
 		log.debug("Filling the report");
 		if (ds != null) {

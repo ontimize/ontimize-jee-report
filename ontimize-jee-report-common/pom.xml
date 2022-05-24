@@ -92,7 +92,6 @@
 			<groupId>com.ontimize.jee</groupId>
 			<artifactId>ontimize-jee-common</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
@@ -100,6 +99,10 @@
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports-fonts</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.mpobjects.jasperreports.font</groupId>
+			<artifactId>jasperreports-fonts-liberation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>ar.com.fdvs</groupId>

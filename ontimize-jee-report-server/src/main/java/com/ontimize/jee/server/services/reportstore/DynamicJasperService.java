@@ -2,7 +2,6 @@ package com.ontimize.jee.server.services.reportstore;
 
 import java.awt.Color;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +58,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 	/** The Constant TOTAL. */
 	private static final String TOTAL = "TOTAL";
 
-	private Locale locale = new Locale("en", "US");;
+	private Locale locale = new Locale("en", "US");
 	private ResourceBundle bundle;
 	@Autowired
 	private ApplicationContext applicationContext;
@@ -133,7 +132,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		String id = "";
 		int width;
 		this.bundle = getBundle();
-		URL urlTemplate = getClass().getClassLoader().getResource("template.jrxml");
+
 		DynamicReportBuilder drb = new DynamicReportBuilder();
 		Style titleStyle = new Style();
 		Style subtitleStyle = new Style();

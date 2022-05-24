@@ -37,7 +37,7 @@ public class PreferencesRestController {
 	private JsonServicePreferencesDtoConversor conversor;
 
 	@RequestMapping(value = "/save", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String savePreferences(@RequestBody PreferencesParamsDto param) throws Exception {
+	public EntityResult savePreferences(@RequestBody PreferencesParamsDto param) throws Exception {
 
 		Map<String, Object> attrMap = new HashMap<>();
 		attrMap.put("NAME", param.getName());
@@ -45,9 +45,8 @@ public class PreferencesRestController {
 		attrMap.put("ENTITY", param.getEntity());
 		attrMap.put("PREFERENCES", conversor.toObjectNode(param));
 
-		preferencesService.preferenceInsert(attrMap);
+		return preferencesService.preferenceInsert(attrMap);
 
-		return param.toString();
 	}
 
 	@RequestMapping(value = "/preferences", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

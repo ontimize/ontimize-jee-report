@@ -124,9 +124,11 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		Style titleStyle = new Style();
 		Style subtitleStyle = new Style();
 		Font titleFont = new Font();
+		titleFont.setBold(true);
 		titleFont.setFontSize(20);
 		Font subtitleFont = new Font();
 		subtitleFont.setFontSize(14);
+		subtitleFont.setBold(true);
 		titleStyle.setBackgroundColor(new Color(255, 255, 255));
 		titleStyle.setTextColor(Color.BLACK);
 		titleStyle.setFont(titleFont);
@@ -145,6 +147,11 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		columnDataStyle.setTransparent(false);
 		columnDataStyle.setBackgroundColor(new Color(255, 255, 255));
 		Style headerStyle = new Style();
+		headerStyle.setBorderBottom(Border.THIN());
+		Font headerFont = new Font();
+		headerFont.setBold(true);
+		headerStyle.setFont(headerFont);
+		headerStyle.setPaddingBottom(-10);
 		if (styleFunctions.contains("grid")) {
 
 			columnDataStyle.setBorderBottom(Border.THIN());
@@ -156,6 +163,9 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 			columnDataStyle.setBorderTop(Border.NO_BORDER());
 			columnDataStyle.setBorderLeft(Border.NO_BORDER());
 			columnDataStyle.setBorderRight(Border.NO_BORDER());
+		}
+		if (styleFunctions.contains("backgroundOnOddRows")) {
+			drb.setPrintBackgroundOnOddRows(true);
 		}
 
 		if (styleFunctions.contains("rowNumber")) {

@@ -32,12 +32,12 @@ import com.ontimize.jee.common.db.SQLStatementBuilder;
 import com.ontimize.jee.common.db.SQLStatementBuilder.BasicExpression;
 import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.common.dto.EntityResultMapImpl;
-import com.ontimize.jee.common.services.reportstore.BasicReportDefinition;
-import com.ontimize.jee.common.services.reportstore.IReportDefinition;
-import com.ontimize.jee.common.services.reportstore.IReportStoreService;
-import com.ontimize.jee.common.services.reportstore.ReportOutputType;
-import com.ontimize.jee.common.services.reportstore.ReportParameter;
-import com.ontimize.jee.common.services.reportstore.ReportStoreException;
+import com.ontimize.jee.report.common.reportstore.BasicReportDefinition;
+import com.ontimize.jee.report.common.services.IReportDefinition;
+import com.ontimize.jee.report.common.services.IReportStoreService;
+import com.ontimize.jee.report.common.reportstore.ReportOutputType;
+import com.ontimize.jee.report.common.reportstore.ReportParameter;
+import com.ontimize.jee.report.common.exception.ReportStoreException;
 import com.ontimize.jee.server.rest.BasicExpressionProcessor;
 import com.ontimize.jee.server.rest.ORestController;
 import com.ontimize.jee.server.rest.ParseUtilsExt;
@@ -45,7 +45,7 @@ import com.ontimize.jee.server.rest.ParseUtilsExt;
 
 @RestController
 @RequestMapping("/reportstore")
-@ComponentScan(basePackageClasses = { com.ontimize.jee.common.services.reportstore.IReportStoreService.class })
+@ComponentScan(basePackageClasses = { IReportStoreService.class })
 public class ReportStoreRestController {
 
 	@Qualifier("ReportStoreService")

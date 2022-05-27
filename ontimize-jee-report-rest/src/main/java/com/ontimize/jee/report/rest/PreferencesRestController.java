@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,10 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.common.dto.EntityResultMapImpl;
-import com.ontimize.jee.common.services.reportstore.IPreferencesService;
-import com.ontimize.jee.report.rest.dtos.PreferencesParamsDto;
+import com.ontimize.jee.report.common.services.IPreferencesService;
+import com.ontimize.jee.report.common.dto.PreferencesParamsDto;
 
-import util.JsonServicePreferencesDtoConversor;
+import com.ontimize.jee.report.rest.util.JsonServicePreferencesDtoConversor;
 
 @RestController
 @RequestMapping("${ontimize.report.preferences.url:/preferences}")

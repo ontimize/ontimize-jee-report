@@ -68,31 +68,30 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 	@Override
 	public InputStream createReport(final ReportParamsDto param) throws DynamicReportException {
-		
-		if(StringUtils.isBlank(param.getService())) {
+
+		if (StringUtils.isBlank(param.getService())) {
 			throw new DynamicReportException("Report cannot be created, 'service' parameter not found!");
 		}
-		if(StringUtils.isBlank(param.getEntity())) {
+		if (StringUtils.isBlank(param.getEntity())) {
 			throw new DynamicReportException("Report cannot be created, 'entity' parameter not found!");
 		}
-		if(param.getColumns() == null || param.getColumns().isEmpty()) {
+		if (param.getColumns() == null || param.getColumns().isEmpty()) {
 			throw new DynamicReportException("Report cannot be created, 'columns' parameter not found!");
 		}
-		
-		return this.generateReport(param.getColumns(), param.getTitle(), param.getGroups(),
-				param.getEntity(), param.getService(), param.getOrientation(), param.getFunctions(),
-				param.getStyleFunctions(), param.getSubtitle(), param.getColumnStyle(), param.getOrderBy(),
-				param.getLanguage());
+
+		return this.generateReport(param.getColumns(), param.getTitle(), param.getGroups(), param.getEntity(),
+				param.getService(), param.getOrientation(), param.getFunctions(), param.getStyleFunctions(),
+				param.getSubtitle(), param.getColumnStyle(), param.getOrderBy(), param.getLanguage());
 	}
 
 	@Override
 	public List<String> getFunctionsName(final FunctionParamsDto params) throws DynamicReportException {
 		try {
 
-			String entity = params.getEntity(); 
-			String service = params.getService(); 
+			String entity = params.getEntity();
+			String service = params.getService();
 			List<String> columns = params.getColumns();
-			
+
 			List<String> functions = new ArrayList<>();
 			Map<String, Object> map = new HashMap<>();
 			Object bean = this.applicationContext.getBean(service.concat("Service"));
@@ -101,12 +100,13 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 			for (String column : columns) {
 				int type = e.getColumnSQLType(column);
 				String className = TypeMappingsUtils.getClassName(type);
-				if (TypeMappingsUtils.INTEGER_PATH.equals(className) || TypeMappingsUtils.DOUBLE_PATH.equals(className)) {
+				if (TypeMappingsUtils.INTEGER_PATH.equals(className)
+						|| TypeMappingsUtils.DOUBLE_PATH.equals(className)) {
 					functions.add(column);
 				}
 			}
 			return functions;
-		} catch (Exception ex){
+		} catch (Exception ex) {
 			throw new DynamicReportException("Impossible to retrieve function names", ex);
 		}
 	}
@@ -340,32 +340,33 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 	@Override
 	public JRDataSource getDataSource(List<String> columns, List<String> groups, List<OrderByDto> orderBy,
-									  String entity, String service) throws  SecurityException {
+			String entity, String service) throws SecurityException {
 
 		Map<String, Object> map = new HashMap<>();
 
 		Integer pageSize = Integer.MAX_VALUE;
 		Integer offset = 0;
 		List<SQLStatementBuilder.SQLOrder> sqlOrders = new ArrayList<>();
-		// If there are group columns, it is necessary to add to order by to allow jasper engine perform grouping well...
-		if(groups != null && !groups.isEmpty()) {
+		// If there are group columns, it is necessary to add to order by to allow
+		// jasper engine perform grouping well...
+		if (groups != null && !groups.isEmpty()) {
 			for (String col : groups) {
 				SQLStatementBuilder.SQLOrder sqlO = new SQLStatementBuilder.SQLOrder(col);
 				sqlOrders.add(sqlO);
 			}
 		}
 		// Second, add the rest of the columns to orderBy
-		if(orderBy != null && !orderBy.isEmpty()) {
-			orderBy.stream().filter(ord -> !groups.contains(ord.getColumnName()))
-					.forEach(ord -> {
-				SQLStatementBuilder.SQLOrder sqlOrder = new SQLStatementBuilder.SQLOrder(ord.getColumnName(), ord.isAscendent());
+		if (orderBy != null && !orderBy.isEmpty()) {
+			orderBy.stream().filter(ord -> !groups.contains(ord.getColumnId())).forEach(ord -> {
+				SQLStatementBuilder.SQLOrder sqlOrder = new SQLStatementBuilder.SQLOrder(ord.getColumnId(),
+						ord.isAscendent());
 				sqlOrders.add(sqlOrder);
 			});
 		}
-		
+
 		Object bean = this.applicationContext.getBean(service.concat("Service"));
-		EntityResult e = (EntityResult) ReflectionTools.invoke(bean, entity.toLowerCase().concat("PaginationQuery"), map,
-				columns, pageSize, offset, sqlOrders);
+		EntityResult e = (EntityResult) ReflectionTools.invoke(bean, entity.toLowerCase().concat("PaginationQuery"),
+				map, columns, pageSize, offset, sqlOrders);
 
 		EntityResultDataSource er = new EntityResultDataSource(e);
 		return er;
@@ -376,19 +377,19 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		if (this.bundle == null) {
 			Locale locale = null;
 			String lang0 = "en";
-			if(!StringUtils.isEmpty(language)){
+			if (!StringUtils.isEmpty(language)) {
 				lang0 = language;
 			}
 			switch (lang0) {
-				case "es":
-					locale = new Locale("es", "ES");
-					break;
-				case "gl":
-					locale = new Locale("gl", "ES");
-					break;
-				default:
-					locale = new Locale("en", "US");
-					break;
+			case "es":
+				locale = new Locale("es", "ES");
+				break;
+			case "gl":
+				locale = new Locale("gl", "ES");
+				break;
+			default:
+				locale = new Locale("en", "US");
+				break;
 			}
 			bundle = ResourceBundle.getBundle("bundle/bundle", locale);
 		}

@@ -1,37 +1,42 @@
 package com.ontimize.jee.report.common.dto;
 
 public class OrderByDto {
+	private String columnId = null;
+	private String columnName = null;
+	private boolean ascendent = true;
 
-    private String columnName = null;
+	public OrderByDto() {
+		// no-op
+	}
 
-    private boolean ascendent = true;
+	public OrderByDto(String columnId, String columnName, boolean ascendent) {
+		this.columnId = columnId;
+		this.columnName = columnName;
+		this.ascendent = ascendent;
+	}
 
-    public OrderByDto() {
-        //no-op
-    }
+	public String getColumnId() {
+		return columnId;
+	}
 
-    public OrderByDto(String columnName) {
-        this.columnName = columnName;
-    }
+	public void setColumnId(String columnId) {
+		this.columnId = columnId;
+	}
 
-    public OrderByDto(String columnName, boolean ascendent) {
-        this.columnName = columnName;
-        this.ascendent = ascendent;
-    }
+	public String getColumnName() {
+		return columnName;
+	}
 
-    public String getColumnName() {
-        return this.columnName;
-    }
+	public void setColumnName(String columnName) {
+		this.columnName = columnName;
+	}
 
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
-    }
+	public boolean isAscendent() {
+		return ascendent;
+	}
 
-    public void setAscendent(boolean ascendent) {
-        this.ascendent = ascendent;
-    }
+	public void setAscendent(boolean ascendent) {
+		this.ascendent = ascendent;
+	}
 
-    public boolean isAscendent() {
-        return this.ascendent;
-    }
 }

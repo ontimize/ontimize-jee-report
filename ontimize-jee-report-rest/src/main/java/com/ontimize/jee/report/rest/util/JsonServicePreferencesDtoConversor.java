@@ -14,7 +14,8 @@ public class JsonServicePreferencesDtoConversor {
 				.put("groups", preferences.getGroups().toString())
 				.put("functions", preferences.getFunctions().toString())
 				.put("columnsStyle", preferences.getColumnsStyle().toString())
-				.put("styleFunctions", preferences.getStyleFunctions().toString());
+				.put("styleFunctions", preferences.getStyleFunctions().toString())
+				.put("orderBy", preferences.getOrderBy().toString());
 
 		return preferencesObject;
 	}

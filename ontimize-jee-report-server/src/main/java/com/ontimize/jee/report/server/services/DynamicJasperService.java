@@ -143,34 +143,16 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		Object bean = this.applicationContext.getBean(service.concat("Service"));
 		EntityResult e = (EntityResult) ReflectionTools.invoke(bean, entity.toLowerCase().concat("Query"), map,
 				columns);
-		Style columnDataStyle = new Style();
-		columnDataStyle.setTransparent(false);
-		columnDataStyle.setBackgroundColor(new Color(255, 255, 255));
-		Style headerStyle = new Style();
-		headerStyle.setBorderBottom(Border.THIN());
-		Font headerFont = new Font();
-		headerFont.setBold(true);
-		headerStyle.setFont(headerFont);
-		headerStyle.setPaddingBottom(-10);
-		if (styleFunctions.contains("grid")) {
 
-			columnDataStyle.setBorderBottom(Border.THIN());
-			columnDataStyle.setBorderTop(Border.THIN());
-			columnDataStyle.setBorderLeft(Border.THIN());
-			columnDataStyle.setBorderRight(Border.THIN());
-		} else {
-			columnDataStyle.setBorderBottom(Border.NO_BORDER());
-			columnDataStyle.setBorderTop(Border.NO_BORDER());
-			columnDataStyle.setBorderLeft(Border.NO_BORDER());
-			columnDataStyle.setBorderRight(Border.NO_BORDER());
-		}
 		if (styleFunctions.contains("backgroundOnOddRows")) {
 			drb.setPrintBackgroundOnOddRows(true);
 		}
 
 		if (styleFunctions.contains("rowNumber")) {
 			AbstractColumn numbers = ColumnBuilder.getInstance().setCustomExpression(getExpression()).build();
-			numbers.setStyle(columnDataStyle);
+			Style styleNumbers = new Style();
+			styleNumbers = getStyleGrid(styleFunctions, styleNumbers);
+			numbers.setStyle(styleNumbers);
 			numbers.setWidth(6 * columns.size());
 			numbers.setName("numbers");
 			drb.addColumn(numbers);
@@ -183,7 +165,17 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		footerStyle.setBorderTop(Border.NO_BORDER());
 		for (int i = 0; i < columnStyle.size(); i++) {
 			AbstractColumn column;
+			Style columnDataStyle = new Style();
+			columnDataStyle = getStyleGrid(styleFunctions, columnDataStyle);
+			columnDataStyle.setTransparent(false);
+			columnDataStyle.setBackgroundColor(new Color(255, 255, 255));
 
+			Style headerStyle = new Style();
+			headerStyle.setBorderBottom(Border.THIN());
+			Font headerFont = new Font();
+			headerFont.setBold(true);
+			headerStyle.setFont(headerFont);
+			headerStyle.setPaddingBottom(-10);
 			int type = e.getColumnSQLType(columnStyle.get(i).getId());
 
 			String className = TypeMappingsUtils.getClassName(type);
@@ -371,6 +363,22 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		EntityResultDataSource er = new EntityResultDataSource(e);
 		return er;
 
+	}
+
+	protected Style getStyleGrid(List<String> styleFunctions, Style style) {
+		if (styleFunctions.contains("grid")) {
+
+			style.setBorderBottom(Border.THIN());
+			style.setBorderTop(Border.THIN());
+			style.setBorderLeft(Border.THIN());
+			style.setBorderRight(Border.THIN());
+		} else {
+			style.setBorderBottom(Border.NO_BORDER());
+			style.setBorderTop(Border.NO_BORDER());
+			style.setBorderLeft(Border.NO_BORDER());
+			style.setBorderRight(Border.NO_BORDER());
+		}
+		return style;
 	}
 
 	protected ResourceBundle getBundle(final String language) {

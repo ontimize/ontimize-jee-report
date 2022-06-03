@@ -2,11 +2,13 @@ package com.ontimize.jee.report.rest;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import com.ontimize.jee.report.common.dto.ServiceRendererDto;
 import com.ontimize.jee.report.common.exception.DynamicReportException;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,17 @@ public class DynamicJasperRestController {
 		EntityResult res = new EntityResultMapImpl();
 		if(param != null) {
 			try {
+				
+				List<ServiceRendererDto> serviceRenderList = new ArrayList<>();
+				ServiceRendererDto dto = new ServiceRendererDto();
+				dto.setService("Customer");
+				dto.setEntity("customerType");
+				dto.setKeyColumn("CUSTOMERTYPEID");
+				dto.setValueColumn("DESCRIPTION");
+				dto.setColumns(Arrays.asList("CUSTOMERTYPEID","DESCRIPTION"));
+				serviceRenderList.add(dto);
+				param.setServicRenderer(serviceRenderList);
+				
 				InputStream is = service.createReport(param);
 				byte[] file = IOUtils.toByteArray(is);
 				is.close();
@@ -56,6 +69,7 @@ public class DynamicJasperRestController {
 				return new ResponseEntity<EntityResult>(res, HttpStatus.OK);
 			} catch (DynamicReportException ex) {
 				res.setMessage(ex.getMessage());
+				res.setCode(EntityResult.OPERATION_WRONG);
 				return new ResponseEntity<EntityResult>(res, HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		} else {
@@ -77,6 +91,7 @@ public class DynamicJasperRestController {
 				res.addRecord(map);
 				return new ResponseEntity<EntityResult>(res, HttpStatus.OK);
 			} catch (DynamicReportException ex) {
+				res.setCode(EntityResult.OPERATION_WRONG);
 				res.setMessage(ex.getMessage());
 				return new ResponseEntity<EntityResult>(res, HttpStatus.INTERNAL_SERVER_ERROR);
 			}

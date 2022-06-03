@@ -3,6 +3,7 @@ package com.ontimize.jee.report.server.services;
 import java.awt.Color;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -13,7 +14,9 @@ import com.ontimize.jee.common.db.SQLStatementBuilder;
 import com.ontimize.jee.report.common.dto.FunctionParamsDto;
 import com.ontimize.jee.report.common.dto.OrderByDto;
 import com.ontimize.jee.report.common.dto.ReportParamsDto;
+import com.ontimize.jee.report.common.dto.ServiceRendererDto;
 import com.ontimize.jee.report.common.exception.DynamicReportException;
+import com.ontimize.jee.report.server.services.util.DynamicJasperHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -63,9 +66,11 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 	private static final String TOTAL = "TOTAL";
 
 	private ResourceBundle bundle;
+
 	@Autowired
 	private ApplicationContext applicationContext;
-
+	private DynamicJasperHelper dynamicJasperHelper;
+	
 	@Override
 	public InputStream createReport(final ReportParamsDto param) throws DynamicReportException {
 
@@ -81,7 +86,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 		return this.generateReport(param.getColumns(), param.getTitle(), param.getGroups(), param.getEntity(),
 				param.getService(), param.getOrientation(), param.getFunctions(), param.getStyleFunctions(),
-				param.getSubtitle(), param.getColumnStyle(), param.getOrderBy(), param.getLanguage());
+				param.getSubtitle(), param.getColumnStyle(), param.getOrderBy(), param.getLanguage(), param.getServicRenderer());
 	}
 
 	@Override
@@ -113,7 +118,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 	public DynamicReport buildReport(List<String> columns, String title, List<String> groups, String entity,
 			String service, String orientation, List<String> functions, List<String> styleFunctions, String subtitle,
-			List<ColumnStyleParamsDto> columnStyle, String language) throws DynamicReportException {
+			List<ColumnStyleParamsDto> columnStyle, String language, List<ServiceRendererDto> serviceRendererList) throws DynamicReportException {
 		int numberGroups = 0;
 		String name = "";
 		String id = "";
@@ -137,12 +142,10 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 				.setUseFullPageWidth(true).setTitleStyle(titleStyle).setSubtitleStyle(subtitleStyle);
 		if (orientation.equals("horizontal")) {
 			drb.setPageSizeAndOrientation(Page.Page_A4_Landscape());
-		} else
+		} else {
 			drb.setPageSizeAndOrientation(Page.Page_A4_Portrait());
-		Map<String, Object> map = new HashMap<>();
-		Object bean = this.applicationContext.getBean(service.concat("Service"));
-		EntityResult e = (EntityResult) ReflectionTools.invoke(bean, entity.toLowerCase().concat("Query"), map,
-				columns);
+		}
+		
 
 		if (styleFunctions.contains("backgroundOnOddRows")) {
 			drb.setPrintBackgroundOnOddRows(true);
@@ -163,6 +166,10 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		footerStyle.setHorizontalAlign(HorizontalAlign.JUSTIFY);
 		footerStyle.setTransparency(Transparency.OPAQUE);
 		footerStyle.setBorderTop(Border.NO_BORDER());
+
+		this.dynamicJasperHelper = new DynamicJasperHelper(this.applicationContext);
+		Map<String, String> columnClassnames = this.dynamicJasperHelper.getColumnClassnames(service, entity, columns, serviceRendererList);
+
 		for (int i = 0; i < columnStyle.size(); i++) {
 			AbstractColumn column;
 			Style columnDataStyle = new Style();
@@ -176,14 +183,15 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 			headerFont.setBold(true);
 			headerStyle.setFont(headerFont);
 			headerStyle.setPaddingBottom(-10);
-			int type = e.getColumnSQLType(columnStyle.get(i).getId());
+			ColumnStyleParamsDto columnStyleParamsDto = columnStyle.get(i);
+						
+			id = columnStyleParamsDto.getId();
+			name = columnStyleParamsDto.getName();
+			width = columnStyleParamsDto.getWidth();
+//			int type = e.getColumnSQLType(columnStyleParamsDto.getId());
+			String className = columnClassnames.get(id); //TypeMappingsUtils.getClassName(type);
 
-			String className = TypeMappingsUtils.getClassName(type);
-			id = columnStyle.get(i).getId();
-			name = columnStyle.get(i).getName();
-			width = columnStyle.get(i).getWidth();
-
-			switch (columnStyle.get(i).getAlignment()) {
+			switch (columnStyleParamsDto.getAlignment()) {
 			case "center":
 
 				columnDataStyle.setHorizontalAlign(HorizontalAlign.CENTER);
@@ -332,7 +340,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 	@Override
 	public JRDataSource getDataSource(List<String> columns, List<String> groups, List<OrderByDto> orderBy,
-			String entity, String service) throws SecurityException {
+			String entity, String service, final List<ServiceRendererDto> serviceRendererList) throws SecurityException {
 
 		Map<String, Object> map = new HashMap<>();
 
@@ -357,12 +365,42 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		}
 
 		Object bean = this.applicationContext.getBean(service.concat("Service"));
-		EntityResult e = (EntityResult) ReflectionTools.invoke(bean, entity.toLowerCase().concat("PaginationQuery"),
+		EntityResult erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.toLowerCase().concat("PaginationQuery"),
 				map, columns, pageSize, offset, sqlOrders);
 
-		EntityResultDataSource er = new EntityResultDataSource(e);
-		return er;
+		EntityResultDataSource entityResultDataSource = new EntityResultDataSource(erReportData);
+		if(serviceRendererList != null && !serviceRendererList.isEmpty()) {
+			evaluateServiceRenderer(entityResultDataSource, serviceRendererList);
+		}
+		
+		return entityResultDataSource;
 
+	}
+	
+	protected void evaluateServiceRenderer(EntityResultDataSource entityResultDataSource, final List<ServiceRendererDto> serviceRendererList) {
+		if(entityResultDataSource != null && serviceRendererList != null){
+			for(ServiceRendererDto serviceRendererDto : serviceRendererList){
+
+				Map<String, Object> map = new HashMap<>();
+				List<String> columns = serviceRendererDto.getColumns();
+				Object bean = this.applicationContext.getBean(serviceRendererDto.getService().concat("Service"));
+				EntityResult eR_renderer = (EntityResult) ReflectionTools.invoke(bean, 
+						serviceRendererDto.getEntity().concat("Query"), 
+						map, columns);
+				
+				Map<String, EntityResult> renderData = new HashMap<>();
+				renderData.put(serviceRendererDto.getKeyColumn(), eR_renderer);
+				entityResultDataSource.setRendererData(renderData);
+
+				ServiceRendererDto srDto = new ServiceRendererDto();
+				srDto.setValueColumn(serviceRendererDto.getValueColumn());
+				Map<String, ServiceRendererDto> renderInfo = new HashMap<>();
+				renderInfo.put(serviceRendererDto.getKeyColumn(), srDto);
+				entityResultDataSource.setRendererInfo(renderInfo);
+				
+				
+			}
+		}
 	}
 
 	protected Style getStyleGrid(List<String> styleFunctions, Style style) {

@@ -40,7 +40,7 @@ public class ColumnStyleParamsDto {
 
 	@Override
 	public String toString() {
-		return "[id=" + id + ", name=" + name + ", width=" + width + ", alignment=" + alignment + "]";
+		return "{id=" + id + ", name=" + name + ", width=" + width + ", alignment=" + alignment + "}";
 	}
 
 }

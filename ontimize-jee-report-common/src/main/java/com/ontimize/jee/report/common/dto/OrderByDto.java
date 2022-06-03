@@ -41,7 +41,7 @@ public class OrderByDto {
 
 	@Override
 	public String toString() {
-		return "[columnId=" + columnId + ", columnName=" + columnName + ", ascendent=" + ascendent + "]";
+		return "{columnId=" + columnId + ", columnName=" + columnName + ", ascendent=" + ascendent + "}";
 	}
 
 }

@@ -39,4 +39,9 @@ public class OrderByDto {
 		this.ascendent = ascendent;
 	}
 
+	@Override
+	public String toString() {
+		return "[columnId=" + columnId + ", columnName=" + columnName + ", ascendent=" + ascendent + "]";
+	}
+
 }

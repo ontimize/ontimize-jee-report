@@ -343,16 +343,33 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 			String entity, String service, final List<ServiceRendererDto> serviceRendererList) throws SecurityException {
 
 		Map<String, Object> map = new HashMap<>();
-
 		Integer pageSize = Integer.MAX_VALUE;
 		Integer offset = 0;
+		boolean order = false;
 		List<SQLStatementBuilder.SQLOrder> sqlOrders = new ArrayList<>();
 		// If there are group columns, it is necessary to add to order by to allow
 		// jasper engine perform grouping well...
 		if (groups != null && !groups.isEmpty()) {
 			for (String col : groups) {
-				SQLStatementBuilder.SQLOrder sqlO = new SQLStatementBuilder.SQLOrder(col);
-				sqlOrders.add(sqlO);
+				if (orderBy != null && !orderBy.isEmpty()) {
+					for (int i = 0; i < orderBy.size(); i++) {
+						if (orderBy.get(i).getColumnId().equals(col)) {
+							SQLStatementBuilder.SQLOrder sqlO = new SQLStatementBuilder.SQLOrder(col,
+									orderBy.get(i).isAscendent());
+							sqlOrders.add(sqlO);
+							order = true;
+						}
+					}
+					if (!order) {
+						SQLStatementBuilder.SQLOrder sqlO = new SQLStatementBuilder.SQLOrder(col);
+						sqlOrders.add(sqlO);
+					}
+
+				} else {
+					SQLStatementBuilder.SQLOrder sqlO = new SQLStatementBuilder.SQLOrder(col);
+					sqlOrders.add(sqlO);
+				}
+
 			}
 		}
 		// Second, add the rest of the columns to orderBy

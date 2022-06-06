@@ -37,4 +37,10 @@ public class ColumnStyleParamsDto {
 	public void setAlignment(String alignment) {
 		this.alignment = alignment;
 	}
+
+	@Override
+	public String toString() {
+		return "{id=" + id + ", name=" + name + ", width=" + width + ", alignment=" + alignment + "}";
+	}
+
 }

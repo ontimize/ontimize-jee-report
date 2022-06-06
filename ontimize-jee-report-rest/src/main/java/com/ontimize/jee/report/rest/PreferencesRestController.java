@@ -7,7 +7,9 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,23 +66,24 @@ public class PreferencesRestController {
 	}
 
 	@RequestMapping(value = "/remove/{id}", method = RequestMethod.DELETE)
-	public EntityResult removePreferences(@PathVariable("id") Long id) {
+	public ResponseEntity<EntityResult> removePreferences(@PathVariable("id") Long id) {
 		EntityResult res = new EntityResultMapImpl();
 		Map<String, Object> attrMap = new HashMap<>();
 		try {
 			attrMap.put("ID", id);
 			this.preferencesService.preferenceDelete(attrMap);
 			res.setCode(EntityResult.OPERATION_SUCCESSFUL);
+			return new ResponseEntity<EntityResult>(res, HttpStatus.OK);
 		} catch (Exception e) {
-			e.printStackTrace();
 			res.setCode(EntityResult.OPERATION_WRONG);
-			return res;
+			res.setMessage(e.getMessage());
+			return new ResponseEntity<EntityResult>(res, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return res;
 	}
 
 	@RequestMapping(value = "/update/{id}", method = RequestMethod.PUT)
-	public EntityResult updatePreferences(@PathVariable("id") Long id, @RequestBody PreferencesParamsDto param) {
+	public ResponseEntity<EntityResult> updatePreferences(@PathVariable("id") Long id,
+			@RequestBody PreferencesParamsDto param) {
 		EntityResult res = new EntityResultMapImpl();
 		Map<String, Object> attrMap = new HashMap<>();
 		attrMap.put("NAME", param.getName());
@@ -92,11 +95,13 @@ public class PreferencesRestController {
 			attrKey.put("ID", id);
 			this.preferencesService.preferenceUpdate(attrMap, attrKey);
 			res.setCode(EntityResult.OPERATION_SUCCESSFUL);
+			return new ResponseEntity<EntityResult>(res, HttpStatus.OK);
+
 		} catch (Exception e) {
-			e.printStackTrace();
 			res.setCode(EntityResult.OPERATION_WRONG);
-			return res;
+			res.setMessage(e.getMessage());
+			return new ResponseEntity<EntityResult>(res, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return res;
+
 	}
 }

@@ -381,6 +381,22 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		if(entityResultDataSource != null && serviceRendererList != null){
 			for(ServiceRendererDto serviceRendererDto : serviceRendererList){
 
+				if(StringUtils.isBlank(serviceRendererDto.getService())) {
+					throw new IllegalArgumentException("'service' argument not found on ServiceRendererDto bean!");
+				}
+
+				if(StringUtils.isBlank(serviceRendererDto.getEntity())) {
+					throw new IllegalArgumentException("'entity' argument not found on ServiceRendererDto bean!");
+				}
+
+				if(StringUtils.isBlank(serviceRendererDto.getKeyColumn())) {
+					throw new IllegalArgumentException("'keyColumn' argument not found on ServiceRendererDto bean!");
+				}
+
+				if(StringUtils.isBlank(serviceRendererDto.getValueColumn())) {
+					throw new IllegalArgumentException("'valueColumn' argument not found on ServiceRendererDto bean!");
+				}
+
 				Map<String, Object> map = new HashMap<>();
 				List<String> columns = serviceRendererDto.getColumns();
 				Object bean = this.applicationContext.getBean(serviceRendererDto.getService().concat("Service"));
@@ -392,13 +408,9 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 				renderData.put(serviceRendererDto.getKeyColumn(), eR_renderer);
 				entityResultDataSource.setRendererData(renderData);
 
-				ServiceRendererDto srDto = new ServiceRendererDto();
-				srDto.setValueColumn(serviceRendererDto.getValueColumn());
 				Map<String, ServiceRendererDto> renderInfo = new HashMap<>();
-				renderInfo.put(serviceRendererDto.getKeyColumn(), srDto);
+				renderInfo.put(serviceRendererDto.getKeyColumn(), serviceRendererDto);
 				entityResultDataSource.setRendererInfo(renderInfo);
-				
-				
 			}
 		}
 	}

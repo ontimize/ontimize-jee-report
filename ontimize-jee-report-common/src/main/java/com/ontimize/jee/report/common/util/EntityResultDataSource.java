@@ -49,41 +49,25 @@ public class EntityResultDataSource implements JRDataSource {
     @SuppressWarnings({ "static-access", "rawtypes", "unchecked" })
 	@Override
     public Object getFieldValue(JRField field) throws JRException {
-        Object obj = this.result.get(field.getName());
-        if ((obj == null) || (!(obj instanceof List))) {
+        if(this.result == null) {
             return null;
         }
-        List v = (ArrayList) obj;
-
+        String fieldName = field.getName();
         Class fieldClass = field.getValueClass();
-        Object value = (this.index >= 0) && (this.index < this.size) ? v.get(this.index) : null;
+        
+        Object value = null;
+        if ((this.index >= 0) && (this.index < this.size)) {
+            Map recordValues = result.getRecordValues(this.index);
+            if(recordValues == null){
+                return null;
+            }
+            value = recordValues.get(fieldName);
+        }
 
         if (java.awt.Image.class.equals(fieldClass)) {
-        	if (value instanceof byte[]) {
-        		Image im = new ImageIcon((byte[]) value).getImage();
-	            v.set(this.index, im);
-	            value = im;
-        	} else if (value instanceof String) {
-        		Image im = new ImageIcon(Base64.getDecoder().decode((String) value)).getImage();
-        		v.set(this.index, im);
-        		value = im;
-        	}
-        } else if(rendererData.containsKey(field.getName())){
-            Object obj2 = rendererData.get(field.getName());
-            if ((!(obj2 instanceof EntityResult))) {
-                return null;
-            }
-            Object obj3 = ((EntityResult)obj2).get(field.getName());
-            if ((!(obj3 instanceof List))) {
-                return null;
-            }
-            List v2 = (ArrayList) obj3;
-            int i = v2.indexOf(value);
-            if(i!=-1 && i >=0 && i < v2.size()) {
-                String valueColumn = this.rendererInfo.get(field.getName()).getValueColumn();
-                Map recordValues = ((EntityResult) obj2).getRecordValues(i);
-                return recordValues.get(valueColumn);
-            }
+            return getImageValue(value);
+        } else if(rendererData.containsKey(fieldName)){
+           return getServiceRendererValue(fieldName, value);
         }
         return value;
     }
@@ -150,4 +134,36 @@ public class EntityResultDataSource implements JRDataSource {
         return a;
     }
     
+    
+    protected Object getImageValue(final Object value) {
+        Object result_ = null;
+        if (value instanceof byte[]) {
+            result_ = new ImageIcon((byte[]) value).getImage();
+        } else if (value instanceof String) {
+            result_ = new ImageIcon(Base64.getDecoder().decode((String) value)).getImage();
+        }
+        return result_;
+    }
+    
+    protected Object getServiceRendererValue(final String fieldName, final Object value) {
+        EntityResult obj2 = rendererData.get(fieldName);
+        if (obj2 == null) {
+            return null;
+        }
+        if(rendererInfo == null || rendererInfo.get(fieldName) == null){
+            return null;
+        }
+        Object obj3 = obj2.get(fieldName);
+        if (!(obj3 instanceof List)) {
+            return null;
+        }
+        List<?> v2 = (List<?>) obj3;
+        int i = v2.indexOf(value);
+        if(i >= 0 && i < v2.size()) {
+            String valueColumn = this.rendererInfo.get(fieldName).getValueColumn();
+            Map recordValues = obj2.getRecordValues(i);
+            return recordValues.get(valueColumn);
+        }
+        return null;
+    }
 }

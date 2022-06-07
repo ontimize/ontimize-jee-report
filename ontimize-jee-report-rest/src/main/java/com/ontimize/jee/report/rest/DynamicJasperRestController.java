@@ -48,17 +48,6 @@ public class DynamicJasperRestController {
 		EntityResult res = new EntityResultMapImpl();
 		if(param != null) {
 			try {
-				
-				List<ServiceRendererDto> serviceRenderList = new ArrayList<>();
-				ServiceRendererDto dto = new ServiceRendererDto();
-				dto.setService("Customer");
-				dto.setEntity("customerType");
-				dto.setKeyColumn("CUSTOMERTYPEID");
-				dto.setValueColumn("DESCRIPTION");
-				dto.setColumns(Arrays.asList("CUSTOMERTYPEID","DESCRIPTION"));
-				serviceRenderList.add(dto);
-				param.setServicRenderer(serviceRenderList);
-				
 				InputStream is = service.createReport(param);
 				byte[] file = IOUtils.toByteArray(is);
 				is.close();

@@ -16,6 +16,8 @@ public class ReportParamsDto {
 	private String subtitle;
 	private List<ColumnStyleParamsDto> columnStyle;
 	
+	private List<ServiceRendererDto> servicRenderer;
+	
 	private String language;
 
 	public List<String> getColumns() {
@@ -112,5 +114,13 @@ public class ReportParamsDto {
 
 	public void setLanguage(String language) {
 		this.language = language;
+	}
+
+	public List<ServiceRendererDto> getServicRenderer() {
+		return servicRenderer;
+	}
+
+	public void setServicRenderer(List<ServiceRendererDto> servicRenderer) {
+		this.servicRenderer = servicRenderer;
 	}
 }

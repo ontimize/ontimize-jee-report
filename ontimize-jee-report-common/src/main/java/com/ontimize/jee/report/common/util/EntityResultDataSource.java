@@ -12,6 +12,7 @@ import javax.swing.ImageIcon;
 
 import com.ontimize.jee.common.dto.EntityResult;
 
+import com.ontimize.jee.report.common.dto.ServiceRendererDto;
 import com.ontimize.jee.report.common.reportstore.OntimizeField;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
@@ -20,6 +21,18 @@ import net.sf.jasperreports.engine.JRField;
 public class EntityResultDataSource implements JRDataSource {
 
 	protected static EntityResult result;
+    
+    protected Map<String, EntityResult> rendererData;
+    
+    protected Map<String, ServiceRendererDto> rendererInfo;
+
+    public void setRendererData(Map<String, EntityResult> rendererData) {
+        this.rendererData = rendererData;
+    }
+
+    public void setRendererInfo(Map<String, ServiceRendererDto> rendererInfo) {
+        this.rendererInfo = rendererInfo;
+    }
 
     private int index = -1;
 
@@ -36,25 +49,25 @@ public class EntityResultDataSource implements JRDataSource {
     @SuppressWarnings({ "static-access", "rawtypes", "unchecked" })
 	@Override
     public Object getFieldValue(JRField field) throws JRException {
-        Object obj = this.result.get(field.getName());
-        if ((obj == null) || (!(obj instanceof List))) {
+        if(this.result == null) {
             return null;
         }
-        List v = (ArrayList) obj;
-
+        String fieldName = field.getName();
         Class fieldClass = field.getValueClass();
-        Object value = (this.index >= 0) && (this.index < this.size) ? v.get(this.index) : null;
+        
+        Object value = null;
+        if ((this.index >= 0) && (this.index < this.size)) {
+            Map recordValues = result.getRecordValues(this.index);
+            if(recordValues == null){
+                return null;
+            }
+            value = recordValues.get(fieldName);
+        }
 
         if (java.awt.Image.class.equals(fieldClass)) {
-        	if (value instanceof byte[]) {
-        		Image im = new ImageIcon((byte[]) value).getImage();
-	            v.set(this.index, im);
-	            value = im;
-        	} else if (value instanceof String) {
-        		Image im = new ImageIcon(Base64.getDecoder().decode((String) value)).getImage();
-        		v.set(this.index, im);
-        		value = im;
-        	}
+            return getImageValue(value);
+        } else if(rendererData.containsKey(fieldName)){
+           return getServiceRendererValue(fieldName, value);
         }
         return value;
     }
@@ -121,4 +134,36 @@ public class EntityResultDataSource implements JRDataSource {
         return a;
     }
     
+    
+    protected Object getImageValue(final Object value) {
+        Object result_ = null;
+        if (value instanceof byte[]) {
+            result_ = new ImageIcon((byte[]) value).getImage();
+        } else if (value instanceof String) {
+            result_ = new ImageIcon(Base64.getDecoder().decode((String) value)).getImage();
+        }
+        return result_;
+    }
+    
+    protected Object getServiceRendererValue(final String fieldName, final Object value) {
+        EntityResult obj2 = rendererData.get(fieldName);
+        if (obj2 == null) {
+            return null;
+        }
+        if(rendererInfo == null || rendererInfo.get(fieldName) == null){
+            return null;
+        }
+        Object obj3 = obj2.get(fieldName);
+        if (!(obj3 instanceof List)) {
+            return null;
+        }
+        List<?> v2 = (List<?>) obj3;
+        int i = v2.indexOf(value);
+        if(i >= 0 && i < v2.size()) {
+            String valueColumn = this.rendererInfo.get(fieldName).getValueColumn();
+            Map recordValues = obj2.getRecordValues(i);
+            return recordValues.get(valueColumn);
+        }
+        return null;
+    }
 }

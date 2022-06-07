@@ -5,26 +5,16 @@ import java.util.List;
 public class ReportParamsDto {
 
 	private String title;
-	private List<String> columns;
 	private String entity;
 	private List<String> groups;
 	private List<OrderByDto> orderBy;
 	private String service;
-	private String orientation;
+	private Boolean vertical;
 	private List<String> functions;
-	private List<String> styleFunctions;
+	private List<String> style;
 	private String subtitle;
-	private List<ColumnStyleParamsDto> columnStyle;
-	
+	private List<ColumnDto> columns;
 	private String language;
-
-	public List<String> getColumns() {
-		return columns;
-	}
-
-	public void setColums(List<String> columns) {
-		this.columns = columns;
-	}
 
 	public String getEntity() {
 		return entity;
@@ -58,12 +48,12 @@ public class ReportParamsDto {
 		this.service = service;
 	}
 
-	public String getOrientation() {
-		return orientation;
+	public Boolean getVertical() {
+		return vertical;
 	}
 
-	public void setOrientation(String orientation) {
-		this.orientation = orientation;
+	public void setVertical(Boolean vertical) {
+		this.vertical = vertical;
 	}
 
 	public List<String> getFunctions() {
@@ -82,20 +72,20 @@ public class ReportParamsDto {
 		this.subtitle = subtitle;
 	}
 
-	public List<String> getStyleFunctions() {
-		return styleFunctions;
+	public List<String> getStyle() {
+		return style;
 	}
 
-	public void setStyleFunctions(List<String> styleFunctions) {
-		this.styleFunctions = styleFunctions;
+	public void setStyle(List<String> style) {
+		this.style = style;
 	}
 
-	public List<ColumnStyleParamsDto> getColumnStyle() {
-		return columnStyle;
+	public List<ColumnDto> getColumns() {
+		return columns;
 	}
 
-	public void setColumnStyle(List<ColumnStyleParamsDto> columnStyle) {
-		this.columnStyle = columnStyle;
+	public void setColumns(List<ColumnDto> columns) {
+		this.columns = columns;
 	}
 
 	public List<OrderByDto> getOrderBy() {

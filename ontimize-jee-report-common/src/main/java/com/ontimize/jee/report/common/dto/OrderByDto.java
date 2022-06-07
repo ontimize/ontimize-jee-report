@@ -2,16 +2,14 @@ package com.ontimize.jee.report.common.dto;
 
 public class OrderByDto {
 	private String columnId = null;
-	private String columnName = null;
 	private boolean ascendent = true;
 
 	public OrderByDto() {
 		// no-op
 	}
 
-	public OrderByDto(String columnId, String columnName, boolean ascendent) {
+	public OrderByDto(String columnId, boolean ascendent) {
 		this.columnId = columnId;
-		this.columnName = columnName;
 		this.ascendent = ascendent;
 	}
 
@@ -21,14 +19,6 @@ public class OrderByDto {
 
 	public void setColumnId(String columnId) {
 		this.columnId = columnId;
-	}
-
-	public String getColumnName() {
-		return columnName;
-	}
-
-	public void setColumnName(String columnName) {
-		this.columnName = columnName;
 	}
 
 	public boolean isAscendent() {
@@ -41,7 +31,7 @@ public class OrderByDto {
 
 	@Override
 	public String toString() {
-		return "{columnId=" + columnId + ", columnName=" + columnName + ", ascendent=" + ascendent + "}";
+		return "{'columnId':" + columnId.toString() + ", 'ascendent':" + String.valueOf(ascendent) + "}";
 	}
 
 }

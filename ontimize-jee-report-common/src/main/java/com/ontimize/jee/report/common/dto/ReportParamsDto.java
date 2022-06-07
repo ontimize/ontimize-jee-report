@@ -14,6 +14,8 @@ public class ReportParamsDto {
 	private List<String> style;
 	private String subtitle;
 	private List<ColumnDto> columns;
+	private List<ServiceRendererDto> servicRenderer;
+
 	private String language;
 
 	public String getEntity() {
@@ -102,5 +104,13 @@ public class ReportParamsDto {
 
 	public void setLanguage(String language) {
 		this.language = language;
+	}
+
+	public List<ServiceRendererDto> getServicRenderer() {
+		return servicRenderer;
+	}
+
+	public void setServicRenderer(List<ServiceRendererDto> servicRenderer) {
+		this.servicRenderer = servicRenderer;
 	}
 }

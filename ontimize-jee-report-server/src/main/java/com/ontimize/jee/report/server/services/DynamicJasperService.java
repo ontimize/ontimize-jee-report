@@ -188,8 +188,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 			id = columnStyleParamsDto.getId();
 			name = columnStyleParamsDto.getName();
 			width = columnStyleParamsDto.getWidth();
-//			int type = e.getColumnSQLType(columnStyleParamsDto.getId());
-			String className = columnClassnames.get(id); //TypeMappingsUtils.getClassName(type);
+			String className = columnClassnames.get(id); 
 
 			switch (columnStyleParamsDto.getAlignment()) {
 			case "center":
@@ -352,23 +351,18 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		if (groups != null && !groups.isEmpty()) {
 			for (String col : groups) {
 				if (orderBy != null && !orderBy.isEmpty()) {
-					for (int i = 0; i < orderBy.size(); i++) {
-						if (orderBy.get(i).getColumnId().equals(col)) {
-							SQLStatementBuilder.SQLOrder sqlO = new SQLStatementBuilder.SQLOrder(col,
-									orderBy.get(i).isAscendent());
-							sqlOrders.add(sqlO);
-							order = true;
-						}
-					}
-					if (!order) {
-						SQLStatementBuilder.SQLOrder sqlO = new SQLStatementBuilder.SQLOrder(col);
-						sqlOrders.add(sqlO);
-					}
 
-				} else {
-					SQLStatementBuilder.SQLOrder sqlO = new SQLStatementBuilder.SQLOrder(col);
-					sqlOrders.add(sqlO);
+					OrderByDto orderByDto = orderBy.stream().filter(item -> item.getColumnId().equals(col))
+							.findFirst().orElse(null);
+					if (orderByDto != null) {
+						SQLStatementBuilder.SQLOrder sqlO = new SQLStatementBuilder.SQLOrder(col,
+								orderByDto.isAscendent());
+						sqlOrders.add(sqlO);
+						continue;
+					}
 				}
+				SQLStatementBuilder.SQLOrder sqlO = new SQLStatementBuilder.SQLOrder(col);
+				sqlOrders.add(sqlO);
 
 			}
 		}
@@ -387,51 +381,13 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 		EntityResultDataSource entityResultDataSource = new EntityResultDataSource(erReportData);
 		if(serviceRendererList != null && !serviceRendererList.isEmpty()) {
-			evaluateServiceRenderer(entityResultDataSource, serviceRendererList);
+			dynamicJasperHelper.evaluateServiceRenderer(entityResultDataSource, serviceRendererList);
 		}
 		
 		return entityResultDataSource;
 
 	}
 	
-	protected void evaluateServiceRenderer(EntityResultDataSource entityResultDataSource, final List<ServiceRendererDto> serviceRendererList) {
-		if(entityResultDataSource != null && serviceRendererList != null){
-			for(ServiceRendererDto serviceRendererDto : serviceRendererList){
-
-				if(StringUtils.isBlank(serviceRendererDto.getService())) {
-					throw new IllegalArgumentException("'service' argument not found on ServiceRendererDto bean!");
-				}
-
-				if(StringUtils.isBlank(serviceRendererDto.getEntity())) {
-					throw new IllegalArgumentException("'entity' argument not found on ServiceRendererDto bean!");
-				}
-
-				if(StringUtils.isBlank(serviceRendererDto.getKeyColumn())) {
-					throw new IllegalArgumentException("'keyColumn' argument not found on ServiceRendererDto bean!");
-				}
-
-				if(StringUtils.isBlank(serviceRendererDto.getValueColumn())) {
-					throw new IllegalArgumentException("'valueColumn' argument not found on ServiceRendererDto bean!");
-				}
-
-				Map<String, Object> map = new HashMap<>();
-				List<String> columns = serviceRendererDto.getColumns();
-				Object bean = this.applicationContext.getBean(serviceRendererDto.getService().concat("Service"));
-				EntityResult eR_renderer = (EntityResult) ReflectionTools.invoke(bean, 
-						serviceRendererDto.getEntity().concat("Query"), 
-						map, columns);
-				
-				Map<String, EntityResult> renderData = new HashMap<>();
-				renderData.put(serviceRendererDto.getKeyColumn(), eR_renderer);
-				entityResultDataSource.setRendererData(renderData);
-
-				Map<String, ServiceRendererDto> renderInfo = new HashMap<>();
-				renderInfo.put(serviceRendererDto.getKeyColumn(), serviceRendererDto);
-				entityResultDataSource.setRendererInfo(renderInfo);
-			}
-		}
-	}
-
 	protected Style getStyleGrid(List<String> styleFunctions, Style style) {
 		if (styleFunctions.contains("grid")) {
 

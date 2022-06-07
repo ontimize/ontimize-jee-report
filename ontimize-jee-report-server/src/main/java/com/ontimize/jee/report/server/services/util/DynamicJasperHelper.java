@@ -3,8 +3,9 @@ package com.ontimize.jee.report.server.services.util;
 import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.common.tools.ReflectionTools;
 import com.ontimize.jee.report.common.dto.ServiceRendererDto;
+import com.ontimize.jee.report.common.util.EntityResultDataSource;
 import com.ontimize.jee.report.common.util.TypeMappingsUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 
 import java.util.HashMap;
@@ -51,6 +52,45 @@ public class DynamicJasperHelper {
     }
     
     return sqlTypes;
+  }
+
+
+  public void evaluateServiceRenderer(EntityResultDataSource entityResultDataSource, final List<ServiceRendererDto> serviceRendererList) {
+    if(entityResultDataSource != null && serviceRendererList != null){
+      for(ServiceRendererDto serviceRendererDto : serviceRendererList){
+
+        if(StringUtils.isBlank(serviceRendererDto.getService())) {
+          throw new IllegalArgumentException("'service' argument not found on ServiceRendererDto bean!");
+        }
+
+        if(StringUtils.isBlank(serviceRendererDto.getEntity())) {
+          throw new IllegalArgumentException("'entity' argument not found on ServiceRendererDto bean!");
+        }
+
+        if(StringUtils.isBlank(serviceRendererDto.getKeyColumn())) {
+          throw new IllegalArgumentException("'keyColumn' argument not found on ServiceRendererDto bean!");
+        }
+
+        if(StringUtils.isBlank(serviceRendererDto.getValueColumn())) {
+          throw new IllegalArgumentException("'valueColumn' argument not found on ServiceRendererDto bean!");
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        List<String> columns = serviceRendererDto.getColumns();
+        Object bean = this.applicationContext.getBean(serviceRendererDto.getService().concat("Service"));
+        EntityResult eR_renderer = (EntityResult) ReflectionTools.invoke(bean,
+                serviceRendererDto.getEntity().concat("Query"),
+                map, columns);
+
+        Map<String, EntityResult> renderData = new HashMap<>();
+        renderData.put(serviceRendererDto.getKeyColumn(), eR_renderer);
+        entityResultDataSource.setRendererData(renderData);
+
+        Map<String, ServiceRendererDto> renderInfo = new HashMap<>();
+        renderInfo.put(serviceRendererDto.getKeyColumn(), serviceRendererDto);
+        entityResultDataSource.setRendererInfo(renderInfo);
+      }
+    }
   }
   
   protected ServiceRendererDto retrieveServiceRenderForColumn(final String column, final List<ServiceRendererDto> serviceRendererList) {

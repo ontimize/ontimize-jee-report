@@ -13,9 +13,9 @@ import ar.com.fdvs.dj.domain.DynamicReport;
 
 public interface IDynamicJasperService {
 
-	public DynamicReport buildReport(List<String> columns, String title, List<String> groups, String entity,
-			String service, Boolean vertical, List<String> functions, List<String> style, String subtitle,
-			List<ColumnDto> columnsDto, String language, List<ServiceRendererDto> serviceRendererList)
+	public DynamicReport buildReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
+			String service, Boolean vertical, List<String> functions, List<String> styles, String subtitle,
+			String language, List<ServiceRendererDto> serviceRendererList)
 			throws DynamicReportException;
 
 	public InputStream createReport(ReportParamsDto param) throws DynamicReportException;

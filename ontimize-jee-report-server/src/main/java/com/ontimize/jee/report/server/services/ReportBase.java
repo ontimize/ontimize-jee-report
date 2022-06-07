@@ -37,21 +37,21 @@ public abstract class ReportBase {
 	protected JasperReport jr;
 	protected Map params = new HashMap();
 
-	public abstract DynamicReport buildReport(List<String> columns, String title, List<String> groups, String entity,
+	public abstract DynamicReport buildReport(List<ColumnDto> columnsDto, String title, List<String> groups, String entity,
 			String service, Boolean vertical, List<String> functions, List<String> style, String subtitle,
-			List<ColumnDto> columnsDto, String language, List<ServiceRendererDto> serviceRendererList)
+			String language, List<ServiceRendererDto> serviceRendererList)
 			throws DynamicReportException;
 
-	public abstract JRDataSource getDataSource(List<String> columns, List<String> groups, List<OrderByDto> orderBy,
+	public abstract JRDataSource getDataSource(List<ColumnDto> columns, List<String> groups, List<OrderByDto> orderBy,
 			String entity, String service, List<ServiceRendererDto> serviceRendererList) throws SecurityException;
 
-	public InputStream generateReport(List<String> columns, String title, List<String> groups, String entity,
+	public InputStream generateReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
 			String service, Boolean vertical, List<String> functions, List<String> style, String subtitle,
-			List<ColumnDto> columnsDto, List<OrderByDto> orderBy, String language,
+			List<OrderByDto> orderBy, String language,
 			List<ServiceRendererDto> serviceRendererList) throws DynamicReportException {
 
 		DynamicReport dr = buildReport(columns, title, groups, entity, service, vertical, functions, style, subtitle,
-				columnsDto, language, serviceRendererList);
+				language, serviceRendererList);
 
 		/**
 		 * We obtain the data source based on a collection of objects

@@ -16,6 +16,7 @@ import com.ontimize.jee.report.common.dto.OrderByDto;
 import com.ontimize.jee.report.common.dto.ReportParamsDto;
 import com.ontimize.jee.report.common.dto.ServiceRendererDto;
 import com.ontimize.jee.report.common.exception.DynamicReportException;
+import com.ontimize.jee.report.server.naming.DynamicJasperNaming;
 import com.ontimize.jee.report.server.services.util.DynamicJasperHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,16 +56,7 @@ import net.sf.jasperreports.engine.JRDataSource;
 @Service("DynamicJasperService")
 @Lazy(value = true)
 public class DynamicJasperService extends ReportBase implements IDynamicJasperService {
-	/** The Constant MAX. */
-	private static final String MAX = "MAX";
-	/** The Constant MIN. */
-	private static final String MIN = "MIN";
-	/** The Constant SUM. */
-	private static final String SUM = "SUM";
-	/** The Constant AVERAGE. */
-	private static final String AVERAGE = "AVERAGE";
-	/** The Constant TOTAL. */
-	private static final String TOTAL = "TOTAL";
+
 
 	private ResourceBundle bundle;
 
@@ -74,10 +66,6 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 	@Override
 	public InputStream createReport(final ReportParamsDto param) throws DynamicReportException {
-		List<String> columns = new ArrayList<>();
-		if (param.getColumns() != null && !param.getColumns().isEmpty()) {
-			columns = getColumns(param.getColumns());
-		}
 
 		if (StringUtils.isBlank(param.getService())) {
 			throw new DynamicReportException("Report cannot be created, 'service' parameter not found!");
@@ -85,12 +73,12 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		if (StringUtils.isBlank(param.getEntity())) {
 			throw new DynamicReportException("Report cannot be created, 'entity' parameter not found!");
 		}
-		if (columns == null || columns.isEmpty()) {
+		if (param.getColumns() == null || param.getColumns().isEmpty()) {
 			throw new DynamicReportException("Report cannot be created, 'columns' parameter not found!");
 		}
 
-		return this.generateReport(columns, param.getTitle(), param.getGroups(), param.getEntity(), param.getService(),
-				param.getVertical(), param.getFunctions(), param.getStyle(), param.getSubtitle(), param.getColumns(),
+		return this.generateReport(param.getColumns(), param.getTitle(), param.getGroups(), param.getEntity(), param.getService(),
+				param.getVertical(), param.getFunctions(), param.getStyle(), param.getSubtitle(),
 				param.getOrderBy(), param.getLanguage(), param.getServicRenderer());
 
 	}
@@ -122,17 +110,17 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		}
 	}
 
-	public DynamicReport buildReport(List<String> columns, String title, List<String> groups, String entity,
-
-			String service, Boolean vertical, List<String> functions, List<String> style, String subtitle,
-			List<ColumnDto> columnsDto, String language, List<ServiceRendererDto> serviceRendererList)
+	public DynamicReport buildReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
+			String service, Boolean vertical, List<String> functions, List<String> styles, String subtitle,
+			String language, List<ServiceRendererDto> serviceRendererList)
 			throws DynamicReportException {
 
 		int numberGroups = 0;
-		String name = "";
-		String id = "";
-		int width;
 		ResourceBundle bundle = getBundle(language);
+		List<String> styleArgs = styles;
+		if(styles == null){
+			styleArgs = new ArrayList<>();
+		}
 
 		DynamicReportBuilder drb = new DynamicReportBuilder();
 		Style titleStyle = new Style();
@@ -155,35 +143,30 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 			drb.setPageSizeAndOrientation(Page.Page_A4_Portrait());
 		}
 
-		if (style.contains("backgroundOnOddRows")) {
+		if (styleArgs.contains("backgroundOnOddRows")) {
 			drb.setPrintBackgroundOnOddRows(true);
 		}
 
-		if (style.contains("rowNumber")) {
+		if (styleArgs.contains("rowNumber")) {
 			AbstractColumn numbers = ColumnBuilder.getInstance().setCustomExpression(getExpression()).build();
 			Style styleNumbers = new Style();
-			styleNumbers = getStyleGrid(style, styleNumbers);
+			styleNumbers = this.getDynamicJasperHelper().getStyleGrid(styleArgs, styleNumbers);
 			numbers.setStyle(styleNumbers);
 			numbers.setWidth(6 * columns.size());
 			numbers.setName("numbers");
 			drb.addColumn(numbers);
 		}
-		Style footerStyle = new Style();
-		footerStyle.setBackgroundColor(new Color(255, 255, 255));
-		footerStyle.setTextColor(Color.BLACK);
-		footerStyle.setHorizontalAlign(HorizontalAlign.JUSTIFY);
-		footerStyle.setTransparency(Transparency.OPAQUE);
-		footerStyle.setBorderTop(Border.NO_BORDER());
+		
 
-		this.dynamicJasperHelper = new DynamicJasperHelper(this.applicationContext);
-		Map<String, String> columnClassnames = this.dynamicJasperHelper.getColumnClassnames(service, entity, columns,
+		Map<String, String> columnClassnames = this.getDynamicJasperHelper().getColumnClassnames(service, entity, columns,
 				serviceRendererList);
 
-		for (int i = 0; i < columnsDto.size(); i++) {
+		boolean firstColumn = true;
+		for (ColumnDto columnDto : columns) {
 
 			AbstractColumn column;
 			Style columnDataStyle = new Style();
-			columnDataStyle = getStyleGrid(style, columnDataStyle);
+			columnDataStyle = this.getDynamicJasperHelper().getStyleGrid(styleArgs, columnDataStyle);
 			columnDataStyle.setTransparent(false);
 			columnDataStyle.setBackgroundColor(new Color(255, 255, 255));
 
@@ -194,147 +177,78 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 			headerStyle.setFont(headerFont);
 			headerStyle.setPaddingBottom(-10);
 
-			ColumnStyleParamsDto columnStyleParamsDto = columnsDto.get(i).getColumnStyle();
+			ColumnStyleParamsDto columnStyleParamsDto = columnDto.getColumnStyle();
 
-			id = columnsDto.get(i).getId();
-			name = columnsDto.get(i).getName();
-			width = columnsDto.get(i).getColumnStyle().getWidth();
+			String id = columnDto.getId();
+			String name = columnDto.getName();
 			String className = columnClassnames.get(id);
 
-			switch (columnsDto.get(i).getColumnStyle().getAlignment()) {
-
-			case "center":
-
-				columnDataStyle.setHorizontalAlign(HorizontalAlign.CENTER);
-				headerStyle.setHorizontalAlign(HorizontalAlign.CENTER);
-				break;
-
-			case "left":
-
-				columnDataStyle.setHorizontalAlign(HorizontalAlign.LEFT);
-				headerStyle.setHorizontalAlign(HorizontalAlign.LEFT);
-				break;
-			case "right":
-				columnDataStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
-				headerStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
-				break;
-
+			if(columnStyleParamsDto != null) {
+				switch (columnStyleParamsDto.getAlignment()) {
+					case "center":
+						columnDataStyle.setHorizontalAlign(HorizontalAlign.CENTER);
+						headerStyle.setHorizontalAlign(HorizontalAlign.CENTER);
+						break;
+					case "left":
+						columnDataStyle.setHorizontalAlign(HorizontalAlign.LEFT);
+						headerStyle.setHorizontalAlign(HorizontalAlign.LEFT);
+						break;
+					case "right":
+						columnDataStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
+						headerStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
+						break;
+				}
 			}
 
 			columnDataStyle.setVerticalAlign(VerticalAlign.MIDDLE);
 			headerStyle.setVerticalAlign(VerticalAlign.MIDDLE);
 
-			column = ColumnBuilder.getNew().setColumnProperty(columns.get(i), className).setTitle(name).setWidth(width)
+			column = ColumnBuilder.getNew().setColumnProperty(id, className).setTitle(name)
 					.setHeaderStyle(headerStyle).build();
 			column.setName(id);
-			if (style.contains("columnName")) {
-				drb.setPrintColumnNames(true);
-			} else {
-				drb.setPrintColumnNames(false);
+			if(columnStyleParamsDto != null && columnStyleParamsDto.getWidth() >=0) {
+				column.setWidth(columnStyleParamsDto.getWidth());
 			}
+			drb.setPrintColumnNames(styleArgs.contains("columnName"));
 			column.setFixedWidth(false);
 
 			column.setStyle(columnDataStyle);
 
-			if (i == 0 && (functions.contains(bundle.getString("total_text"))
-					|| functions.contains(bundle.getString("total")))) {
-				drb.addGlobalFooterVariable(column, DJCalculation.COUNT, footerStyle, getValueFormatter(TOTAL))
-						.setGrandTotalLegend("");
+			if(functions != null) {
+				if (firstColumn && (functions.contains(bundle.getString("total_text"))
+						|| functions.contains(bundle.getString("total")))) {
+					DJValueFormatter valueFormatter = this.getDynamicJasperHelper().getFunctionValueFormatter(DynamicJasperNaming.TOTAL, bundle);
+					Style footerStyle = this.getDynamicJasperHelper().getFooterStyle();
+					drb.addGlobalFooterVariable(column, DJCalculation.COUNT, footerStyle, valueFormatter)
+							.setGrandTotalLegend("");
+				}
 
-			}
-			for (int z = 0; z < functions.size(); z++) {
-				if (functions.get(z).startsWith(columns.get(i))) {
-					if (functions.get(z).endsWith(bundle.getString("sum"))) {
-						drb.addGlobalFooterVariable(column, DJCalculation.SUM, footerStyle, getValueFormatter(SUM))
-								.setGrandTotalLegend("");
-					} else if (functions.get(z).endsWith(bundle.getString("average"))) {
-						drb.addGlobalFooterVariable(column, DJCalculation.AVERAGE, footerStyle,
-								getValueFormatter(AVERAGE)).setGrandTotalLegend("");
-					} else if (functions.get(z).endsWith(bundle.getString("max"))) {
-						drb.addGlobalFooterVariable(column, DJCalculation.HIGHEST, footerStyle, getValueFormatter(MAX))
-								.setGrandTotalLegend("");
-					} else if (functions.get(z).endsWith(bundle.getString("min"))) {
-						drb.addGlobalFooterVariable(column, DJCalculation.LOWEST, footerStyle, getValueFormatter(MIN))
-								.setGrandTotalLegend("");
-
+				// Configure aggregate functions...
+				for (String function : functions) {
+					if (function.startsWith(id)) {
+						this.getDynamicJasperHelper().configureReportFunction(drb, column, function, bundle);
 					}
 				}
 			}
 			drb.addColumn(column);
-
-		}
-		for (int z = 0; z < groups.size(); z++) {
-			for (int i = 0; i < drb.getColumns().size(); i++) {
-				if (groups.get(z).compareTo(drb.getColumn(i).getName()) == 0) {
-					GroupBuilder gb1 = new GroupBuilder();
-					DJGroup g1 = gb1.setCriteriaColumn((PropertyColumn) drb.getColumn(i)).build();
-					if (numberGroups == 0 && style.contains("firstGroupNewPage")) {
-						g1.setStartInNewPage(true);
-					}
-					if (style.contains("hideGroupDetails")) {
-						gb1.setGroupLayout(GroupLayout.EMPTY);
-
-					} else {
-						gb1.setGroupLayout(GroupLayout.VALUE_IN_HEADER);
-					}
-
-					if (style.contains("groupNewPage")) {
-						g1.setStartInNewPage(true);
-					}
-					Style groupStyle = new Style();
-					groupStyle.setPaddingLeft(numberGroups * 20);
-					groupStyle.setTransparent(false);
-					if (numberGroups < 3) {
-						groupStyle.setBackgroundColor(new Color(178 + (numberGroups * 26), 178 + (numberGroups * 26),
-								178 + (numberGroups * 26)));
-					} else if (numberGroups == 3) {
-						groupStyle.setBackgroundColor(new Color(249, 249, 249));
-					} else {
-						groupStyle.setBackgroundColor(new Color(255, 255, 255));
-					}
-					drb.getColumn(i).setStyle(groupStyle);
-					drb.addGroup(g1);
-					numberGroups += 1;
-				}
+			
+			// Configure report grouping...
+			if(groups!= null && groups.contains(column.getName())) {
+				DJGroup reportGroup = this.getDynamicJasperHelper().createReportGroup(column, styleArgs, numberGroups);
+				drb.addGroup(reportGroup);
+				numberGroups += 1;
 			}
-
+			
+			firstColumn = false;
 		}
+
 		drb.addAutoText(AutoText.AUTOTEXT_PAGE_X_OF_Y, AutoText.POSITION_FOOTER, AutoText.ALIGNMENT_CENTER);
 		drb.setUseFullPageWidth(true);
 		DynamicReport dr = drb.build();
 		return dr;
 	}
 
-	private DJValueFormatter getValueFormatter(String type) {
-		return new DJValueFormatter() {
-
-			public Object evaluate(Object value, Map fields, Map variables, Map parameters) {
-				String valor = "";
-				switch (type) {
-				case SUM:
-					valor = bundle.getString("sum_text") + " : " + value;
-					break;
-				case AVERAGE:
-					valor = bundle.getString("average_text") + " : " + value;
-					break;
-				case MAX:
-					valor = bundle.getString("max_text") + " : " + value;
-					break;
-				case MIN:
-					valor = bundle.getString("min_text") + " : " + value;
-					break;
-				case TOTAL:
-					valor = bundle.getString("total_text") + " : " + value;
-					break;
-				}
-				return valor;
-			}
-
-			public String getClassName() {
-				return String.class.getName();
-			}
-		};
-	}
+	
 
 	private CustomExpression getExpression() {
 		return new CustomExpression() {
@@ -350,11 +264,12 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 	}
 
 	@Override
-	public JRDataSource getDataSource(List<String> columns, List<String> groups, List<OrderByDto> orderBy,
+	public JRDataSource getDataSource(List<ColumnDto> columns, List<String> groups, List<OrderByDto> orderBy,
 			String entity, String service, final List<ServiceRendererDto> serviceRendererList)
 			throws SecurityException {
 
 		Map<String, Object> map = new HashMap<>();
+		List<String> columns1 = this.getDynamicJasperHelper().getColumnsFromDto(columns);
 		Integer pageSize = Integer.MAX_VALUE;
 		Integer offset = 0;
 		boolean order = false;
@@ -390,7 +305,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 		Object bean = this.applicationContext.getBean(service.concat("Service"));
 		EntityResult erReportData = (EntityResult) ReflectionTools.invoke(bean,
-				entity.toLowerCase().concat("PaginationQuery"), map, columns, pageSize, offset, sqlOrders);
+				entity.toLowerCase().concat("PaginationQuery"), map, columns1, pageSize, offset, sqlOrders);
 
 		EntityResultDataSource entityResultDataSource = new EntityResultDataSource(erReportData);
 		if (serviceRendererList != null && !serviceRendererList.isEmpty()) {
@@ -400,23 +315,6 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		return entityResultDataSource;
 
 	}
-
-	protected Style getStyleGrid(List<String> styleFunctions, Style style) {
-		if (styleFunctions.contains("grid")) {
-
-			style.setBorderBottom(Border.THIN());
-			style.setBorderTop(Border.THIN());
-			style.setBorderLeft(Border.THIN());
-			style.setBorderRight(Border.THIN());
-		} else {
-			style.setBorderBottom(Border.NO_BORDER());
-			style.setBorderTop(Border.NO_BORDER());
-			style.setBorderLeft(Border.NO_BORDER());
-			style.setBorderRight(Border.NO_BORDER());
-		}
-		return style;
-	}
-
 	protected ResourceBundle getBundle(final String language) {
 		if (this.bundle == null) {
 			Locale locale = null;
@@ -440,11 +338,10 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		return this.bundle;
 	}
 
-	protected List<String> getColumns(List<ColumnDto> columnsDto) {
-		List<String> columns = new ArrayList<>();
-		columnsDto.forEach(column -> columns.add(column.getId()));
-		return columns;
-
+	protected DynamicJasperHelper getDynamicJasperHelper(){
+		if(this.dynamicJasperHelper == null){
+			this.dynamicJasperHelper = new DynamicJasperHelper(this.applicationContext);
+		}
+		return this.dynamicJasperHelper;
 	}
-
 }

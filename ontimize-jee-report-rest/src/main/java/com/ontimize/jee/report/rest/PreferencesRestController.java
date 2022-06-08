@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.common.dto.EntityResultMapImpl;
 import com.ontimize.jee.report.common.services.IPreferencesService;
@@ -52,10 +53,8 @@ public class PreferencesRestController {
 
 	@RequestMapping(value = "/preferences", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public EntityResult getPreferences() {
-		List<String> columns = new ArrayList<>();
 		Map<String, Object> map = new HashMap<>();
 		List<String> attrList = new ArrayList<>();
-		PreferencesParamsDto preferences = new PreferencesParamsDto();
 		attrList.add("ID");
 		attrList.add("NAME");
 		attrList.add("DESCRIPTION");
@@ -83,12 +82,12 @@ public class PreferencesRestController {
 
 	@RequestMapping(value = "/update/{id}", method = RequestMethod.PUT)
 	public ResponseEntity<EntityResult> updatePreferences(@PathVariable("id") Long id,
-			@RequestBody PreferencesParamsDto param) {
+			@RequestBody PreferencesParamsDto param) throws JsonProcessingException {
 		EntityResult res = new EntityResultMapImpl();
 		Map<String, Object> attrMap = new HashMap<>();
 		attrMap.put("NAME", param.getName());
 		attrMap.put("DESCRIPTION", param.getDescription());
-		attrMap.put("PREFERENCES", conversor.toObjectNode(param).toString());
+		attrMap.put("PREFERENCES", conversor.toObjectNode(param));
 
 		Map<String, Object> attrKey = new HashMap<>();
 		try {

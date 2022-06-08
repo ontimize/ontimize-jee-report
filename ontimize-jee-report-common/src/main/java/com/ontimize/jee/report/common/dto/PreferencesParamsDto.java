@@ -10,11 +10,10 @@ public class PreferencesParamsDto {
 	public boolean vertical;
 	private String title;
 	private String subtitle;
-	private List<String> columns;
 	private List<String> groups;
 	private List<String> functions;
-	private List<String> styleFunctions;
-	private List<ColumnStyleParamsDto> columnsStyle;
+	private List<String> style;
+	private List<ColumnDto> columns;
 	private List<OrderByDto> orderBy;
 	private String entity;
 
@@ -58,14 +57,6 @@ public class PreferencesParamsDto {
 		this.subtitle = subtitle;
 	}
 
-	public List<String> getColumns() {
-		return columns;
-	}
-
-	public void setColumns(List<String> columns) {
-		this.columns = columns;
-	}
-
 	public List<String> getGroups() {
 		return groups;
 	}
@@ -82,14 +73,6 @@ public class PreferencesParamsDto {
 		this.functions = functions;
 	}
 
-	public List<String> getStyleFunctions() {
-		return styleFunctions;
-	}
-
-	public void setStyleFunctions(List<String> styleFunctions) {
-		this.styleFunctions = styleFunctions;
-	}
-
 	public String getEntity() {
 		return entity;
 	}
@@ -98,12 +81,20 @@ public class PreferencesParamsDto {
 		this.entity = entity;
 	}
 
-	public List<ColumnStyleParamsDto> getColumnsStyle() {
-		return columnsStyle;
+	public List<String> getStyle() {
+		return style;
 	}
 
-	public void setColumnsStyle(List<ColumnStyleParamsDto> columnsStyle) {
-		this.columnsStyle = columnsStyle;
+	public void setStyle(List<String> style) {
+		this.style = style;
+	}
+
+	public List<ColumnDto> getColumns() {
+		return columns;
+	}
+
+	public void setColumns(List<ColumnDto> columns) {
+		this.columns = columns;
 	}
 
 	public List<OrderByDto> getOrderBy() {

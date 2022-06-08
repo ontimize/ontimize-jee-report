@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ontimize.jee.report.common.dto.ColumnDto;
 import com.ontimize.jee.report.common.dto.ColumnStyleParamsDto;
 import com.ontimize.jee.report.common.dto.OrderByDto;
 import com.ontimize.jee.report.common.dto.ServiceRendererDto;
@@ -36,20 +37,21 @@ public abstract class ReportBase {
 	protected JasperReport jr;
 	protected Map params = new HashMap();
 
-	public abstract DynamicReport buildReport(List<String> colums, String title, List<String> groups, String entity,
-			String service, String orientation, List<String> functions, List<String> styleFunctions, String subtitle,
-			List<ColumnStyleParamsDto> columnStyle, String language, List<ServiceRendererDto> serviceRendererList) throws DynamicReportException;
+	public abstract DynamicReport buildReport(List<ColumnDto> columnsDto, String title, List<String> groups, String entity,
+			String service, Boolean vertical, List<String> functions, List<String> style, String subtitle,
+			String language, List<ServiceRendererDto> serviceRendererList)
+			throws DynamicReportException;
 
-	public abstract JRDataSource getDataSource(List<String> columns, List<String> groups, List<OrderByDto> orderBy, String entity, String service,
-											   List<ServiceRendererDto> serviceRendererList) throws SecurityException;
+	public abstract JRDataSource getDataSource(List<ColumnDto> columns, List<String> groups, List<OrderByDto> orderBy,
+			String entity, String service, List<ServiceRendererDto> serviceRendererList) throws SecurityException;
 
-	public InputStream generateReport(List<String> columns, String title, List<String> groups, String entity,
-									  String service, String orientation, List<String> functions, List<String> styleFunctions, String subtitle,
-									  List<ColumnStyleParamsDto> columnStyle, List<OrderByDto> orderBy,
-									  String language, List<ServiceRendererDto> serviceRendererList) throws DynamicReportException {
+	public InputStream generateReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
+			String service, Boolean vertical, List<String> functions, List<String> style, String subtitle,
+			List<OrderByDto> orderBy, String language,
+			List<ServiceRendererDto> serviceRendererList) throws DynamicReportException {
 
-		DynamicReport dr = buildReport(columns, title, groups, entity, service, orientation, functions, styleFunctions, subtitle,
-				columnStyle, language, serviceRendererList);
+		DynamicReport dr = buildReport(columns, title, groups, entity, service, vertical, functions, style, subtitle,
+				language, serviceRendererList);
 
 		/**
 		 * We obtain the data source based on a collection of objects
@@ -80,7 +82,7 @@ public abstract class ReportBase {
 				jp = JasperFillManager.fillReport(jr, params);
 			}
 			log.debug("Filling done!");
-		} catch (JRException e){
+		} catch (JRException e) {
 			log.error(e);
 			throw new DynamicReportException("Impossible to fill Jasper Report!", e);
 		}
@@ -98,8 +100,7 @@ public abstract class ReportBase {
 		return new ClassicLayoutManager();
 	}
 
-	protected InputStream convertReport(final JasperPrint fillReport)
-			throws IOException  {
+	protected InputStream convertReport(final JasperPrint fillReport) throws IOException {
 		final PipedInputStream in = new PipedInputStream();
 		final PipedOutputStream os = new PipedOutputStream(in);
 

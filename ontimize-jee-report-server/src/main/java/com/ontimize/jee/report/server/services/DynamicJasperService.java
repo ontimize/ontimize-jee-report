@@ -18,6 +18,7 @@ import com.ontimize.jee.report.common.dto.ServiceRendererDto;
 import com.ontimize.jee.report.common.exception.DynamicReportException;
 import com.ontimize.jee.report.server.naming.DynamicJasperNaming;
 import com.ontimize.jee.report.server.services.util.DynamicJasperHelper;
+import com.ontimize.jee.report.server.services.util.DynamicReportBuilderHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -63,6 +64,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 	@Autowired
 	private ApplicationContext applicationContext;
 	private DynamicJasperHelper dynamicJasperHelper;
+	
+	private DynamicReportBuilderHelper dynamicReportBuilderHelper;
 
 	@Override
 	public InputStream createReport(final ReportParamsDto param) throws DynamicReportException {
@@ -123,40 +126,13 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		}
 
 		DynamicReportBuilder drb = new DynamicReportBuilder();
-		Style titleStyle = new Style();
-		Style subtitleStyle = new Style();
-		Font titleFont = new Font();
-		titleFont.setBold(true);
-		titleFont.setFontSize(20);
-		Font subtitleFont = new Font();
-		subtitleFont.setFontSize(14);
-		subtitleFont.setBold(true);
-		titleStyle.setBackgroundColor(new Color(255, 255, 255));
-		titleStyle.setTextColor(Color.BLACK);
-		titleStyle.setFont(titleFont);
-		subtitleStyle.setFont(subtitleFont);
-		drb.setTitle(title).setSubtitle(subtitle).setPrintBackgroundOnOddRows(false).setUseFullPageWidth(true)
-				.setUseFullPageWidth(true).setTitleStyle(titleStyle).setSubtitleStyle(subtitleStyle);
-		if (!vertical) {
-			drb.setPageSizeAndOrientation(Page.Page_A4_Landscape());
-		} else {
-			drb.setPageSizeAndOrientation(Page.Page_A4_Portrait());
-		}
-
-		if (styleArgs.contains("backgroundOnOddRows")) {
-			drb.setPrintBackgroundOnOddRows(true);
-		}
-
-		if (styleArgs.contains("rowNumber")) {
-			AbstractColumn numbers = ColumnBuilder.getInstance().setCustomExpression(getExpression()).build();
-			Style styleNumbers = new Style();
-			styleNumbers = this.getDynamicJasperHelper().getStyleGrid(styleArgs, styleNumbers);
-			numbers.setStyle(styleNumbers);
-			numbers.setWidth(6 * columns.size());
-			numbers.setName("numbers");
-			drb.addColumn(numbers);
-		}
-		
+		DynamicReportBuilderHelper builderHelper = this.getDynamicReportBuilderHelper(drb);
+		// title
+		builderHelper.configureTitle(title);
+		// subtitle
+		builderHelper.configureSubTitle(subtitle);
+		// generic styles
+		builderHelper.configureGenericStyles(vertical, styleArgs, columns.size());
 
 		Map<String, String> columnClassnames = this.getDynamicJasperHelper().getColumnClassnames(service, entity, columns,
 				serviceRendererList);
@@ -166,7 +142,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 			AbstractColumn column;
 			Style columnDataStyle = new Style();
-			columnDataStyle = this.getDynamicJasperHelper().getStyleGrid(styleArgs, columnDataStyle);
+			columnDataStyle = builderHelper.getStyleGrid(styleArgs, columnDataStyle);
 			columnDataStyle.setTransparent(false);
 			columnDataStyle.setBackgroundColor(new Color(255, 255, 255));
 
@@ -217,8 +193,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 			if(functions != null) {
 				if (firstColumn && (functions.contains(bundle.getString("total_text"))
 						|| functions.contains(bundle.getString("total")))) {
-					DJValueFormatter valueFormatter = this.getDynamicJasperHelper().getFunctionValueFormatter(DynamicJasperNaming.TOTAL, bundle);
-					Style footerStyle = this.getDynamicJasperHelper().getFooterStyle();
+					DJValueFormatter valueFormatter = builderHelper.getFunctionValueFormatter(DynamicJasperNaming.TOTAL, bundle);
+					Style footerStyle = builderHelper.getFooterStyle();
 					drb.addGlobalFooterVariable(column, DJCalculation.COUNT, footerStyle, valueFormatter)
 							.setGrandTotalLegend("");
 				}
@@ -226,7 +202,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 				// Configure aggregate functions...
 				for (String function : functions) {
 					if (function.startsWith(id)) {
-						this.getDynamicJasperHelper().configureReportFunction(drb, column, function, bundle);
+						builderHelper.configureReportFunction(column, function, bundle);
 					}
 				}
 			}
@@ -234,7 +210,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 			
 			// Configure report grouping...
 			if(groups!= null && groups.contains(column.getName())) {
-				DJGroup reportGroup = this.getDynamicJasperHelper().createReportGroup(column, styleArgs, numberGroups);
+				DJGroup reportGroup = builderHelper.createReportGroup(column, styleArgs, numberGroups);
 				drb.addGroup(reportGroup);
 				numberGroups += 1;
 			}
@@ -242,26 +218,13 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 			firstColumn = false;
 		}
 
-		drb.addAutoText(AutoText.AUTOTEXT_PAGE_X_OF_Y, AutoText.POSITION_FOOTER, AutoText.ALIGNMENT_CENTER);
-		drb.setUseFullPageWidth(true);
 		DynamicReport dr = drb.build();
 		return dr;
 	}
 
 	
 
-	private CustomExpression getExpression() {
-		return new CustomExpression() {
-
-			public Object evaluate(Map fields, Map variables, Map parameters) {
-				return variables.get("REPORT_COUNT");
-			}
-
-			public String getClassName() {
-				return Integer.class.getName();
-			}
-		};
-	}
+	
 
 	@Override
 	public JRDataSource getDataSource(List<ColumnDto> columns, List<String> groups, List<OrderByDto> orderBy,
@@ -343,5 +306,13 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 			this.dynamicJasperHelper = new DynamicJasperHelper(this.applicationContext);
 		}
 		return this.dynamicJasperHelper;
+	}
+	
+	protected DynamicReportBuilderHelper getDynamicReportBuilderHelper(DynamicReportBuilder drb) {
+		if(this.dynamicReportBuilderHelper == null){
+			this.dynamicReportBuilderHelper = new DynamicReportBuilderHelper(drb);
+			this.dynamicReportBuilderHelper.setDynamicJasperHelper(getDynamicJasperHelper());
+		}
+		return this.dynamicReportBuilderHelper;
 	}
 }

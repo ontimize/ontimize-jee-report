@@ -1,10 +1,11 @@
 package com.ontimize.jee.report.rest;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.ontimize.jee.common.dto.EntityResult;
+import com.ontimize.jee.common.dto.EntityResultMapImpl;
+import com.ontimize.jee.report.common.dto.PreferencesParamsDto;
+import com.ontimize.jee.report.common.services.IPreferencesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -16,12 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ontimize.jee.common.dto.EntityResult;
-import com.ontimize.jee.common.dto.EntityResultMapImpl;
-import com.ontimize.jee.report.common.services.IPreferencesService;
-import com.ontimize.jee.report.common.dto.PreferencesParamsDto;
-
-import com.ontimize.jee.report.rest.util.JsonServicePreferencesDtoConversor;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("${ontimize.report.preferences.url:/preferences}")
@@ -34,20 +33,34 @@ public class PreferencesRestController {
 		return this.preferencesService;
 	}
 
-	@Autowired
-	private JsonServicePreferencesDtoConversor conversor;
-
 	@RequestMapping(value = "/save", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public EntityResult savePreferences(@RequestBody PreferencesParamsDto param) throws Exception {
+	public ResponseEntity<EntityResult> savePreferences(@RequestBody PreferencesParamsDto param) {
 
-		Map<String, Object> attrMap = new HashMap<>();
-		attrMap.put("NAME", param.getName());
-		attrMap.put("DESCRIPTION", param.getDescription());
-		attrMap.put("ENTITY", param.getEntity());
-		attrMap.put("PREFERENCES", conversor.toObjectNode(param));
+		EntityResult res = new EntityResultMapImpl();
+		if (param != null) {
+			try {
+				ObjectMapper mapper = new ObjectMapper();
+				mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+				String serializedParams = mapper.writeValueAsString(param);
 
-		return preferencesService.preferenceInsert(attrMap);
+				Map<String, Object> attrMap = new HashMap<>();
+				attrMap.put("NAME", param.getName());
+				attrMap.put("DESCRIPTION", param.getDescription());
+				attrMap.put("ENTITY", param.getEntity());
+				attrMap.put("PREFERENCES", serializedParams);
 
+				res = preferencesService.preferenceInsert(attrMap);
+				return new ResponseEntity<EntityResult>(res, HttpStatus.OK);
+			} catch (	Exception ex) {
+				res.setMessage(ex.getMessage());
+				res.setCode(EntityResult.OPERATION_WRONG);
+				return new ResponseEntity<EntityResult>(res, HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		} else {
+			res.setCode(EntityResult.OPERATION_WRONG);
+			res.setMessage("Report configuration parameters value is empty.");
+			return new ResponseEntity<EntityResult>(res, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@RequestMapping(value = "/preferences", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -85,21 +98,31 @@ public class PreferencesRestController {
 	public ResponseEntity<EntityResult> updatePreferences(@PathVariable("id") Long id,
 			@RequestBody PreferencesParamsDto param) {
 		EntityResult res = new EntityResultMapImpl();
-		Map<String, Object> attrMap = new HashMap<>();
-		attrMap.put("NAME", param.getName());
-		attrMap.put("DESCRIPTION", param.getDescription());
-		attrMap.put("PREFERENCES", conversor.toObjectNode(param).toString());
 
-		Map<String, Object> attrKey = new HashMap<>();
-		try {
-			attrKey.put("ID", id);
-			this.preferencesService.preferenceUpdate(attrMap, attrKey);
-			res.setCode(EntityResult.OPERATION_SUCCESSFUL);
-			return new ResponseEntity<EntityResult>(res, HttpStatus.OK);
+		if (param != null) {
+			try {
+				ObjectMapper mapper = new ObjectMapper();
+				mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+				String serializedParams = mapper.writeValueAsString(param);
 
-		} catch (Exception e) {
+				Map<String, Object> attrMap = new HashMap<>();
+				attrMap.put("NAME", param.getName());
+				attrMap.put("DESCRIPTION", param.getDescription());
+				attrMap.put("PREFERENCES", serializedParams);
+
+				Map<String, Object> attrKey = new HashMap<>();
+				attrKey.put("ID", id);
+				this.preferencesService.preferenceUpdate(attrMap, attrKey);
+				res.setCode(EntityResult.OPERATION_SUCCESSFUL);
+				return new ResponseEntity<EntityResult>(res, HttpStatus.OK);
+			} catch (Exception ex) {
+				res.setMessage(ex.getMessage());
+				res.setCode(EntityResult.OPERATION_WRONG);
+				return new ResponseEntity<EntityResult>(res, HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		} else {
 			res.setCode(EntityResult.OPERATION_WRONG);
-			res.setMessage(e.getMessage());
+			res.setMessage("Report configuration parameters value is empty.");
 			return new ResponseEntity<EntityResult>(res, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 

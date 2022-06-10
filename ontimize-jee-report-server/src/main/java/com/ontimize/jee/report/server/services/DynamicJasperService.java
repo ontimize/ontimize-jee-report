@@ -126,13 +126,13 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		}
 
 		DynamicReportBuilder drb = new DynamicReportBuilder();
-		DynamicReportBuilderHelper builderHelper = this.getDynamicReportBuilderHelper(drb);
+		DynamicReportBuilderHelper builderHelper = this.getDynamicReportBuilderHelper();
 		// title
-		builderHelper.configureTitle(title);
+		builderHelper.configureTitle(drb, title);
 		// subtitle
-		builderHelper.configureSubTitle(subtitle);
+		builderHelper.configureSubTitle(drb, subtitle);
 		// generic styles
-		builderHelper.configureGenericStyles(vertical, styleArgs, columns.size());
+		builderHelper.configureGenericStyles(drb, vertical, styleArgs, columns.size());
 
 		Map<String, String> columnClassnames = this.getDynamicJasperHelper().getColumnClassnames(service, entity, columns,
 				serviceRendererList);
@@ -202,7 +202,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 				// Configure aggregate functions...
 				for (String function : functions) {
 					if (function.startsWith(id)) {
-						builderHelper.configureReportFunction(column, function, bundle);
+						builderHelper.configureReportFunction(drb, column, function, bundle);
 					}
 				}
 			}
@@ -308,9 +308,9 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 		return this.dynamicJasperHelper;
 	}
 	
-	protected DynamicReportBuilderHelper getDynamicReportBuilderHelper(DynamicReportBuilder drb) {
+	protected DynamicReportBuilderHelper getDynamicReportBuilderHelper() {
 		if(this.dynamicReportBuilderHelper == null){
-			this.dynamicReportBuilderHelper = new DynamicReportBuilderHelper(drb);
+			this.dynamicReportBuilderHelper = new DynamicReportBuilderHelper();
 			this.dynamicReportBuilderHelper.setDynamicJasperHelper(getDynamicJasperHelper());
 		}
 		return this.dynamicReportBuilderHelper;

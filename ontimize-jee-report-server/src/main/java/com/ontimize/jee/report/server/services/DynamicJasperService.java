@@ -118,10 +118,10 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 			String language, List<ServiceRendererDto> serviceRendererList) throws DynamicReportException {
 
 		int numberGroups = 0;
-		ResourceBundle bundle = getBundle(language);
 
 		DynamicReportBuilder drb = new DynamicReportBuilder();
 		DynamicReportBuilderHelper builderHelper = this.getDynamicReportBuilderHelper();
+		ResourceBundle bundle = getBundle(language, drb);
 		// title
 		builderHelper.configureTitle(drb, title);
 		// subtitle
@@ -271,7 +271,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 	}
 
-	protected ResourceBundle getBundle(final String language) {
+	protected ResourceBundle getBundle(final String language, final DynamicReportBuilder drb) {
 		if (this.bundle == null) {
 			Locale locale = null;
 			String lang0 = "en";
@@ -289,6 +289,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 				locale = new Locale("en", "US");
 				break;
 			}
+			drb.setReportLocale(locale);
 			bundle = ResourceBundle.getBundle("bundle/bundle", locale);
 		}
 		return this.bundle;

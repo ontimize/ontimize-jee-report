@@ -14,7 +14,7 @@ public class ReportParamsDto {
 	private List<String> style;
 	private String subtitle;
 	private List<ColumnDto> columns;
-	private List<ServiceRendererDto> servicRenderer;
+	private List<ServiceRendererDto> serviceRenderer;
 
 	private String language;
 
@@ -106,11 +106,12 @@ public class ReportParamsDto {
 		this.language = language;
 	}
 
-	public List<ServiceRendererDto> getServicRenderer() {
-		return servicRenderer;
+	public List<ServiceRendererDto> getServiceRenderer() {
+		return serviceRenderer;
 	}
 
-	public void setServicRenderer(List<ServiceRendererDto> servicRenderer) {
-		this.servicRenderer = servicRenderer;
+	public void setServiceRenderer(List<ServiceRendererDto> serviceRenderer) {
+		this.serviceRenderer = serviceRenderer;
 	}
+
 }

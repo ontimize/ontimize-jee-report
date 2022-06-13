@@ -82,7 +82,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 		return this.generateReport(param.getColumns(), param.getTitle(), param.getGroups(), param.getEntity(), param.getService(),
 				param.getVertical(), param.getFunctions(), param.getStyle(), param.getSubtitle(),
-				param.getOrderBy(), param.getLanguage(), param.getServicRenderer());
+				param.getOrderBy(), param.getLanguage(), param.getServiceRenderer());
 
 	}
 

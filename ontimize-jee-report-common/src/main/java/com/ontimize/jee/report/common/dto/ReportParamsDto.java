@@ -11,11 +11,10 @@ public class ReportParamsDto {
 	private String service;
 	private Boolean vertical;
 	private List<String> functions;
-	private List<String> style;
+	private StyleParamsDto style;
 	private String subtitle;
 	private List<ColumnDto> columns;
 	private List<ServiceRendererDto> serviceRenderer;
-
 	private String language;
 
 	public String getEntity() {
@@ -74,11 +73,11 @@ public class ReportParamsDto {
 		this.subtitle = subtitle;
 	}
 
-	public List<String> getStyle() {
+	public StyleParamsDto getStyle() {
 		return style;
 	}
 
-	public void setStyle(List<String> style) {
+	public void setStyle(StyleParamsDto style) {
 		this.style = style;
 	}
 

@@ -17,6 +17,8 @@ import ar.com.fdvs.dj.domain.constants.Transparency;
 import ar.com.fdvs.dj.domain.entities.DJGroup;
 import ar.com.fdvs.dj.domain.entities.columns.AbstractColumn;
 import ar.com.fdvs.dj.domain.entities.columns.PropertyColumn;
+
+import com.ontimize.jee.report.common.dto.StyleParamsDto;
 import com.ontimize.jee.report.server.naming.DynamicJasperNaming;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -30,9 +32,9 @@ import java.util.ResourceBundle;
 public class DynamicReportBuilderHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(DynamicReportBuilderHelper.class);
-    
+
     private DynamicJasperHelper dynamicJasperHelper;
-    
+
     public DynamicReportBuilderHelper() {
     }
 
@@ -45,7 +47,7 @@ public class DynamicReportBuilderHelper {
     }
 
     public void configureTitle(final DynamicReportBuilder dynamicReportBuilder, final String title) {
-        if(StringUtils.isBlank(title)) {
+        if (StringUtils.isBlank(title)) {
             logger.debug("Report title not configured because of 'subtitle' parameter is blank");
             return;
         }
@@ -57,14 +59,14 @@ public class DynamicReportBuilderHelper {
         titleStyle.setBackgroundColor(new Color(255, 255, 255));
         titleStyle.setTextColor(Color.BLACK);
         titleStyle.setFont(titleFont);
-        
+
         dynamicReportBuilder.setTitle(title).setTitleStyle(titleStyle);
     }
-    
-    public void configureSubTitle( final DynamicReportBuilder dynamicReportBuilder, final String subtitle) {
-        if(StringUtils.isBlank(subtitle)) {
-           logger.debug("Report subtitle not configured because of 'subtitle' parameter is blank");
-           return;
+
+    public void configureSubTitle(final DynamicReportBuilder dynamicReportBuilder, final String subtitle) {
+        if (StringUtils.isBlank(subtitle)) {
+            logger.debug("Report subtitle not configured because of 'subtitle' parameter is blank");
+            return;
         }
         Font subtitleFont = new Font();
         subtitleFont.setFontSize(14);
@@ -74,19 +76,20 @@ public class DynamicReportBuilderHelper {
         subtitleStyle.setFont(subtitleFont);
         dynamicReportBuilder.setSubtitle(subtitle).setSubtitleStyle(subtitleStyle);
     }
-    
-    public void configureGenericStyles(final DynamicReportBuilder dynamicReportBuilder, final Boolean vertical, List<String> styleArgs, int numColumns) {
-        
+
+    public void configureGenericStyles(final DynamicReportBuilder dynamicReportBuilder, final Boolean vertical,
+                                       StyleParamsDto styleArgs, int numColumns) {
+
         if (Boolean.FALSE.equals(vertical)) {
             dynamicReportBuilder.setPageSizeAndOrientation(Page.Page_A4_Landscape());
         } else {
             dynamicReportBuilder.setPageSizeAndOrientation(Page.Page_A4_Portrait());
         }
 
-        if(styleArgs != null) {
-            dynamicReportBuilder.setPrintBackgroundOnOddRows(styleArgs.contains("backgroundOnOddRows"));
+        if (styleArgs != null) {
+            dynamicReportBuilder.setPrintBackgroundOnOddRows(styleArgs.isBackgroundOnOddRows());
 
-            if (styleArgs.contains("rowNumber")) {
+            if (styleArgs.isRowNumber()) {
                 AbstractColumn numbers = ColumnBuilder.getInstance().setCustomExpression(getExpression()).build();
                 Style styleNumbers = new Style();
                 styleNumbers = this.getStyleGrid(styleArgs, styleNumbers);
@@ -98,9 +101,9 @@ public class DynamicReportBuilderHelper {
         }
 
         dynamicReportBuilder.setUseFullPageWidth(true).setUseFullPageWidth(true);
-        dynamicReportBuilder.addAutoText(AutoText.AUTOTEXT_PAGE_X_OF_Y, AutoText.POSITION_FOOTER, AutoText.ALIGNMENT_CENTER);
+        dynamicReportBuilder.addAutoText(AutoText.AUTOTEXT_PAGE_X_OF_Y, AutoText.POSITION_FOOTER,
+                AutoText.ALIGNMENT_CENTER);
     }
-
 
     public DJValueFormatter getFunctionValueFormatter(String type, ResourceBundle bundle) {
         return new DJValueFormatter() {
@@ -133,28 +136,29 @@ public class DynamicReportBuilderHelper {
         };
     }
 
-    public DJGroup createReportGroup(final AbstractColumn column, final List<String> styleArgs, final int numberGroups) {
+    public DJGroup createReportGroup(final AbstractColumn column, final StyleParamsDto styleArgs,
+                                     final int numberGroups) {
         GroupBuilder gb1 = new GroupBuilder();
         DJGroup g1 = gb1.setCriteriaColumn((PropertyColumn) column).build();
-        if (numberGroups == 0 && styleArgs.contains("firstGroupNewPage")) {
+        if (numberGroups == 0 && styleArgs.isFirstGroupNewPage()) {
             g1.setStartInNewPage(true);
         }
-        if (styleArgs.contains("hideGroupDetails")) {
+        if (styleArgs.isHideGroupDetails()) {
             gb1.setGroupLayout(GroupLayout.EMPTY);
 
         } else {
             gb1.setGroupLayout(GroupLayout.VALUE_IN_HEADER);
         }
 
-        if (styleArgs.contains("groupNewPage")) {
+        if (styleArgs.isGroupNewPage()) {
             g1.setStartInNewPage(true);
         }
         Style groupStyle = new Style();
         groupStyle.setPaddingLeft(numberGroups * 20);
         groupStyle.setTransparent(false);
         if (numberGroups < 3) {
-            groupStyle.setBackgroundColor(new Color(178 + (numberGroups * 26), 178 + (numberGroups * 26),
-                    178 + (numberGroups * 26)));
+            groupStyle.setBackgroundColor(
+                    new Color(178 + (numberGroups * 26), 178 + (numberGroups * 26), 178 + (numberGroups * 26)));
         } else if (numberGroups == 3) {
             groupStyle.setBackgroundColor(new Color(249, 249, 249));
         } else {
@@ -164,8 +168,8 @@ public class DynamicReportBuilderHelper {
         return g1;
     }
 
-    public Style getStyleGrid(List<String> styleArgs, Style style) {
-        if (styleArgs.contains("grid")) {
+    public Style getStyleGrid(StyleParamsDto styleArgs, Style style) {
+        if (styleArgs.isGrid()) {
             style.setBorderBottom(Border.THIN());
             style.setBorderTop(Border.THIN());
             style.setBorderLeft(Border.THIN());
@@ -179,18 +183,21 @@ public class DynamicReportBuilderHelper {
         return style;
     }
 
-    public Style getFooterStyle(){
+    public Style getFooterStyle() {
         Style footerStyle = new Style();
         footerStyle.setBackgroundColor(new Color(255, 255, 255));
         footerStyle.setTextColor(Color.BLACK);
         footerStyle.setHorizontalAlign(HorizontalAlign.JUSTIFY);
-        footerStyle.setTransparency(Transparency.OPAQUE);
-        footerStyle.setBorderTop(Border.NO_BORDER());
+        footerStyle.setBorderTop(Border.THIN());
+        footerStyle.setPaddingBottom(20);
+        Font footerFont = new Font();
+        footerFont.setBold(true);
+        footerStyle.setFont(footerFont);
         return footerStyle;
     }
-    public void configureReportFunction(final DynamicReportBuilder dynamicReportBuilder,
-                                        final AbstractColumn column, final String function,
-                                        final ResourceBundle bundle) {
+
+    public void configureReportFunction(final DynamicReportBuilder dynamicReportBuilder, final AbstractColumn column,
+                                        final String function, final ResourceBundle bundle) {
         Style footerStyle = getFooterStyle();
         if (function.endsWith(bundle.getString("sum"))) {
             DJValueFormatter valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.SUM, bundle);
@@ -198,8 +205,8 @@ public class DynamicReportBuilderHelper {
                     .setGrandTotalLegend("");
         } else if (function.endsWith(bundle.getString("average"))) {
             DJValueFormatter valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.AVERAGE, bundle);
-            dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.AVERAGE, footerStyle,
-                    valueFormatter).setGrandTotalLegend("");
+            dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.AVERAGE, footerStyle, valueFormatter)
+                    .setGrandTotalLegend("");
         } else if (function.endsWith(bundle.getString("max"))) {
             DJValueFormatter valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.MAX, bundle);
             dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.HIGHEST, footerStyle, valueFormatter)

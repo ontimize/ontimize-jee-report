@@ -188,8 +188,11 @@ public class DynamicReportBuilderHelper {
 		footerStyle.setBackgroundColor(new Color(255, 255, 255));
 		footerStyle.setTextColor(Color.BLACK);
 		footerStyle.setHorizontalAlign(HorizontalAlign.JUSTIFY);
-		footerStyle.setTransparency(Transparency.OPAQUE);
-		footerStyle.setBorderTop(Border.NO_BORDER());
+		footerStyle.setBorderTop(Border.THIN());
+		footerStyle.setPaddingBottom(20);
+		Font footerFont = new Font();
+		footerFont.setBold(true);
+		footerStyle.setFont(footerFont);
 		return footerStyle;
 	}
 

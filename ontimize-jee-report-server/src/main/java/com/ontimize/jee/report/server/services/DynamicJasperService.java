@@ -3,56 +3,48 @@ package com.ontimize.jee.report.server.services;
 import java.awt.Color;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import com.ontimize.jee.common.db.SQLStatementBuilder;
-import com.ontimize.jee.report.common.dto.FunctionParamsDto;
-import com.ontimize.jee.report.common.dto.OrderByDto;
-import com.ontimize.jee.report.common.dto.ReportParamsDto;
-import com.ontimize.jee.report.common.dto.ServiceRendererDto;
-import com.ontimize.jee.report.common.dto.StyleParamsDto;
-import com.ontimize.jee.report.common.exception.DynamicReportException;
-import com.ontimize.jee.report.server.naming.DynamicJasperNaming;
-import com.ontimize.jee.report.server.services.util.DynamicJasperHelper;
-import com.ontimize.jee.report.server.services.util.DynamicReportBuilderHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import com.ontimize.jee.common.db.SQLStatementBuilder;
 import com.ontimize.jee.common.dto.EntityResult;
+import com.ontimize.jee.common.tools.ReflectionTools;
 import com.ontimize.jee.report.common.dto.ColumnDto;
 import com.ontimize.jee.report.common.dto.ColumnStyleParamsDto;
-import com.ontimize.jee.report.common.util.EntityResultDataSource;
+import com.ontimize.jee.report.common.dto.FunctionParamsDto;
+import com.ontimize.jee.report.common.dto.OrderByDto;
+import com.ontimize.jee.report.common.dto.ReportParamsDto;
+import com.ontimize.jee.report.common.dto.ServiceRendererDto;
+import com.ontimize.jee.report.common.dto.StyleParamsDto;
+import com.ontimize.jee.report.common.exception.DynamicReportException;
 import com.ontimize.jee.report.common.services.IDynamicJasperService;
+import com.ontimize.jee.report.common.util.EntityResultDataSource;
 import com.ontimize.jee.report.common.util.TypeMappingsUtils;
-import com.ontimize.jee.common.tools.ReflectionTools;
+import com.ontimize.jee.report.server.naming.DynamicJasperNaming;
+import com.ontimize.jee.report.server.services.util.DynamicJasperHelper;
+import com.ontimize.jee.report.server.services.util.DynamicReportBuilderHelper;
 
-import ar.com.fdvs.dj.domain.AutoText;
-import ar.com.fdvs.dj.domain.CustomExpression;
 import ar.com.fdvs.dj.domain.DJCalculation;
 import ar.com.fdvs.dj.domain.DJValueFormatter;
 import ar.com.fdvs.dj.domain.DynamicReport;
 import ar.com.fdvs.dj.domain.Style;
 import ar.com.fdvs.dj.domain.builders.ColumnBuilder;
 import ar.com.fdvs.dj.domain.builders.DynamicReportBuilder;
-import ar.com.fdvs.dj.domain.builders.GroupBuilder;
 import ar.com.fdvs.dj.domain.constants.Border;
 import ar.com.fdvs.dj.domain.constants.Font;
-import ar.com.fdvs.dj.domain.constants.GroupLayout;
 import ar.com.fdvs.dj.domain.constants.HorizontalAlign;
-import ar.com.fdvs.dj.domain.constants.Page;
-import ar.com.fdvs.dj.domain.constants.Transparency;
 import ar.com.fdvs.dj.domain.constants.VerticalAlign;
 import ar.com.fdvs.dj.domain.entities.DJGroup;
 import ar.com.fdvs.dj.domain.entities.columns.AbstractColumn;
-import ar.com.fdvs.dj.domain.entities.columns.PropertyColumn;
 import net.sf.jasperreports.engine.JRDataSource;
 
 @Service("DynamicJasperService")
@@ -82,7 +74,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
 		return this.generateReport(param.getColumns(), param.getTitle(), param.getGroups(), param.getEntity(),
 				param.getService(), param.getVertical(), param.getFunctions(), param.getStyle(), param.getSubtitle(),
-				param.getOrderBy(), param.getLanguage(), param.getServicRenderer());
+				param.getOrderBy(), param.getLanguage(), param.getServiceRenderer());
 
 	}
 

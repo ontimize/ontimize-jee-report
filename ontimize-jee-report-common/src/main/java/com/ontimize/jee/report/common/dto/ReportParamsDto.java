@@ -15,6 +15,8 @@ public class ReportParamsDto {
 	private String subtitle;
 	private List<ColumnDto> columns;
 	private List<ServiceRendererDto> servicRenderer;
+	
+	private String path;
 
 	private String language;
 
@@ -112,5 +114,13 @@ public class ReportParamsDto {
 
 	public void setServicRenderer(List<ServiceRendererDto> servicRenderer) {
 		this.servicRenderer = servicRenderer;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
 	}
 }

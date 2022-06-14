@@ -106,8 +106,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
     }
 
     public DynamicReport buildReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
-            String service, Boolean vertical, List<String> functions, StyleParamsDto styles, String subtitle,
-            String language, List<ServiceRendererDto> serviceRendererList) throws DynamicReportException {
+                                     String service, Boolean vertical, List<String> functions, StyleParamsDto styles, String subtitle,
+                                     String language, List<ServiceRendererDto> serviceRendererList) throws DynamicReportException {
 
         int numberGroups = 0;
 
@@ -148,18 +148,18 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
             if (columnStyleParamsDto != null) {
                 switch (columnStyleParamsDto.getAlignment()) {
-                case "center":
-                    columnDataStyle.setHorizontalAlign(HorizontalAlign.CENTER);
-                    headerStyle.setHorizontalAlign(HorizontalAlign.CENTER);
-                    break;
-                case "left":
-                    columnDataStyle.setHorizontalAlign(HorizontalAlign.LEFT);
-                    headerStyle.setHorizontalAlign(HorizontalAlign.LEFT);
-                    break;
-                case "right":
-                    columnDataStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
-                    headerStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
-                    break;
+                    case "center":
+                        columnDataStyle.setHorizontalAlign(HorizontalAlign.CENTER);
+                        headerStyle.setHorizontalAlign(HorizontalAlign.CENTER);
+                        break;
+                    case "left":
+                        columnDataStyle.setHorizontalAlign(HorizontalAlign.LEFT);
+                        headerStyle.setHorizontalAlign(HorizontalAlign.LEFT);
+                        break;
+                    case "right":
+                        columnDataStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
+                        headerStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
+                        break;
                 }
             }
 
@@ -212,7 +212,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
     @Override
     public JRDataSource getDataSource(List<ColumnDto> columns, List<String> groups, List<OrderByDto> orderBy,
-            String entity, String service, final List<ServiceRendererDto> serviceRendererList)
+                                      String entity, String service, final List<ServiceRendererDto> serviceRendererList)
             throws SecurityException {
 
         Map<String, Object> map = new HashMap<>();
@@ -271,15 +271,15 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
                 lang0 = language;
             }
             switch (lang0) {
-            case "es":
-                locale = new Locale("es", "ES");
-                break;
-            case "gl":
-                locale = new Locale("gl", "ES");
-                break;
-            default:
-                locale = new Locale("en", "US");
-                break;
+                case "es":
+                    locale = new Locale("es", "ES");
+                    break;
+                case "gl":
+                    locale = new Locale("gl", "ES");
+                    break;
+                default:
+                    locale = new Locale("en", "US");
+                    break;
             }
             drb.setReportLocale(locale);
             bundle = ResourceBundle.getBundle("bundle/bundle", locale);

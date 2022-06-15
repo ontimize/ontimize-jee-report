@@ -1,6 +1,5 @@
 package com.ontimize.jee.report.server.services;
 
-import java.awt.Color;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,12 +38,14 @@ import ar.com.fdvs.dj.domain.DynamicReport;
 import ar.com.fdvs.dj.domain.Style;
 import ar.com.fdvs.dj.domain.builders.ColumnBuilder;
 import ar.com.fdvs.dj.domain.builders.DynamicReportBuilder;
-import ar.com.fdvs.dj.domain.constants.Border;
-import ar.com.fdvs.dj.domain.constants.Font;
+import ar.com.fdvs.dj.domain.builders.GroupBuilder;
+import ar.com.fdvs.dj.domain.constants.GroupLayout;
 import ar.com.fdvs.dj.domain.constants.HorizontalAlign;
 import ar.com.fdvs.dj.domain.constants.VerticalAlign;
 import ar.com.fdvs.dj.domain.entities.DJGroup;
+import ar.com.fdvs.dj.domain.entities.DJGroupVariable;
 import ar.com.fdvs.dj.domain.entities.columns.AbstractColumn;
+import ar.com.fdvs.dj.domain.entities.columns.PropertyColumn;
 import net.sf.jasperreports.engine.JRDataSource;
 
 @Service("DynamicJasperService")
@@ -110,7 +111,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
                                      String language, List<ServiceRendererDto> serviceRendererList) throws DynamicReportException {
 
         int numberGroups = 0;
-
+        boolean functionColumn = false;
         DynamicReportBuilder drb = new DynamicReportBuilder();
         DynamicReportBuilderHelper builderHelper = this.getDynamicReportBuilderHelper();
         ResourceBundle bundle = getBundle(language, drb);
@@ -119,7 +120,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
         // subtitle
         builderHelper.configureSubTitle(drb, subtitle);
         // generic styles
-        builderHelper.configureGenericStyles(drb, vertical, styles, columns.size());
+        builderHelper.configureGenericStyles(drb, vertical, styles, columns.size(), bundle);
 
         Map<String, String> columnClassnames = this.getDynamicJasperHelper().getColumnClassnames(service, entity,
                 columns, serviceRendererList);
@@ -130,16 +131,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
             AbstractColumn column;
             Style columnDataStyle = new Style();
             columnDataStyle = builderHelper.getStyleGrid(styles, columnDataStyle);
-            columnDataStyle.setTransparent(false);
-            columnDataStyle.setBackgroundColor(new Color(255, 255, 255));
 
-            Style headerStyle = new Style();
-            headerStyle.setBorderBottom(Border.THIN());
-            Font headerFont = new Font();
-            headerFont.setBold(true);
-            headerStyle.setFont(headerFont);
-            headerStyle.setPaddingBottom(-10);
-
+            Style headerStyle = builderHelper.getHeaderStyle();
             ColumnStyleParamsDto columnStyleParamsDto = columnDto.getColumnStyle();
 
             String id = columnDto.getId();
@@ -168,6 +161,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
             column = ColumnBuilder.getNew().setColumnProperty(id, className).setTitle(name).setHeaderStyle(headerStyle)
                     .build();
+
             column.setName(id);
             if (columnStyleParamsDto != null && columnStyleParamsDto.getWidth() >= 0) {
                 column.setWidth(columnStyleParamsDto.getWidth());
@@ -176,23 +170,43 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
             column.setFixedWidth(false);
 
             column.setStyle(columnDataStyle);
+            // The column of numbers is hidden if it is not wanted but it must always be
+            // created to make the total if it is needed
+            if (!styles.isRowNumber()) {
+                DJGroup g1 = new GroupBuilder().setCriteriaColumn((PropertyColumn) drb.getColumn(0))
+                        .setGroupLayout(GroupLayout.EMPTY).build();
 
-            if (functions != null) {
+                drb.getColumn(0).setWidth(50);
+                drb.addGroup(g1);
+            }
+            if (functions != null && !functions.isEmpty()) {
+                Style footerStyle = builderHelper.getFooterStyle();
                 if (firstColumn && (functions.contains(bundle.getString("total_text"))
                         || functions.contains(bundle.getString("total")))) {
                     DJValueFormatter valueFormatter = builderHelper.getFunctionValueFormatter(DynamicJasperNaming.TOTAL,
                             bundle);
-                    Style footerStyle = builderHelper.getFooterStyle();
-                    drb.addGlobalFooterVariable(column, DJCalculation.COUNT, footerStyle, valueFormatter)
+                    // The column of row numbers is used to perform a correct calculation of the
+                    // total number of rows
+                    drb.addGlobalFooterVariable(drb.getColumn(0), DJCalculation.COUNT, footerStyle, valueFormatter)
                             .setGrandTotalLegend("");
+
+                } else if (firstColumn) {
+                    drb.addGlobalFooterVariable(
+                            new DJGroupVariable(drb.getColumn(0), DJCalculation.SYSTEM, footerStyle));
                 }
 
                 // Configure aggregate functions...
                 for (String function : functions) {
                     if (function.startsWith(id)) {
                         builderHelper.configureReportFunction(drb, column, function, bundle);
+                        functionColumn = true;
                     }
                 }
+                if (!functionColumn) {
+                    drb.addGlobalFooterVariable(new DJGroupVariable(column, DJCalculation.SYSTEM, footerStyle));
+
+                }
+
             }
             drb.addColumn(column);
 

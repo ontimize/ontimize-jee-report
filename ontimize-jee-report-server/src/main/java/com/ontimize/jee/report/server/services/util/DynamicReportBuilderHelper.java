@@ -14,6 +14,7 @@ import ar.com.fdvs.dj.domain.constants.GroupLayout;
 import ar.com.fdvs.dj.domain.constants.HorizontalAlign;
 import ar.com.fdvs.dj.domain.constants.Page;
 import ar.com.fdvs.dj.domain.constants.Transparency;
+import ar.com.fdvs.dj.domain.constants.VerticalAlign;
 import ar.com.fdvs.dj.domain.entities.DJGroup;
 import ar.com.fdvs.dj.domain.entities.columns.AbstractColumn;
 import ar.com.fdvs.dj.domain.entities.columns.PropertyColumn;
@@ -78,7 +79,7 @@ public class DynamicReportBuilderHelper {
     }
 
     public void configureGenericStyles(final DynamicReportBuilder dynamicReportBuilder, final Boolean vertical,
-                                       StyleParamsDto styleArgs, int numColumns) {
+                                       StyleParamsDto styleArgs, int numColumns, ResourceBundle bundle) {
 
         if (Boolean.FALSE.equals(vertical)) {
             dynamicReportBuilder.setPageSizeAndOrientation(Page.Page_A4_Landscape());
@@ -88,16 +89,19 @@ public class DynamicReportBuilderHelper {
 
         if (styleArgs != null) {
             dynamicReportBuilder.setPrintBackgroundOnOddRows(styleArgs.isBackgroundOnOddRows());
+            Style headerNumbersStyle = getHeaderStyle();
 
-            if (styleArgs.isRowNumber()) {
-                AbstractColumn numbers = ColumnBuilder.getInstance().setCustomExpression(getExpression()).build();
-                Style styleNumbers = new Style();
-                styleNumbers = this.getStyleGrid(styleArgs, styleNumbers);
-                numbers.setStyle(styleNumbers);
-                numbers.setWidth(6 * numColumns);
-                numbers.setName("numbers");
-                dynamicReportBuilder.addColumn(numbers);
-            }
+            headerNumbersStyle.setVerticalAlign(VerticalAlign.MIDDLE);
+
+            AbstractColumn numbers = ColumnBuilder.getNew().setCustomExpression(getExpression())
+                    .setTitle(bundle.getString("number")).setHeaderStyle(headerNumbersStyle).build();
+            Style styleNumbers = new Style();
+            styleNumbers = this.getStyleGrid(styleArgs, styleNumbers);
+            numbers.setStyle(styleNumbers);
+            numbers.setWidth(6 * numColumns);
+            numbers.setName("numbers");
+            dynamicReportBuilder.addColumn(numbers);
+
         }
 
         dynamicReportBuilder.setUseFullPageWidth(true).setUseFullPageWidth(true);
@@ -183,12 +187,25 @@ public class DynamicReportBuilderHelper {
         return style;
     }
 
+    public Style getHeaderStyle() {
+        Style headerStyle = new Style();
+
+        Font headerFont = new Font();
+        headerFont.setBold(true);
+        headerStyle.setFont(headerFont);
+        headerStyle.setPaddingBottom(-10);
+        headerStyle.setPaddingTop(4);
+        headerStyle.setBorderBottom(Border.PEN_1_POINT());
+        headerStyle.getBorderBottom().setColor(new Color(204, 204, 204));
+        return headerStyle;
+    }
+
     public Style getFooterStyle() {
         Style footerStyle = new Style();
-        footerStyle.setBackgroundColor(new Color(255, 255, 255));
         footerStyle.setTextColor(Color.BLACK);
         footerStyle.setHorizontalAlign(HorizontalAlign.JUSTIFY);
-        footerStyle.setBorderTop(Border.THIN());
+        footerStyle.setBorderTop(Border.PEN_1_POINT());
+        footerStyle.getBorderTop().setColor(new Color(204, 204, 204));
         footerStyle.setPaddingBottom(20);
         Font footerFont = new Font();
         footerFont.setBold(true);

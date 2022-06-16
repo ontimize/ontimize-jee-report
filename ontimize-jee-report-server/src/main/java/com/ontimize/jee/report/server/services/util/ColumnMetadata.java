@@ -1,7 +1,5 @@
 package com.ontimize.jee.report.server.services.util;
 
-import com.ontimize.jee.report.common.dto.ColumnDto;
-
 public class ColumnMetadata {
     
     private String id;

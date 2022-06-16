@@ -11,8 +11,6 @@ import com.ontimize.jee.report.common.util.TypeMappingsUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 
-import javax.xml.rpc.Service;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

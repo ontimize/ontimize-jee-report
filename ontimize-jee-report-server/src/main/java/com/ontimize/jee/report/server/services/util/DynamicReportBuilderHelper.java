@@ -13,12 +13,10 @@ import ar.com.fdvs.dj.domain.constants.Font;
 import ar.com.fdvs.dj.domain.constants.GroupLayout;
 import ar.com.fdvs.dj.domain.constants.HorizontalAlign;
 import ar.com.fdvs.dj.domain.constants.Page;
-import ar.com.fdvs.dj.domain.constants.Transparency;
 import ar.com.fdvs.dj.domain.constants.VerticalAlign;
 import ar.com.fdvs.dj.domain.entities.DJGroup;
 import ar.com.fdvs.dj.domain.entities.columns.AbstractColumn;
 import ar.com.fdvs.dj.domain.entities.columns.PropertyColumn;
-
 import com.ontimize.jee.report.common.dto.StyleParamsDto;
 import com.ontimize.jee.report.server.naming.DynamicJasperNaming;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 

@@ -16,7 +16,6 @@ import ar.com.fdvs.dj.domain.entities.columns.AbstractColumn;
 import ar.com.fdvs.dj.domain.entities.columns.PropertyColumn;
 import com.ontimize.jee.common.db.SQLStatementBuilder;
 import com.ontimize.jee.common.dto.EntityResult;
-import com.ontimize.jee.common.dto.EntityResultMapImpl;
 import com.ontimize.jee.common.tools.ReflectionTools;
 import com.ontimize.jee.report.common.dto.ColumnDto;
 import com.ontimize.jee.report.common.dto.ColumnStyleParamsDto;
@@ -40,9 +39,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
-import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;

@@ -271,27 +271,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
         }
 
         Object bean = this.applicationContext.getBean(service.concat("Service"));
-//		EntityResult erReportData = (EntityResult) ReflectionTools.invoke(bean,
-//				entity.toLowerCase().concat("PaginationQuery"), map, columns1, pageSize, offset, sqlOrders);
-
-		//FIXME Only for testing
-		EntityResult erReportData = new EntityResultMapImpl();
-		Map<String,Object> record = new HashMap<>();
-		record.put("integer", Integer.valueOf(5000));
-		record.put("real", Double.valueOf(3265));
-		record.put("currency", Double.valueOf(25000));
-		record.put("percentage", Double.valueOf(0.45));
-		record.put("date", new Date());
-		record.put("CUSTOMERTYPEID", 1);
-		erReportData.addRecord(record);
-		Map<String,Integer> types = new HashMap<>();
-		types.put("integer", Types.INTEGER);
-		types.put("real", Types.REAL);
-		types.put("currency",Types.DOUBLE);
-		types.put("percentage", Types.DOUBLE);
-		types.put("date", Types.DATE);
-		types.put("CUSTOMERTYPEID", Types.INTEGER);
-		erReportData.setColumnSQLTypes(types);
+		EntityResult erReportData = (EntityResult) ReflectionTools.invoke(bean,
+				entity.toLowerCase().concat("PaginationQuery"), map, columns1, pageSize, offset, sqlOrders);
 
         EntityResultDataSource entityResultDataSource = new EntityResultDataSource(erReportData);
 		dynamicJasperHelper.evaluateServiceRenderer(entityResultDataSource, columns);

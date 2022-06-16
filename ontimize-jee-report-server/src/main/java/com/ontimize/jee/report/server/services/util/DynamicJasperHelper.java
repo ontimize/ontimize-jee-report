@@ -49,9 +49,7 @@ public class DynamicJasperHelper {
       if(serviceRendererDto != null) {
         Map<String, Integer> rendererSqlColumnTypes =
             getSQLColumnTypes(serviceRendererDto.getService(), serviceRendererDto.getEntity(), serviceRendererDto.getColumns());
-//        type = rendererSqlColumnTypes.get(serviceRendererDto.getValueColumn());
-        //FIXME Only for testing
-        type = Types.LONGVARCHAR;
+        type = rendererSqlColumnTypes.get(serviceRendererDto.getValueColumn());
       }
       String classname = TypeMappingsUtils.getClassName(type);
       ColumnMetadata columnMetadata = new ColumnMetadata(id, type, classname);
@@ -63,23 +61,15 @@ public class DynamicJasperHelper {
   
   public Map<String, Integer> getSQLColumnTypes(final String service, final String entity, final List<String> columns) {
     Map<String,Integer> sqlTypes = new HashMap<>();
-//    Object bean = this.applicationContext.getBean(service.concat("Service"));
-//    EntityResult entityResult = (EntityResult) ReflectionTools.invoke(bean, 
-//        entity.concat("Query"), 
-//        new HashMap<>(),
-//        columns);
-//    
-//    if(entityResult.getCode() == EntityResult.OPERATION_SUCCESSFUL) {
-//      return entityResult.getColumnSQLTypes();
-//    }
-    
-    //FIXME Only for testing
-    sqlTypes.put("integer", Types.INTEGER);
-    sqlTypes.put("real", Types.REAL);
-    sqlTypes.put("currency",Types.DOUBLE);
-    sqlTypes.put("percentage", Types.DOUBLE);
-    sqlTypes.put("date", Types.DATE);
-    sqlTypes.put("CUSTOMERTYPEID", Types.INTEGER);
+    Object bean = this.applicationContext.getBean(service.concat("Service"));
+    EntityResult entityResult = (EntityResult) ReflectionTools.invoke(bean, 
+        entity.concat("Query"), 
+        new HashMap<>(),
+        columns);
+
+    if(entityResult.getCode() == EntityResult.OPERATION_SUCCESSFUL) {
+      return entityResult.getColumnSQLTypes();
+    }
     return sqlTypes;
   }
   

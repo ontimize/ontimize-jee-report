@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.ontimize.jee.report.common.dto.ColumnDto;
+import com.ontimize.jee.report.common.dto.ColumnStyleParamsDto;
 import com.ontimize.jee.report.common.dto.OrderByDto;
+import com.ontimize.jee.report.common.dto.StyleParamsDto;
 import com.ontimize.jee.report.common.dto.renderer.ServiceRendererDto;
 import com.ontimize.jee.report.common.exception.DynamicReportException;
 import org.apache.commons.logging.Log;
@@ -37,14 +39,15 @@ public abstract class ReportBase {
 	protected Map params = new HashMap();
 
 	public abstract DynamicReport buildReport(List<ColumnDto> columnsDto, String title, List<String> groups, String entity,
-			String service, Boolean vertical, List<String> functions, List<String> style, String subtitle,
-			String language) throws DynamicReportException;
+			String service, Boolean vertical, List<String> functions, StyleParamsDto style, String subtitle,
+			String language)
+			throws DynamicReportException;
 
 	public abstract JRDataSource getDataSource(List<ColumnDto> columns, List<String> groups, List<OrderByDto> orderBy,
 			String entity, String service) throws SecurityException;
 
 	public InputStream generateReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
-			String service, Boolean vertical, List<String> functions, List<String> style, String subtitle,
+			String service, Boolean vertical, List<String> functions, StyleParamsDto style, String subtitle,
 			List<OrderByDto> orderBy, String language) throws DynamicReportException {
 
 		DynamicReport dr = buildReport(columns, title, groups, entity, service, vertical, functions, style, subtitle,

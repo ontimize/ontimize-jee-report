@@ -12,7 +12,7 @@ public class PreferencesParamsDto {
 	private String subtitle;
 	private List<String> groups;
 	private List<String> functions;
-	private List<String> style;
+	private StyleParamsDto style;
 	private List<ColumnDto> columns;
 	private List<OrderByDto> orderBy;
 	private String entity;
@@ -81,11 +81,11 @@ public class PreferencesParamsDto {
 		this.entity = entity;
 	}
 
-	public List<String> getStyle() {
+	public StyleParamsDto getStyle() {
 		return style;
 	}
 
-	public void setStyle(List<String> style) {
+	public void setStyle(StyleParamsDto style) {
 		this.style = style;
 	}
 

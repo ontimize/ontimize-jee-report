@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.ws.rs.QueryParam;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,7 +65,7 @@ public class PreferencesRestController {
 	}
 
 	@RequestMapping(value = "/preferences", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public EntityResult getPreferences() {
+	public EntityResult getPreferences(@QueryParam("entity") String entity) {
 		List<String> columns = new ArrayList<>();
 		Map<String, Object> map = new HashMap<>();
 		List<String> attrList = new ArrayList<>();

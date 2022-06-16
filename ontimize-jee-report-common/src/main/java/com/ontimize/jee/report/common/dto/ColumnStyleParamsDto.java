@@ -1,15 +1,19 @@
 package com.ontimize.jee.report.common.dto;
 
+import com.ontimize.jee.report.common.dto.renderer.RendererDto;
+
 public class ColumnStyleParamsDto {
 
-	int width;
+	Integer width;
 	String alignment;
+	
+	RendererDto renderer;
 
-	public int getWidth() {
+	public Integer getWidth() {
 		return width;
 	}
 
-	public void setWidth(int width) {
+	public void setWidth(Integer width) {
 		this.width = width;
 	}
 
@@ -21,4 +25,11 @@ public class ColumnStyleParamsDto {
 		this.alignment = alignment;
 	}
 
+	public RendererDto getRenderer() {
+		return renderer;
+	}
+
+	public void setRenderer(RendererDto renderer) {
+		this.renderer = renderer;
+	}
 }

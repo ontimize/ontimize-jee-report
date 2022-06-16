@@ -1,7 +1,7 @@
 package com.ontimize.jee.report.common.util;
 
 import com.ontimize.jee.common.dto.EntityResult;
-import com.ontimize.jee.report.common.dto.ServiceRendererDto;
+import com.ontimize.jee.report.common.dto.renderer.ServiceRendererDto;
 import com.ontimize.jee.report.common.reportstore.OntimizeField;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;

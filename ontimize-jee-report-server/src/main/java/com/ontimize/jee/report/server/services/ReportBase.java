@@ -10,9 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.ontimize.jee.report.common.dto.ColumnDto;
-import com.ontimize.jee.report.common.dto.ColumnStyleParamsDto;
 import com.ontimize.jee.report.common.dto.OrderByDto;
-import com.ontimize.jee.report.common.dto.ServiceRendererDto;
+import com.ontimize.jee.report.common.dto.renderer.ServiceRendererDto;
 import com.ontimize.jee.report.common.exception.DynamicReportException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,24 +38,22 @@ public abstract class ReportBase {
 
 	public abstract DynamicReport buildReport(List<ColumnDto> columnsDto, String title, List<String> groups, String entity,
 			String service, Boolean vertical, List<String> functions, List<String> style, String subtitle,
-			String language, List<ServiceRendererDto> serviceRendererList)
-			throws DynamicReportException;
+			String language) throws DynamicReportException;
 
 	public abstract JRDataSource getDataSource(List<ColumnDto> columns, List<String> groups, List<OrderByDto> orderBy,
-			String entity, String service, List<ServiceRendererDto> serviceRendererList) throws SecurityException;
+			String entity, String service) throws SecurityException;
 
 	public InputStream generateReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
 			String service, Boolean vertical, List<String> functions, List<String> style, String subtitle,
-			List<OrderByDto> orderBy, String language,
-			List<ServiceRendererDto> serviceRendererList) throws DynamicReportException {
+			List<OrderByDto> orderBy, String language) throws DynamicReportException {
 
 		DynamicReport dr = buildReport(columns, title, groups, entity, service, vertical, functions, style, subtitle,
-				language, serviceRendererList);
+				language);
 
 		/**
 		 * We obtain the data source based on a collection of objects
 		 */
-		JRDataSource ds = getDataSource(columns, groups, orderBy, entity, service, serviceRendererList);
+		JRDataSource ds = getDataSource(columns, groups, orderBy, entity, service);
 
 		/**
 		 * We create the JasperReport object that we pass as a parameter to

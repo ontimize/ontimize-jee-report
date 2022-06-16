@@ -1,14 +1,10 @@
 package com.ontimize.jee.report.rest;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import com.ontimize.jee.report.common.dto.ServiceRendererDto;
 import com.ontimize.jee.report.common.exception.DynamicReportException;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,5 +1,7 @@
 package com.ontimize.jee.report.common.dto;
 
+import com.ontimize.jee.report.common.dto.renderer.ServiceRendererDto;
+
 import java.util.List;
 
 public class ReportParamsDto {
@@ -14,7 +16,6 @@ public class ReportParamsDto {
 	private List<String> style;
 	private String subtitle;
 	private List<ColumnDto> columns;
-	private List<ServiceRendererDto> serviceRenderer;
 
 	private String language;
 
@@ -106,12 +107,5 @@ public class ReportParamsDto {
 		this.language = language;
 	}
 
-	public List<ServiceRendererDto> getServiceRenderer() {
-		return serviceRenderer;
-	}
-
-	public void setServiceRenderer(List<ServiceRendererDto> serviceRenderer) {
-		this.serviceRenderer = serviceRenderer;
-	}
 
 }

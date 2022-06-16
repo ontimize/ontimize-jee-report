@@ -171,13 +171,13 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 			if(columnStyleParamsDto != null && columnStyleParamsDto.getWidth() != null && columnStyleParamsDto.getWidth() > 0) {
                 column.setWidth(columnStyleParamsDto.getWidth());
             }
-            drb.setPrintColumnNames(styles.isColumnName());
+            drb.setPrintColumnNames(styles != null && styles.isColumnName());
             column.setFixedWidth(false);
 
             column.setStyle(columnDataStyle);
             // The column of numbers is hidden if it is not wanted but it must always be
             // created to make the total if it is needed
-            if (!styles.isRowNumber()) {
+            if (styles != null && !styles.isRowNumber()) {
                 DJGroup g1 = new GroupBuilder().setCriteriaColumn((PropertyColumn) drb.getColumn(0))
                         .setGroupLayout(GroupLayout.EMPTY).build();
 
@@ -299,7 +299,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
     }
 
     protected ResourceBundle getBundle(final String language, final DynamicReportBuilder drb) {
-        if (this.bundle == null) {
+        if (this.bundle == null ||
+                (!this.bundle.getLocale().getLanguage().equals(language) )) {
             Locale locale = null;
             String lang0 = "en";
             if (!StringUtils.isEmpty(language)) {

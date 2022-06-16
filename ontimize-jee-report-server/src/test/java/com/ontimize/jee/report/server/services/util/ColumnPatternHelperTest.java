@@ -1,5 +1,6 @@
 package com.ontimize.jee.report.server.services.util;
 
+import com.ontimize.jee.report.common.dto.renderer.CurrencyRendererDto;
 import com.ontimize.jee.report.common.dto.renderer.IntegerRendererDto;
 import com.ontimize.jee.report.common.dto.renderer.RealRendererDto;
 import com.ontimize.jee.report.common.dto.renderer.RendererDto;
@@ -101,6 +102,42 @@ public class ColumnPatternHelperTest {
         Assertions.assertEquals("2,000.2300", format.format(2000.23));
         Assertions.assertEquals("2,000.1234", format.format(2000.1234));
         Assertions.assertEquals("2,000.1235", format.format(2000.12349));
+
+
+    }
+
+    @Test
+    public void testCurrencyPatternCustomDecimalsAndSymbolFirst() {
+        CurrencyRendererDto renderer = new CurrencyRendererDto();
+        renderer.setGrouping(true);
+        renderer.setDecimalDigits(4);
+        renderer.setCurrencySymbol("$");
+        renderer.setCurrencySymbolPosition("left");
+        String pattern = ColumnPatternHelper.getPatternForClass(Double.class, renderer);
+
+        Assertions.assertNotNull(pattern);
+
+        DecimalFormat format = new DecimalFormat(pattern, new DecimalFormatSymbols(Locale.ENGLISH));
+        Assertions.assertEquals("$2,000.2300", format.format(2000.23));
+        Assertions.assertEquals("$2,000.1234", format.format(2000.1234));
+        Assertions.assertEquals("$2,000.1235", format.format(2000.12349));
+    }
+
+    @Test
+    public void testCurrencyPatternCustomDecimalsAndSymbolEnd() {
+        CurrencyRendererDto renderer = new CurrencyRendererDto();
+        renderer.setGrouping(true);
+        renderer.setDecimalDigits(4);
+        renderer.setCurrencySymbol("€");
+        renderer.setCurrencySymbolPosition("right");
+        String pattern = ColumnPatternHelper.getPatternForClass(Double.class, renderer);
+
+        Assertions.assertNotNull(pattern);
+
+        DecimalFormat format = new DecimalFormat(pattern, new DecimalFormatSymbols(Locale.ENGLISH));
+        Assertions.assertEquals("2,000.2300€", format.format(2000.23));
+        Assertions.assertEquals("2,000.1234€", format.format(2000.1234));
+        Assertions.assertEquals("2,000.1235€", format.format(2000.12349));
 
 
     }

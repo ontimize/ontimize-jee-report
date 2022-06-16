@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 )
 @JsonSubTypes({
 //        @JsonSubTypes.Type(value = IntegerRendererDto.class, name = "boolean"),
-//        @JsonSubTypes.Type(value = IntegerRendererDto.class, name = "currency"),
+        @JsonSubTypes.Type(value = CurrencyRendererDto.class, name = "currency"),
 //        @JsonSubTypes.Type(value = IntegerRendererDto.class, name = "date"),
 //        @JsonSubTypes.Type(value = IntegerRendererDto.class, name = "image"),
         @JsonSubTypes.Type(value = IntegerRendererDto.class, name = "integer"),

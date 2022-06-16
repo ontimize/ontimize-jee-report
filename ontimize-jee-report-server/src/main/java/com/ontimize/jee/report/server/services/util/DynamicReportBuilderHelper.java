@@ -173,7 +173,10 @@ public class DynamicReportBuilderHelper {
     }
 
     public Style getStyleGrid(StyleParamsDto styleArgs, Style style) {
-        if (styleArgs.isGrid()) {
+        if(style == null) {
+            return style;
+        }
+        if (styleArgs != null && styleArgs.isGrid()) {
             style.setBorderBottom(Border.THIN());
             style.setBorderTop(Border.THIN());
             style.setBorderLeft(Border.THIN());

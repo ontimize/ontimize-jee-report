@@ -1,5 +1,6 @@
 package com.ontimize.jee.report.server.services.util;
 
+import com.ontimize.jee.report.common.dto.renderer.CurrencyRendererDto;
 import com.ontimize.jee.report.common.dto.renderer.IntegerRendererDto;
 import com.ontimize.jee.report.common.dto.renderer.RealRendererDto;
 import com.ontimize.jee.report.common.dto.renderer.RendererDto;
@@ -21,8 +22,12 @@ public class ColumnPatternHelper {
             IntegerRendererDto renderer = rendererDto instanceof IntegerRendererDto ? (IntegerRendererDto) rendererDto : null;
             pattern = integerPattern(renderer);
         } else if (Number.class.isAssignableFrom(type)) {
-            if(rendererDto instanceof RealRendererDto) {
+            if(rendererDto instanceof CurrencyRendererDto) {
+                pattern = currencyPattern((CurrencyRendererDto) rendererDto);
+            } else if(rendererDto instanceof RealRendererDto) {
                 pattern = realPattern((RealRendererDto) rendererDto);
+            } else {
+                pattern = defaultRealPattern;
             }
         } else if (Date.class.isAssignableFrom(type)
                 || LocalDate.class.isAssignableFrom(type)) {
@@ -54,6 +59,26 @@ public class ColumnPatternHelper {
             if(rendererDto.getDecimalDigits() > 0) {
                 sb.append(".")
                     .append(StringUtils.rightPad("", rendererDto.getDecimalDigits(), "0"));
+            }
+            pattern = sb.toString();
+        }
+        return pattern;
+    }
+    
+    static String currencyPattern(final CurrencyRendererDto rendererDto) {
+        String pattern = defaultRealPattern;
+        if(rendererDto != null) {
+            StringBuilder sb = new StringBuilder();
+            if("left".equals(rendererDto.getCurrencySymbolPosition() )){
+                sb.append(rendererDto.getCurrencySymbol());
+            }
+            sb.append(rendererDto.isGrouping() ? "#,##0" : "0");
+            if(rendererDto.getDecimalDigits() > 0) {
+                sb.append(".")
+                        .append(StringUtils.rightPad("", rendererDto.getDecimalDigits(), "0"));
+            }
+            if("right".equals(rendererDto.getCurrencySymbolPosition() )){
+                sb.append(rendererDto.getCurrencySymbol());
             }
             pattern = sb.toString();
         }

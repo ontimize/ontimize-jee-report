@@ -16,6 +16,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class DynamicJasperHelper {
@@ -26,12 +27,13 @@ public class DynamicJasperHelper {
     this.applicationContext = applicationContext;
   }
   
-  public String getColumnPattern(final ColumnMetadata columnMetadata, final ColumnStyleParamsDto columnStyleParamsDto){
+  public String getColumnPattern(final ColumnMetadata columnMetadata, final ColumnStyleParamsDto columnStyleParamsDto,
+                                 final Locale locale){
     String pattern = null;
     if(columnMetadata != null){
       Class<?> aClass = TypeMappingsUtils.getClass(columnMetadata.getType());
       RendererDto rendererDto = columnStyleParamsDto != null ? columnStyleParamsDto.getRenderer() : null;
-      pattern = ColumnPatternHelper.getPatternForClass(aClass, rendererDto);
+      pattern = ColumnPatternHelper.getPatternForClass(aClass, rendererDto, locale);
     }
     return pattern;
   }

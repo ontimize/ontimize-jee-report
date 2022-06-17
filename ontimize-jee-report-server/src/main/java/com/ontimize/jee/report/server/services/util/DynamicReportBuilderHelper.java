@@ -17,6 +17,7 @@ import ar.com.fdvs.dj.domain.constants.VerticalAlign;
 import ar.com.fdvs.dj.domain.entities.DJGroup;
 import ar.com.fdvs.dj.domain.entities.columns.AbstractColumn;
 import ar.com.fdvs.dj.domain.entities.columns.PropertyColumn;
+import com.ontimize.jee.report.common.dto.FunctionTypeDto;
 import com.ontimize.jee.report.common.dto.StyleParamsDto;
 import com.ontimize.jee.report.server.naming.DynamicJasperNaming;
 import org.apache.commons.lang3.StringUtils;
@@ -215,21 +216,21 @@ public class DynamicReportBuilderHelper {
     }
 
     public void configureReportFunction(final DynamicReportBuilder dynamicReportBuilder, final AbstractColumn column,
-                                        final String function, final ResourceBundle bundle) {
+                                        final FunctionTypeDto function, final ResourceBundle bundle) {
         Style footerStyle = getFooterStyle();
-        if (function.endsWith(bundle.getString("sum"))) {
+        if (function.getType().equals(bundle.getString("sum"))) {
             DJValueFormatter valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.SUM, bundle);
             dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.SUM, footerStyle, valueFormatter)
                     .setGrandTotalLegend("");
-        } else if (function.endsWith(bundle.getString("average"))) {
+        } else if (function.getType().equals(bundle.getString("average"))) {
             DJValueFormatter valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.AVERAGE, bundle);
             dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.AVERAGE, footerStyle, valueFormatter)
                     .setGrandTotalLegend("");
-        } else if (function.endsWith(bundle.getString("max"))) {
+        } else if (function.getType().equals(bundle.getString("max"))) {
             DJValueFormatter valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.MAX, bundle);
             dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.HIGHEST, footerStyle, valueFormatter)
                     .setGrandTotalLegend("");
-        } else if (function.endsWith(bundle.getString("min"))) {
+        } else if (function.getType().equals(bundle.getString("min"))) {
             DJValueFormatter valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.MIN, bundle);
             dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.LOWEST, footerStyle, valueFormatter)
                     .setGrandTotalLegend("");

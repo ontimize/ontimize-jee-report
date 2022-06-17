@@ -17,12 +17,7 @@ import ar.com.fdvs.dj.domain.entities.columns.PropertyColumn;
 import com.ontimize.jee.common.db.SQLStatementBuilder;
 import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.common.tools.ReflectionTools;
-import com.ontimize.jee.report.common.dto.ColumnDto;
-import com.ontimize.jee.report.common.dto.ColumnStyleParamsDto;
-import com.ontimize.jee.report.common.dto.FunctionParamsDto;
-import com.ontimize.jee.report.common.dto.OrderByDto;
-import com.ontimize.jee.report.common.dto.ReportParamsDto;
-import com.ontimize.jee.report.common.dto.StyleParamsDto;
+import com.ontimize.jee.report.common.dto.*;
 import com.ontimize.jee.report.common.exception.DynamicReportException;
 import com.ontimize.jee.report.common.services.IDynamicJasperService;
 import com.ontimize.jee.report.common.util.EntityResultDataSource;
@@ -105,7 +100,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
     }
 
     public DynamicReport buildReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
-                                     String service, Boolean vertical, List<String> functions, StyleParamsDto styles, String subtitle,
+                                     String service, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto styles, String subtitle,
                                      String language)
             throws DynamicReportException {
 
@@ -200,8 +195,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
                 }
 
                 // Configure aggregate functions...
-                for (String function : functions) {
-                    if (function.startsWith(id)) {
+                for (FunctionTypeDto function : functions) {
+                    if (function.getColumnName().equals(id)) {
                         builderHelper.configureReportFunction(drb, column, function, bundle);
                         functionColumn = true;
                     }

@@ -97,6 +97,7 @@ public class DynamicReportBuilderHelper {
                     .setTitle(bundle.getString("number")).setHeaderStyle(headerNumbersStyle).build();
             Style styleNumbers = new Style();
             styleNumbers = this.getStyleGrid(styleArgs, styleNumbers);
+            styleNumbers.setVerticalAlign(VerticalAlign.MIDDLE);
             numbers.setStyle(styleNumbers);
             numbers.setWidth(6 * numColumns);
             numbers.setName("numbers");

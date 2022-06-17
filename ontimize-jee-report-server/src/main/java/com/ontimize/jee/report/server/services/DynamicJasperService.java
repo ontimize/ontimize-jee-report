@@ -221,6 +221,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
             }
 
             firstColumn = false;
+            functionColumn = false;
         }
 
         DynamicReport dr = drb.build();

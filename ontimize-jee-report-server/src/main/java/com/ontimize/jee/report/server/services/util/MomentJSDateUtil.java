@@ -9,48 +9,48 @@ import java.util.Locale;
 import java.util.Map;
 
 public class MomentJSDateUtil {
-    
+
     private static MomentJSDateUtil instance;
-    
+
     private static final List<String> momentFormats = Arrays.asList("LT", "LTS", "L", "l", "LL", "ll", "LLL", "lll", "LLLL", "llll");
-    
+
     private final Map<String, Map<String, String>> cache = new HashMap<>();
-    
-    private MomentJSDateUtil(){
+
+    private MomentJSDateUtil() {
         initializeCache();
     }
-    
+
     public static MomentJSDateUtil getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new MomentJSDateUtil();
         }
         return instance;
     }
-    
+
     public String getPatternFromMommentJsFormat(final String format, final Locale locale) {
-        if(StringUtils.isBlank(format) || !momentFormats.contains(format)) {
+        if (StringUtils.isBlank(format) || !momentFormats.contains(format)) {
             return format;
         }
-        
+
         String lang = "en";
-        if(locale != null) {
+        if (locale != null) {
             lang = locale.getLanguage();
         }
         Map<String, String> longDateFormatMap = this.cache.get(lang);
-        if(longDateFormatMap != null) {
+        if (longDateFormatMap != null) {
             return longDateFormatMap.get(format);
         }
         return null;
     }
-    
-    protected void initializeCache(){
-        
+
+    protected void initializeCache() {
+
         cache.put("en", getENLongDateFormat());
         cache.put("es", getESLongDateFormat());
     }
-    
+
     protected Map<String, String> getESLongDateFormat() {
-        Map<String,String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>();
         map.put("LT", "H:mm");
         map.put("LTS", "H:mm:ss");
         map.put("L", "dd/MM/YYYY");
@@ -65,7 +65,7 @@ public class MomentJSDateUtil {
     }
 
     protected Map<String, String> getENLongDateFormat() {
-        Map<String,String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>();
         map.put("LT", "h:mm a");
         map.put("LTS", "h:mm:ss a");
         map.put("L", "MM/dd/YYYY");

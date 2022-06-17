@@ -19,113 +19,113 @@ import java.util.Map;
 
 public class DynamicJasperHelper {
 
-  private ApplicationContext applicationContext;
+    private ApplicationContext applicationContext;
 
-  public DynamicJasperHelper(ApplicationContext applicationContext) {
-    this.applicationContext = applicationContext;
-  }
-  
-  public String getColumnPattern(final ColumnMetadata columnMetadata, final ColumnStyleParamsDto columnStyleParamsDto,
-                                 final Locale locale){
-    String pattern = null;
-    if(columnMetadata != null){
-      Class<?> aClass = TypeMappingsUtils.getClass(columnMetadata.getType());
-      RendererDto rendererDto = columnStyleParamsDto != null ? columnStyleParamsDto.getRenderer() : null;
-      pattern = ColumnPatternHelper.getPatternForClass(aClass, rendererDto, locale);
+    public DynamicJasperHelper(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
     }
-    return pattern;
-  }
-  
-  public Map<String, ColumnMetadata> getColumnMetadata(final String service, final String entity, final List<ColumnDto> columns) {
-    Map<String,ColumnMetadata> columnMetadataMap = new HashMap<>();
-    List<String> stringColumns = getColumnsFromDto(columns);
-    Map<String, Integer> defaultSqlColumnTypes = getSQLColumnTypes(service, entity, stringColumns);
-    for(ColumnDto col : columns) {
-      String id = col.getId();
-      int type = defaultSqlColumnTypes.get(id);
-      ServiceRendererDto serviceRendererDto = retrieveServiceRenderForColumn(col);
-      if(serviceRendererDto != null) {
-        Map<String, Integer> rendererSqlColumnTypes =
-            getSQLColumnTypes(serviceRendererDto.getService(), serviceRendererDto.getEntity(), serviceRendererDto.getColumns());
-        type = rendererSqlColumnTypes.get(serviceRendererDto.getValueColumn());
-      }
-      String classname = TypeMappingsUtils.getClassName(type);
-      ColumnMetadata columnMetadata = new ColumnMetadata(id, type, classname);
-      columnMetadataMap.put(id, columnMetadata);
-    }
-    return columnMetadataMap;
-  }
-  
-  
-  public Map<String, Integer> getSQLColumnTypes(final String service, final String entity, final List<String> columns) {
-    Map<String,Integer> sqlTypes = new HashMap<>();
-    Object bean = this.applicationContext.getBean(service.concat("Service"));
-    EntityResult entityResult = (EntityResult) ReflectionTools.invoke(bean, 
-        entity.concat("Query"), 
-        new HashMap<>(),
-        columns);
 
-    if(entityResult.getCode() == EntityResult.OPERATION_SUCCESSFUL) {
-      return entityResult.getColumnSQLTypes();
-    }
-    return sqlTypes;
-  }
-  
-  public List<String> getColumnsFromDto(List<ColumnDto> columnsDto) {
-    List<String> columns = new ArrayList<>();
-    columnsDto.forEach(column -> columns.add(column.getId()));
-    return columns;
-  }
-
-
-  public void evaluateServiceRenderer(EntityResultDataSource entityResultDataSource, List<ColumnDto> columns) {
-    if(entityResultDataSource != null && columns != null){
-      for(ColumnDto columnDto : columns) {
-        RendererDto renderer = columnDto.getColumnStyle() != null ? columnDto.getColumnStyle().getRenderer() : null;
-        if (renderer instanceof ServiceRendererDto) {
-          ServiceRendererDto serviceRendererDto = (ServiceRendererDto) renderer;
-          if (StringUtils.isBlank(serviceRendererDto.getService())) {
-            throw new IllegalArgumentException("'service' argument not found on ServiceRendererDto bean!");
-          }
-
-          if (StringUtils.isBlank(serviceRendererDto.getEntity())) {
-            throw new IllegalArgumentException("'entity' argument not found on ServiceRendererDto bean!");
-          }
-
-          if (StringUtils.isBlank(serviceRendererDto.getKeyColumn())) {
-            throw new IllegalArgumentException("'keyColumn' argument not found on ServiceRendererDto bean!");
-          }
-
-          if (StringUtils.isBlank(serviceRendererDto.getValueColumn())) {
-            throw new IllegalArgumentException("'valueColumn' argument not found on ServiceRendererDto bean!");
-          }
-
-          Map<String, Object> map = new HashMap<>();
-          List<String> cols = serviceRendererDto.getColumns();
-          Object bean = this.applicationContext.getBean(serviceRendererDto.getService().concat("Service"));
-          EntityResult eR_renderer = (EntityResult) ReflectionTools.invoke(bean,
-                  serviceRendererDto.getEntity().concat("Query"),
-                  map, cols);
-
-          Map<String, EntityResult> renderData = new HashMap<>();
-          renderData.put(serviceRendererDto.getKeyColumn(), eR_renderer);
-          entityResultDataSource.setRendererData(renderData);
-
-          Map<String, ServiceRendererDto> renderInfo = new HashMap<>();
-          renderInfo.put(serviceRendererDto.getKeyColumn(), serviceRendererDto);
-          entityResultDataSource.setRendererInfo(renderInfo);
+    public String getColumnPattern(final ColumnMetadata columnMetadata, final ColumnStyleParamsDto columnStyleParamsDto,
+                                   final Locale locale) {
+        String pattern = null;
+        if (columnMetadata != null) {
+            Class<?> aClass = TypeMappingsUtils.getClass(columnMetadata.getType());
+            RendererDto rendererDto = columnStyleParamsDto != null ? columnStyleParamsDto.getRenderer() : null;
+            pattern = ColumnPatternHelper.getPatternForClass(aClass, rendererDto, locale);
         }
-      }
+        return pattern;
     }
-  }
 
-  protected ServiceRendererDto retrieveServiceRenderForColumn(final ColumnDto column) {
-    if(column != null && column.getColumnStyle() != null) {
-      if(column.getColumnStyle().getRenderer() instanceof ServiceRendererDto) {
-        return (ServiceRendererDto) column.getColumnStyle().getRenderer();
-      }
+    public Map<String, ColumnMetadata> getColumnMetadata(final String service, final String entity, final List<ColumnDto> columns) {
+        Map<String, ColumnMetadata> columnMetadataMap = new HashMap<>();
+        List<String> stringColumns = getColumnsFromDto(columns);
+        Map<String, Integer> defaultSqlColumnTypes = getSQLColumnTypes(service, entity, stringColumns);
+        for (ColumnDto col : columns) {
+            String id = col.getId();
+            int type = defaultSqlColumnTypes.get(id);
+            ServiceRendererDto serviceRendererDto = retrieveServiceRenderForColumn(col);
+            if (serviceRendererDto != null) {
+                Map<String, Integer> rendererSqlColumnTypes =
+                        getSQLColumnTypes(serviceRendererDto.getService(), serviceRendererDto.getEntity(), serviceRendererDto.getColumns());
+                type = rendererSqlColumnTypes.get(serviceRendererDto.getValueColumn());
+            }
+            String classname = TypeMappingsUtils.getClassName(type);
+            ColumnMetadata columnMetadata = new ColumnMetadata(id, type, classname);
+            columnMetadataMap.put(id, columnMetadata);
+        }
+        return columnMetadataMap;
     }
-    return null;
-  }
+
+
+    public Map<String, Integer> getSQLColumnTypes(final String service, final String entity, final List<String> columns) {
+        Map<String, Integer> sqlTypes = new HashMap<>();
+        Object bean = this.applicationContext.getBean(service.concat("Service"));
+        EntityResult entityResult = (EntityResult) ReflectionTools.invoke(bean,
+                entity.concat("Query"),
+                new HashMap<>(),
+                columns);
+
+        if (entityResult.getCode() == EntityResult.OPERATION_SUCCESSFUL) {
+            return entityResult.getColumnSQLTypes();
+        }
+        return sqlTypes;
+    }
+
+    public List<String> getColumnsFromDto(List<ColumnDto> columnsDto) {
+        List<String> columns = new ArrayList<>();
+        columnsDto.forEach(column -> columns.add(column.getId()));
+        return columns;
+    }
+
+
+    public void evaluateServiceRenderer(EntityResultDataSource entityResultDataSource, List<ColumnDto> columns) {
+        if (entityResultDataSource != null && columns != null) {
+            for (ColumnDto columnDto : columns) {
+                RendererDto renderer = columnDto.getColumnStyle() != null ? columnDto.getColumnStyle().getRenderer() : null;
+                if (renderer instanceof ServiceRendererDto) {
+                    ServiceRendererDto serviceRendererDto = (ServiceRendererDto) renderer;
+                    if (StringUtils.isBlank(serviceRendererDto.getService())) {
+                        throw new IllegalArgumentException("'service' argument not found on ServiceRendererDto bean!");
+                    }
+
+                    if (StringUtils.isBlank(serviceRendererDto.getEntity())) {
+                        throw new IllegalArgumentException("'entity' argument not found on ServiceRendererDto bean!");
+                    }
+
+                    if (StringUtils.isBlank(serviceRendererDto.getKeyColumn())) {
+                        throw new IllegalArgumentException("'keyColumn' argument not found on ServiceRendererDto bean!");
+                    }
+
+                    if (StringUtils.isBlank(serviceRendererDto.getValueColumn())) {
+                        throw new IllegalArgumentException("'valueColumn' argument not found on ServiceRendererDto bean!");
+                    }
+
+                    Map<String, Object> map = new HashMap<>();
+                    List<String> cols = serviceRendererDto.getColumns();
+                    Object bean = this.applicationContext.getBean(serviceRendererDto.getService().concat("Service"));
+                    EntityResult eR_renderer = (EntityResult) ReflectionTools.invoke(bean,
+                            serviceRendererDto.getEntity().concat("Query"),
+                            map, cols);
+
+                    Map<String, EntityResult> renderData = new HashMap<>();
+                    renderData.put(serviceRendererDto.getKeyColumn(), eR_renderer);
+                    entityResultDataSource.setRendererData(renderData);
+
+                    Map<String, ServiceRendererDto> renderInfo = new HashMap<>();
+                    renderInfo.put(serviceRendererDto.getKeyColumn(), serviceRendererDto);
+                    entityResultDataSource.setRendererInfo(renderInfo);
+                }
+            }
+        }
+    }
+
+    protected ServiceRendererDto retrieveServiceRenderForColumn(final ColumnDto column) {
+        if (column != null && column.getColumnStyle() != null) {
+            if (column.getColumnStyle().getRenderer() instanceof ServiceRendererDto) {
+                return (ServiceRendererDto) column.getColumnStyle().getRenderer();
+            }
+        }
+        return null;
+    }
 
 }

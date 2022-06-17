@@ -21,6 +21,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 //        @JsonSubTypes.Type(value = ServiceRendererDto.class, name = "time")
 })
 public interface Renderer {
-    
+
     String getType();
 }

@@ -1,7 +1,7 @@
 package com.ontimize.jee.report.common.dto.renderer;
 
-public class IntegerRendererDto extends RendererDto{
-    
+public class IntegerRendererDto extends RendererDto {
+
     private boolean grouping;
     private String thousandSeparator;
 

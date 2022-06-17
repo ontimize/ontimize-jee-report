@@ -4,15 +4,13 @@ import com.ontimize.jee.report.common.dto.renderer.CurrencyRendererDto;
 import com.ontimize.jee.report.common.dto.renderer.DateRendererDto;
 import com.ontimize.jee.report.common.dto.renderer.IntegerRendererDto;
 import com.ontimize.jee.report.common.dto.renderer.RealRendererDto;
-import com.ontimize.jee.report.common.dto.renderer.RendererDto;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
@@ -26,11 +24,11 @@ public class ColumnPatternHelperTest {
         IntegerRendererDto renderer = new IntegerRendererDto();
         renderer.setGrouping(false);
         String pattern = ColumnPatternHelper.getPatternForClass(Integer.class, renderer);
-        
+
         Assertions.assertNotNull(pattern);
 
         DecimalFormat format = new DecimalFormat(pattern);
-        Assertions.assertEquals("2000",  format.format(2000));
+        Assertions.assertEquals("2000", format.format(2000));
     }
 
     @Test
@@ -71,7 +69,7 @@ public class ColumnPatternHelperTest {
         Assertions.assertNotNull(pattern);
 
         DecimalFormat format = new DecimalFormat(pattern, new DecimalFormatSymbols(Locale.ENGLISH));
-        Assertions.assertEquals("2,000.00",  format.format(2000));
+        Assertions.assertEquals("2,000.00", format.format(2000));
 
 
         Locale customLocale = new Locale("es", "ES");
@@ -153,7 +151,7 @@ public class ColumnPatternHelperTest {
     public void testDefaultDatePattern() {
         DateRendererDto renderer = new DateRendererDto();
         //2022/06/28 13:24:56
-        Calendar calendar = new GregorianCalendar(2022,5,28,13,24,56);
+        Calendar calendar = new GregorianCalendar(2022, 5, 28, 13, 24, 56);
         Date targetDate = calendar.getTime();
         Locale es_locale = new Locale("es", "ES");
 
@@ -162,12 +160,12 @@ public class ColumnPatternHelperTest {
         format = getDateFormat(Date.class, renderer, es_locale);
         Assertions.assertEquals("28 jun. 2022", format.format(targetDate));
     }
-    
+
     @Test
     public void testDatePatternUsingMomentJSFormat() {
         DateRendererDto renderer = new DateRendererDto();
         //2022/06/28 13:24:56
-        Calendar calendar = new GregorianCalendar(2022,5,28,13,24,56);
+        Calendar calendar = new GregorianCalendar(2022, 5, 28, 13, 24, 56);
         Date targetDate = calendar.getTime();
         Locale es_locale = new Locale("es", "ES");
 
@@ -206,7 +204,7 @@ public class ColumnPatternHelperTest {
         Assertions.assertEquals("6/28/2022", format.format(targetDate));
         format = getDateFormat(Date.class, renderer, es_locale);
         Assertions.assertEquals("28/6/2022", format.format(targetDate));
-        
+
         // Case 'll'
         renderer.setFormat("ll");
         format = getDateFormat(Date.class, renderer, Locale.ENGLISH);
@@ -228,18 +226,18 @@ public class ColumnPatternHelperTest {
         format = getDateFormat(Date.class, renderer, es_locale);
         Assertions.assertEquals("mar., 28 de jun. de 2022 13:24", format.format(targetDate));
     }
-    
+
     private DateFormat getDateFormat(Class<?> dateClass, DateRendererDto renderer, Locale locale) {
         String pattern = ColumnPatternHelper.getPatternForClass(dateClass, renderer, locale);
         Assertions.assertNotNull(pattern);
-        return new SimpleDateFormat(pattern,locale);
+        return new SimpleDateFormat(pattern, locale);
     }
 
     @Test
     public void testDefaultDateTimePattern() {
         DateRendererDto renderer = new DateRendererDto();
         //2022/06/28 13:24:56
-        Calendar calendar = new GregorianCalendar(2022,5,28,13,24,56);
+        Calendar calendar = new GregorianCalendar(2022, 5, 28, 13, 24, 56);
         Date targetDate = calendar.getTime();
         Locale es_locale = new Locale("es", "ES");
 

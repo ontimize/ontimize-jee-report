@@ -1,7 +1,7 @@
 package com.ontimize.jee.report.common.dto.renderer;
 
-public class RendererDto implements Renderer{
-    
+public class RendererDto implements Renderer {
+
     private String type;
 
     @Override

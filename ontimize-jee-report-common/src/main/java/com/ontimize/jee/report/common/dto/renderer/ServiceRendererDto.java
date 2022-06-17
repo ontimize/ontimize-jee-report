@@ -3,14 +3,14 @@ package com.ontimize.jee.report.common.dto.renderer;
 import java.util.List;
 
 public class ServiceRendererDto extends RendererDto {
-    
+
     private String service;
     private String entity;
     private String keyColumn;
     private String valueColumn;
     private List<String> columns;
     private List<String> parentKeys;
-    
+
 
     public String getService() {
         return service;

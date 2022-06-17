@@ -171,7 +171,7 @@ public class DynamicReportBuilderHelper {
     }
 
     public Style getStyleGrid(StyleParamsDto styleArgs, Style style) {
-        if(style == null) {
+        if (style == null) {
             return style;
         }
         if (styleArgs != null && styleArgs.isGrid()) {

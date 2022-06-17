@@ -4,32 +4,32 @@ import com.ontimize.jee.report.common.dto.renderer.RendererDto;
 
 public class ColumnStyleParamsDto {
 
-	Integer width;
-	String alignment;
-	
-	RendererDto renderer;
+    Integer width;
+    String alignment;
 
-	public Integer getWidth() {
-		return width;
-	}
+    RendererDto renderer;
 
-	public void setWidth(Integer width) {
-		this.width = width;
-	}
+    public Integer getWidth() {
+        return width;
+    }
 
-	public String getAlignment() {
-		return alignment;
-	}
+    public void setWidth(Integer width) {
+        this.width = width;
+    }
 
-	public void setAlignment(String alignment) {
-		this.alignment = alignment;
-	}
+    public String getAlignment() {
+        return alignment;
+    }
 
-	public RendererDto getRenderer() {
-		return renderer;
-	}
+    public void setAlignment(String alignment) {
+        this.alignment = alignment;
+    }
 
-	public void setRenderer(RendererDto renderer) {
-		this.renderer = renderer;
-	}
+    public RendererDto getRenderer() {
+        return renderer;
+    }
+
+    public void setRenderer(RendererDto renderer) {
+        this.renderer = renderer;
+    }
 }

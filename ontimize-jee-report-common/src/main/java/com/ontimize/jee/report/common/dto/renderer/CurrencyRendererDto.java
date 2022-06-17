@@ -1,7 +1,7 @@
 package com.ontimize.jee.report.common.dto.renderer;
 
 public class CurrencyRendererDto extends RealRendererDto {
-    
+
     private String currencySymbol;
     private String currencySymbolPosition;
 

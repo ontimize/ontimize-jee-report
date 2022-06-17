@@ -1,12 +1,12 @@
 package com.ontimize.jee.report.server.services.util;
 
 public class ColumnMetadata {
-    
+
     private String id;
     private int type;
     private String className;
-    
-    public ColumnMetadata(){
+
+    public ColumnMetadata() {
         //no-op
     }
 

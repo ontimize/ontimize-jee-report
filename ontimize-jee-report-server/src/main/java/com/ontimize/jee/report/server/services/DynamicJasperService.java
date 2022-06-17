@@ -1,37 +1,5 @@
 package com.ontimize.jee.report.server.services;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-
-import com.ontimize.jee.common.db.SQLStatementBuilder;
-import com.ontimize.jee.common.dto.EntityResult;
-import com.ontimize.jee.common.tools.ReflectionTools;
-import com.ontimize.jee.report.common.dto.ColumnDto;
-import com.ontimize.jee.report.common.dto.ColumnStyleParamsDto;
-import com.ontimize.jee.report.common.dto.FunctionParamsDto;
-import com.ontimize.jee.report.common.dto.OrderByDto;
-import com.ontimize.jee.report.common.dto.ReportParamsDto;
-import com.ontimize.jee.report.common.dto.ServiceRendererDto;
-import com.ontimize.jee.report.common.dto.StyleParamsDto;
-import com.ontimize.jee.report.common.exception.DynamicReportException;
-import com.ontimize.jee.report.common.services.IDynamicJasperService;
-import com.ontimize.jee.report.common.util.EntityResultDataSource;
-import com.ontimize.jee.report.common.util.TypeMappingsUtils;
-import com.ontimize.jee.report.server.naming.DynamicJasperNaming;
-import com.ontimize.jee.report.server.services.util.DynamicJasperHelper;
-import com.ontimize.jee.report.server.services.util.DynamicReportBuilderHelper;
-
 import ar.com.fdvs.dj.domain.DJCalculation;
 import ar.com.fdvs.dj.domain.DJValueFormatter;
 import ar.com.fdvs.dj.domain.DynamicReport;
@@ -46,7 +14,37 @@ import ar.com.fdvs.dj.domain.entities.DJGroup;
 import ar.com.fdvs.dj.domain.entities.DJGroupVariable;
 import ar.com.fdvs.dj.domain.entities.columns.AbstractColumn;
 import ar.com.fdvs.dj.domain.entities.columns.PropertyColumn;
+import com.ontimize.jee.common.db.SQLStatementBuilder;
+import com.ontimize.jee.common.dto.EntityResult;
+import com.ontimize.jee.common.tools.ReflectionTools;
+import com.ontimize.jee.report.common.dto.ColumnDto;
+import com.ontimize.jee.report.common.dto.ColumnStyleParamsDto;
+import com.ontimize.jee.report.common.dto.FunctionParamsDto;
+import com.ontimize.jee.report.common.dto.OrderByDto;
+import com.ontimize.jee.report.common.dto.ReportParamsDto;
+import com.ontimize.jee.report.common.dto.StyleParamsDto;
+import com.ontimize.jee.report.common.exception.DynamicReportException;
+import com.ontimize.jee.report.common.services.IDynamicJasperService;
+import com.ontimize.jee.report.common.util.EntityResultDataSource;
+import com.ontimize.jee.report.common.util.TypeMappingsUtils;
+import com.ontimize.jee.report.server.naming.DynamicJasperNaming;
+import com.ontimize.jee.report.server.services.util.ColumnMetadata;
+import com.ontimize.jee.report.server.services.util.DynamicJasperHelper;
+import com.ontimize.jee.report.server.services.util.DynamicReportBuilderHelper;
 import net.sf.jasperreports.engine.JRDataSource;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 @Service("DynamicJasperService")
 @Lazy(value = true)
@@ -73,9 +71,9 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
             throw new DynamicReportException("Report cannot be created, 'columns' parameter not found!");
         }
 
-        return this.generateReport(param.getColumns(), param.getTitle(), param.getGroups(), param.getEntity(),
-                param.getService(), param.getVertical(), param.getFunctions(), param.getStyle(), param.getSubtitle(),
-                param.getOrderBy(), param.getLanguage(), param.getServiceRenderer());
+        return this.generateReport(param.getColumns(), param.getTitle(), param.getGroups(), param.getEntity(), param.getService(),
+                param.getVertical(), param.getFunctions(), param.getStyle(), param.getSubtitle(),
+                param.getOrderBy(), param.getLanguage());
 
     }
 
@@ -108,13 +106,16 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
     public DynamicReport buildReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
                                      String service, Boolean vertical, List<String> functions, StyleParamsDto styles, String subtitle,
-                                     String language, List<ServiceRendererDto> serviceRendererList) throws DynamicReportException {
+                                     String language)
+            throws DynamicReportException {
 
         int numberGroups = 0;
         boolean functionColumn = false;
+        ResourceBundle bundle = getBundle(language);
         DynamicReportBuilder drb = new DynamicReportBuilder();
+        drb.setReportLocale(bundle.getLocale());
         DynamicReportBuilderHelper builderHelper = this.getDynamicReportBuilderHelper();
-        ResourceBundle bundle = getBundle(language, drb);
+
         // title
         builderHelper.configureTitle(drb, title);
         // subtitle
@@ -122,8 +123,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
         // generic styles
         builderHelper.configureGenericStyles(drb, vertical, styles, columns.size(), bundle);
 
-        Map<String, String> columnClassnames = this.getDynamicJasperHelper().getColumnClassnames(service, entity,
-                columns, serviceRendererList);
+        Map<String, ColumnMetadata> columnMetadataMap = this.getDynamicJasperHelper().getColumnMetadata(service, entity, columns);
 
         boolean firstColumn = true;
         for (ColumnDto columnDto : columns) {
@@ -137,9 +137,9 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
             String id = columnDto.getId();
             String name = columnDto.getName();
-            String className = columnClassnames.get(id);
+            String className = columnMetadataMap.get(id).getClassName();
 
-            if (columnStyleParamsDto != null) {
+            if (columnStyleParamsDto != null && columnStyleParamsDto.getAlignment() != null) {
                 switch (columnStyleParamsDto.getAlignment()) {
                     case "center":
                         columnDataStyle.setHorizontalAlign(HorizontalAlign.CENTER);
@@ -163,16 +163,20 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
                     .build();
 
             column.setName(id);
-            if (columnStyleParamsDto != null && columnStyleParamsDto.getWidth() >= 0) {
+            String columnPattern = this.getDynamicJasperHelper().getColumnPattern(columnMetadataMap.get(id), columnStyleParamsDto, bundle.getLocale());
+            if (columnPattern != null) {
+                column.setPattern(columnPattern);
+            }
+            if (columnStyleParamsDto != null && columnStyleParamsDto.getWidth() != null && columnStyleParamsDto.getWidth() > 0) {
                 column.setWidth(columnStyleParamsDto.getWidth());
             }
-            drb.setPrintColumnNames(styles.isColumnName());
+            drb.setPrintColumnNames(styles != null && styles.isColumnName());
             column.setFixedWidth(false);
 
             column.setStyle(columnDataStyle);
             // The column of numbers is hidden if it is not wanted but it must always be
             // created to make the total if it is needed
-            if (!styles.isRowNumber()) {
+            if (styles != null && !styles.isRowNumber()) {
                 DJGroup g1 = new GroupBuilder().setCriteriaColumn((PropertyColumn) drb.getColumn(0))
                         .setGroupLayout(GroupLayout.EMPTY).build();
 
@@ -226,8 +230,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
     @Override
     public JRDataSource getDataSource(List<ColumnDto> columns, List<String> groups, List<OrderByDto> orderBy,
-                                      String entity, String service, final List<ServiceRendererDto> serviceRendererList)
-            throws SecurityException {
+                                      String entity, String service) throws SecurityException {
 
         Map<String, Object> map = new HashMap<>();
         List<String> columns1 = this.getDynamicJasperHelper().getColumnsFromDto(columns);
@@ -269,16 +272,15 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
                 entity.toLowerCase().concat("PaginationQuery"), map, columns1, pageSize, offset, sqlOrders);
 
         EntityResultDataSource entityResultDataSource = new EntityResultDataSource(erReportData);
-        if (serviceRendererList != null && !serviceRendererList.isEmpty()) {
-            dynamicJasperHelper.evaluateServiceRenderer(entityResultDataSource, serviceRendererList);
-        }
+        dynamicJasperHelper.evaluateServiceRenderer(entityResultDataSource, columns);
 
         return entityResultDataSource;
 
     }
 
-    protected ResourceBundle getBundle(final String language, final DynamicReportBuilder drb) {
-        if (this.bundle == null) {
+    protected ResourceBundle getBundle(final String language) {
+        if (this.bundle == null ||
+                (!this.bundle.getLocale().getLanguage().equals(language))) {
             Locale locale = null;
             String lang0 = "en";
             if (!StringUtils.isEmpty(language)) {
@@ -295,7 +297,6 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
                     locale = new Locale("en", "US");
                     break;
             }
-            drb.setReportLocale(locale);
             bundle = ResourceBundle.getBundle("bundle/bundle", locale);
         }
         return this.bundle;

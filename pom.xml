@@ -95,6 +95,7 @@
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 		<spring.version>5.1.3.RELEASE</spring.version>
+		<junit-jupiter.version>5.7.2</junit-jupiter.version>
 		<!-- =========================================================== -->
 		<!-- Plugin versions -->
 		<!-- =========================================================== -->
@@ -160,6 +161,12 @@
 				<groupId>com.mpobjects.jasperreports.font</groupId>
 				<artifactId>jasperreports-fonts-liberation</artifactId>
 				<version>${fonts-liberation.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-engine</artifactId>
+				<version>${junit-jupiter.version}</version>
+				<scope>test</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

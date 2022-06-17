@@ -4,7 +4,7 @@ import com.ontimize.jee.common.dto.EntityResult;
 
 public class EntityResultDataSource extends AbstractEntityResultDataSource<EntityResult> {
 
-	public EntityResultDataSource(EntityResult result) {
+    public EntityResultDataSource(EntityResult result) {
         super(result);
     }
 

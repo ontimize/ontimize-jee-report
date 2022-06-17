@@ -4,13 +4,13 @@ import com.ontimize.jee.report.server.reportstore.ReportStoreConfiguration;
 
 public class OntimizeReportConfiguration {
 
-	private ReportStoreConfiguration reportStoreConfiguration;
+    private ReportStoreConfiguration reportStoreConfiguration;
 
-	public ReportStoreConfiguration getReportStoreConfiguration() {
-		return this.reportStoreConfiguration;
-	}
+    public ReportStoreConfiguration getReportStoreConfiguration() {
+        return this.reportStoreConfiguration;
+    }
 
-	public void setReportStoreConfiguration(ReportStoreConfiguration reportStoreConfiguration) {
-		this.reportStoreConfiguration = reportStoreConfiguration;
-	}
+    public void setReportStoreConfiguration(ReportStoreConfiguration reportStoreConfiguration) {
+        this.reportStoreConfiguration = reportStoreConfiguration;
+    }
 }

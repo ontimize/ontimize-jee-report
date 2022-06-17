@@ -7,7 +7,7 @@ import net.sf.jasperreports.engine.JRPropertyExpression;
 
 public class OntimizeField implements JRField {
 
-	public static final String NAME_KEY = "NAME",
+    public static final String NAME_KEY = "NAME",
             DESCRIPTION_KEY = "DESCRIPTION",
             VALUE_CLASS_KEY = "VALUE_CLASS",
             VALUE_CLASS_NAME_KEY = "VALUE_CLASS_KEY",
@@ -28,14 +28,14 @@ public class OntimizeField implements JRField {
     protected String description;
 
     @SuppressWarnings("rawtypes")
-	protected Class valueClass;
+    protected Class valueClass;
 
     protected String valueClassName;
 
     protected JRPropertiesMap propertiesMap;
 
     @SuppressWarnings("rawtypes")
-	public OntimizeField(java.util.Map m) throws IllegalArgumentException {
+    public OntimizeField(java.util.Map m) throws IllegalArgumentException {
         Object o = m.get(NAME_KEY);
         if (o == null || o instanceof String == false) {
             throw new IllegalArgumentException(MSG_NAME_NULL);
@@ -79,8 +79,8 @@ public class OntimizeField implements JRField {
         return name;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-	public Class getValueClass() {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public Class getValueClass() {
         return valueClass;
     }
 
@@ -118,10 +118,10 @@ public class OntimizeField implements JRField {
         return this;
     }
 
-	@Override
-	public JRPropertyExpression[] getPropertyExpressions() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public JRPropertyExpression[] getPropertyExpressions() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

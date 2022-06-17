@@ -4,8 +4,7 @@ import com.ontimize.jee.server.dao.IOntimizeDaoSupport;
 
 /**
  * Interface for autowired purpose
- *
  */
-public interface IReportParameterDao extends IOntimizeDaoSupport{
+public interface IReportParameterDao extends IOntimizeDaoSupport {
 
 }

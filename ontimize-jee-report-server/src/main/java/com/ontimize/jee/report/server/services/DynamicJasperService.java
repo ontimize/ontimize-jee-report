@@ -121,6 +121,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
         Map<String, ColumnMetadata> columnMetadataMap = this.getDynamicJasperHelper().getColumnMetadata(service, entity, columns);
 
         boolean firstColumn = true;
+        boolean totalFunction = false;
         for (ColumnDto columnDto : columns) {
 
             AbstractColumn column;
@@ -180,29 +181,32 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
             }
             if (functions != null && !functions.isEmpty()) {
                 Style footerStyle = builderHelper.getFooterStyle();
-                if (firstColumn && (functions.contains(bundle.getString("total_text"))
-                        || functions.contains(bundle.getString("total")))) {
-                    DJValueFormatter valueFormatter = builderHelper.getFunctionValueFormatter(DynamicJasperNaming.TOTAL,
-                            bundle);
-                    // The column of row numbers is used to perform a correct calculation of the
-                    // total number of rows
-                    drb.addGlobalFooterVariable(drb.getColumn(0), DJCalculation.COUNT, footerStyle, valueFormatter)
-                            .setGrandTotalLegend("");
-
-                } else if (firstColumn) {
-                    drb.addGlobalFooterVariable(
-                            new DJGroupVariable(drb.getColumn(0), DJCalculation.SYSTEM, footerStyle));
-                }
 
                 // Configure aggregate functions...
                 for (FunctionTypeDto function : functions) {
                     if (function.getColumnName().equals(id)) {
                         builderHelper.configureReportFunction(drb, column, function, bundle);
                         functionColumn = true;
+                    } else if (function.getType().name().equals(bundle.getString("total"))) {
+                        totalFunction = true;
+                    }
+                }
+                if (firstColumn) {
+                    if (totalFunction) {
+                        DJValueFormatter valueFormatter = builderHelper.getFunctionValueFormatter(DynamicJasperNaming.TOTAL,
+                                bundle);
+                        // The column of row numbers is used to perform a correct calculation of the
+                        // total number of rows
+                        drb.addGlobalFooterVariable(drb.getColumn(0), DJCalculation.COUNT, footerStyle, valueFormatter)
+                                .setGrandTotalLegend("");
+                    } else {
+                        drb.addGlobalFooterVariable(
+                                new DJGroupVariable(drb.getColumn(0), DJCalculation.SYSTEM, footerStyle)).setGrandTotalLegend("");
+
                     }
                 }
                 if (!functionColumn) {
-                    drb.addGlobalFooterVariable(new DJGroupVariable(column, DJCalculation.SYSTEM, footerStyle));
+                    drb.addGlobalFooterVariable(new DJGroupVariable(column, DJCalculation.SYSTEM, footerStyle)).setGrandTotalLegend("");
 
                 }
 

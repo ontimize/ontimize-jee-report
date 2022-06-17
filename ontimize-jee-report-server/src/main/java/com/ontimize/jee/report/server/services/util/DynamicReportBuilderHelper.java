@@ -218,19 +218,19 @@ public class DynamicReportBuilderHelper {
     public void configureReportFunction(final DynamicReportBuilder dynamicReportBuilder, final AbstractColumn column,
                                         final FunctionTypeDto function, final ResourceBundle bundle) {
         Style footerStyle = getFooterStyle();
-        if (function.getType().equals(bundle.getString("sum"))) {
+        if (function.getType().name().equals(bundle.getString("sum"))) {
             DJValueFormatter valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.SUM, bundle);
             dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.SUM, footerStyle, valueFormatter)
                     .setGrandTotalLegend("");
-        } else if (function.getType().equals(bundle.getString("average"))) {
+        } else if (function.getType().name().equals(bundle.getString("average"))) {
             DJValueFormatter valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.AVERAGE, bundle);
             dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.AVERAGE, footerStyle, valueFormatter)
                     .setGrandTotalLegend("");
-        } else if (function.getType().equals(bundle.getString("max"))) {
+        } else if (function.getType().name().equals(bundle.getString("max"))) {
             DJValueFormatter valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.MAX, bundle);
             dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.HIGHEST, footerStyle, valueFormatter)
                     .setGrandTotalLegend("");
-        } else if (function.getType().equals(bundle.getString("min"))) {
+        } else if (function.getType().name().equals(bundle.getString("min"))) {
             DJValueFormatter valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.MIN, bundle);
             dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.LOWEST, footerStyle, valueFormatter)
                     .setGrandTotalLegend("");

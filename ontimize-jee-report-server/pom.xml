@@ -93,6 +93,10 @@
 		</dependency>
 		<dependency>
 			<groupId>com.ontimize.jee</groupId>
+			<artifactId>ontimize-jee-server-rest</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.ontimize.jee</groupId>
 			<artifactId>ontimize-jee-server</artifactId>
 		</dependency>
 		<dependency>

@@ -16,5 +16,5 @@ public interface IDynamicJasperService {
 
     public InputStream createReport(ReportParamsDto param) throws DynamicReportException;
 
-    public List<String> getFunctionsName(FunctionParamsDto params) throws DynamicReportException;
+    public List<FunctionTypeDto> getFunctionsName(FunctionParamsDto params) throws DynamicReportException;
 }

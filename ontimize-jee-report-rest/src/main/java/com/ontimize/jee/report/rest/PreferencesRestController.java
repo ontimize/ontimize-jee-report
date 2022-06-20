@@ -110,7 +110,7 @@ public class PreferencesRestController {
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-                String serializedParams = mapper.writeValueAsString(param);
+                String serializedParams = mapper.writeValueAsString(param.getReportParams());
 
                 Map<String, Object> attrMap = new HashMap<>();
                 attrMap.put("NAME", param.getName());

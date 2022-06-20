@@ -18,6 +18,7 @@ import com.ontimize.jee.common.db.SQLStatementBuilder;
 import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.common.tools.ReflectionTools;
 import com.ontimize.jee.report.common.dto.*;
+import com.ontimize.jee.report.common.dto.FunctionTypeDto.Type;
 import com.ontimize.jee.report.common.exception.DynamicReportException;
 import com.ontimize.jee.report.common.services.IDynamicJasperService;
 import com.ontimize.jee.report.common.util.EntityResultDataSource;
@@ -66,21 +67,21 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
             throw new DynamicReportException("Report cannot be created, 'columns' parameter not found!");
         }
 
-        return this.generateReport(param.getColumns(), param.getTitle(), param.getGroups(), param.getEntity(), param.getService(),
-                param.getVertical(), param.getFunctions(), param.getStyle(), param.getSubtitle(),
+        return this.generateReport(param.getColumns(), param.getTitle(), param.getGroups(), param.getEntity(),
+                param.getService(), param.getVertical(), param.getFunctions(), param.getStyle(), param.getSubtitle(),
                 param.getOrderBy(), param.getLanguage());
 
     }
 
     @Override
-    public List<String> getFunctionsName(final FunctionParamsDto params) throws DynamicReportException {
+    public List<FunctionTypeDto> getFunctionsName(final FunctionParamsDto params) throws DynamicReportException {
         try {
 
             String entity = params.getEntity();
             String service = params.getService();
             List<String> columns = params.getColumns();
 
-            List<String> functions = new ArrayList<>();
+            List<FunctionTypeDto> functions = new ArrayList<>();
             Map<String, Object> map = new HashMap<>();
             Object bean = this.applicationContext.getBean(service.concat("Service"));
             EntityResult e = (EntityResult) ReflectionTools.invoke(bean, entity.toLowerCase().concat("Query"), map,
@@ -90,9 +91,10 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
                 String className = TypeMappingsUtils.getClassName(type);
                 if (TypeMappingsUtils.INTEGER_PATH.equals(className)
                         || TypeMappingsUtils.DOUBLE_PATH.equals(className)) {
-                    functions.add(column);
+                    functions.add(new FunctionTypeDto(column, Type.SUM));
                 }
             }
+            functions.add(new FunctionTypeDto("TOTAL", Type.TOTAL));
             return functions;
         } catch (Exception ex) {
             throw new DynamicReportException("Impossible to retrieve function names", ex);
@@ -101,8 +103,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
     public DynamicReport buildReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
                                      String service, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto styles, String subtitle,
-                                     String language)
-            throws DynamicReportException {
+                                     String language) throws DynamicReportException {
 
         int numberGroups = 0;
         boolean functionColumn = false;
@@ -118,7 +119,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
         // generic styles
         builderHelper.configureGenericStyles(drb, vertical, styles, columns.size(), bundle);
 
-        Map<String, ColumnMetadata> columnMetadataMap = this.getDynamicJasperHelper().getColumnMetadata(service, entity, columns);
+        Map<String, ColumnMetadata> columnMetadataMap = this.getDynamicJasperHelper().getColumnMetadata(service, entity,
+                columns);
 
         boolean firstColumn = true;
         boolean totalFunction = false;
@@ -159,11 +161,13 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
                     .build();
 
             column.setName(id);
-            String columnPattern = this.getDynamicJasperHelper().getColumnPattern(columnMetadataMap.get(id), columnStyleParamsDto, bundle.getLocale());
+            String columnPattern = this.getDynamicJasperHelper().getColumnPattern(columnMetadataMap.get(id),
+                    columnStyleParamsDto, bundle.getLocale());
             if (columnPattern != null) {
                 column.setPattern(columnPattern);
             }
-            if (columnStyleParamsDto != null && columnStyleParamsDto.getWidth() != null && columnStyleParamsDto.getWidth() > 0) {
+            if (columnStyleParamsDto != null && columnStyleParamsDto.getWidth() != null
+                    && columnStyleParamsDto.getWidth() > 0) {
                 column.setWidth(columnStyleParamsDto.getWidth());
             }
             drb.setPrintColumnNames(styles != null && styles.isColumnName());
@@ -193,20 +197,22 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
                 }
                 if (firstColumn) {
                     if (totalFunction) {
-                        DJValueFormatter valueFormatter = builderHelper.getFunctionValueFormatter(DynamicJasperNaming.TOTAL,
-                                bundle);
+                        DJValueFormatter valueFormatter = builderHelper
+                                .getFunctionValueFormatter(DynamicJasperNaming.TOTAL, bundle);
                         // The column of row numbers is used to perform a correct calculation of the
                         // total number of rows
                         drb.addGlobalFooterVariable(drb.getColumn(0), DJCalculation.COUNT, footerStyle, valueFormatter)
                                 .setGrandTotalLegend("");
                     } else {
                         drb.addGlobalFooterVariable(
-                                new DJGroupVariable(drb.getColumn(0), DJCalculation.SYSTEM, footerStyle)).setGrandTotalLegend("");
+                                        new DJGroupVariable(drb.getColumn(0), DJCalculation.SYSTEM, footerStyle))
+                                .setGrandTotalLegend("");
 
                     }
                 }
                 if (!functionColumn) {
-                    drb.addGlobalFooterVariable(new DJGroupVariable(column, DJCalculation.SYSTEM, footerStyle)).setGrandTotalLegend("");
+                    drb.addGlobalFooterVariable(new DJGroupVariable(column, DJCalculation.SYSTEM, footerStyle))
+                            .setGrandTotalLegend("");
 
                 }
 
@@ -279,8 +285,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
     }
 
     protected ResourceBundle getBundle(final String language) {
-        if (this.bundle == null ||
-                (!this.bundle.getLocale().getLanguage().equals(language))) {
+        if (this.bundle == null || (!this.bundle.getLocale().getLanguage().equals(language))) {
             Locale locale = null;
             String lang0 = "en";
             if (!StringUtils.isEmpty(language)) {

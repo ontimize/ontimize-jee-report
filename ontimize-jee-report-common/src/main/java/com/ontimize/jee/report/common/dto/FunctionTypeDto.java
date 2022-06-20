@@ -28,4 +28,9 @@ public class FunctionTypeDto {
 
     }
 
+    public FunctionTypeDto(String columnName, Type type) {
+        this.columnName = columnName;
+        this.type = type;
+    }
+
 }

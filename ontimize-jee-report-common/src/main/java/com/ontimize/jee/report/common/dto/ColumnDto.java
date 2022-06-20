@@ -1,36 +1,36 @@
 package com.ontimize.jee.report.common.dto;
 
 public class ColumnDto {
-	String id;
-	String name;
-	ColumnStyleParamsDto columnStyle;
+    String id;
+    String name;
+    ColumnStyleParamsDto columnStyle;
 
-	public ColumnDto() {
+    public ColumnDto() {
 
-	}
+    }
 
-	public String getId() {
-		return id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public ColumnStyleParamsDto getColumnStyle() {
-		return columnStyle;
-	}
+    public ColumnStyleParamsDto getColumnStyle() {
+        return columnStyle;
+    }
 
-	public void setColumnStyle(ColumnStyleParamsDto columnStyle) {
-		this.columnStyle = columnStyle;
-	}
+    public void setColumnStyle(ColumnStyleParamsDto columnStyle) {
+        this.columnStyle = columnStyle;
+    }
 
 }

@@ -10,14 +10,14 @@ import java.util.Set;
 
 public class TypeMappingsUtils {
 
-	public static final String STRING = "String",
+    public static final String STRING = "String",
             BOOLEAN = "Boolean",
             BINARY = "Binary",
             DOUBLE = "Double",
             DATE = "Date",
             INTEGER = "Integer",
 
-            STRING_PATH = "java.lang.String",
+    STRING_PATH = "java.lang.String",
             BOOLEAN_PATH = "java.lang.Boolean",
             OBJECT_PATH = "java.lang.Object",
             DOUBLE_PATH = "java.lang.Double",
@@ -25,7 +25,7 @@ public class TypeMappingsUtils {
             INTEGER_PATH = "java.lang.Integer";
 
     @SuppressWarnings("rawtypes")
-	public static Class getClass(int type) {
+    public static Class getClass(int type) {
         switch (type) {
             case Types.VARCHAR:
             case Types.LONGVARCHAR:
@@ -66,7 +66,7 @@ public class TypeMappingsUtils {
     }
 
     @SuppressWarnings("rawtypes")
-	public static Class getClass(String type) {
+    public static Class getClass(String type) {
         return getClass(getSQLType(type));
     }
 
@@ -133,12 +133,12 @@ public class TypeMappingsUtils {
         // Returns java.sql.Types.OTHER
         return returned;
     }
-    
+
     /**
      * Transforms current Map with SQL types as strings in a new Map with SQL types as integers.
      */
-    @SuppressWarnings({ "rawtypes", "deprecation", "unchecked" })
-	public static Map convertStrSQLMap2IntSQLMap(Map m) {
+    @SuppressWarnings({"rawtypes", "deprecation", "unchecked"})
+    public static Map convertStrSQLMap2IntSQLMap(Map m) {
         HashMap newMap = new HashMap(m.size());
 
         Set k = m.keySet();

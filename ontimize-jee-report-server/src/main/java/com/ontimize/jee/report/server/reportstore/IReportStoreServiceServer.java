@@ -7,9 +7,9 @@ import com.ontimize.jee.report.common.services.IReportStoreService;
  */
 public interface IReportStoreServiceServer extends IReportStoreService {
 
-	/**
-	 * Update settings.
-	 */
-	void updateSettings();
+    /**
+     * Update settings.
+     */
+    void updateSettings();
 
 }

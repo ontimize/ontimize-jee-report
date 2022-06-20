@@ -1,111 +1,54 @@
 package com.ontimize.jee.report.common.dto;
 
-import java.util.List;
-import java.util.Objects;
-
 public class PreferencesParamsDto {
 
-	private String name;
-	private String description;
-	public boolean vertical;
-	private String title;
-	private String subtitle;
-	private List<String> groups;
-	private List<String> functions;
-	private List<String> style;
-	private List<ColumnDto> columns;
-	private List<OrderByDto> orderBy;
-	private String entity;
+    private String name;
+    private String description;
+    private String entity;
+    private String service;
+    private ReportParamsDto reportParams;
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public boolean isVertical() {
-		return vertical;
-	}
+    public String getEntity() {
+        return entity;
+    }
 
-	public void setVertical(boolean vertical) {
-		this.vertical = vertical;
-	}
+    public void setEntity(String entity) {
+        this.entity = entity;
+    }
 
-	public String getTitle() {
-		return title;
-	}
+    public String getService() {
+        return service;
+    }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    public void setService(String service) {
+        this.service = service;
+    }
 
-	public String getSubtitle() {
-		return subtitle;
-	}
+    public ReportParamsDto getReportParams() {
+        return reportParams;
+    }
 
-	public void setSubtitle(String subtitle) {
-		this.subtitle = subtitle;
-	}
+    public void setReportParams(ReportParamsDto reportParams) {
+        this.reportParams = reportParams;
+    }
 
-	public List<String> getGroups() {
-		return groups;
-	}
-
-	public void setGroups(List<String> groups) {
-		this.groups = groups;
-	}
-
-	public List<String> getFunctions() {
-		return functions;
-	}
-
-	public void setFunctions(List<String> functions) {
-		this.functions = functions;
-	}
-
-	public String getEntity() {
-		return entity;
-	}
-
-	public void setEntity(String entity) {
-		this.entity = entity;
-	}
-
-	public List<String> getStyle() {
-		return style;
-	}
-
-	public void setStyle(List<String> style) {
-		this.style = style;
-	}
-
-	public List<ColumnDto> getColumns() {
-		return columns;
-	}
-
-	public void setColumns(List<ColumnDto> columns) {
-		this.columns = columns;
-	}
-
-	public List<OrderByDto> getOrderBy() {
-		return orderBy;
-	}
-
-	public void setOrderBy(List<OrderByDto> orderBy) {
-		this.orderBy = orderBy;
-	}
-
-	public PreferencesParamsDto() {
-	}
+    public PreferencesParamsDto() {
+    }
 
 }

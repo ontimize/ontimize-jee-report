@@ -1,7 +1,7 @@
 package com.ontimize.jee.report.common.util;
 
 import com.ontimize.jee.common.dto.EntityResult;
-import com.ontimize.jee.report.common.dto.ServiceRendererDto;
+import com.ontimize.jee.report.common.dto.renderer.ServiceRendererDto;
 import com.ontimize.jee.report.common.reportstore.OntimizeField;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
@@ -18,13 +18,13 @@ import java.util.Map;
 
 public abstract class AbstractEntityResultDataSource<T extends EntityResult> implements JRDataSource {
 
-	protected T result;
+    protected T result;
     protected Map<String, T> rendererData;
     protected Map<String, ServiceRendererDto> rendererInfo;
     protected int index = -1;
     protected final int size;
 
-	public AbstractEntityResultDataSource(T result) {
+    public AbstractEntityResultDataSource(T result) {
         this.result = result;
 
         this.size = result.calculateRecordNumber();
@@ -39,19 +39,19 @@ public abstract class AbstractEntityResultDataSource<T extends EntityResult> imp
         this.rendererInfo = rendererInfo;
     }
 
-	@Override
+    @Override
     public Object getFieldValue(JRField field) throws JRException {
-        if(this.result == null) {
+        if (this.result == null) {
             return null;
         }
         String fieldName = field.getName();
         Class<?> fieldClass = field.getValueClass();
-        
+
         Object value = null;
         int auxIdx = calculateIndex();
         if ((auxIdx >= 0) && (auxIdx < this.size)) {
-            Map<?,?> recordValues = getEntityResult().getRecordValues(this.index);
-            if(recordValues == null){
+            Map<?, ?> recordValues = getEntityResult().getRecordValues(this.index);
+            if (recordValues == null) {
                 return null;
             }
             value = recordValues.get(fieldName);
@@ -59,12 +59,12 @@ public abstract class AbstractEntityResultDataSource<T extends EntityResult> imp
 
         if (Image.class.equals(fieldClass)) {
             return getImageValue(value);
-        } else if(rendererData != null && rendererData.containsKey(fieldName)){
-           return getServiceRendererValue(fieldName, value);
+        } else if (rendererData != null && rendererData.containsKey(fieldName)) {
+            return getServiceRendererValue(fieldName, value);
         }
         return value;
     }
-    
+
     public abstract int calculateIndex();
 
     @Override
@@ -77,16 +77,16 @@ public abstract class AbstractEntityResultDataSource<T extends EntityResult> imp
         this.index = -1;
     }
 
-	public T getEntityResult() {
+    public T getEntityResult() {
         return this.result;
     }
 
-	public JRField[] getFields() {
+    public JRField[] getFields() {
         return AbstractEntityResultDataSource.getFields(this.result);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-	public static JRField[] getFields(EntityResult result) {
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static JRField[] getFields(EntityResult result) {
         Enumeration keys = result.keys();
         List tmp = new ArrayList();
 
@@ -126,8 +126,8 @@ public abstract class AbstractEntityResultDataSource<T extends EntityResult> imp
         }
         return a;
     }
-    
-    
+
+
     protected Object getImageValue(final Object value) {
         Object result_ = null;
         if (value instanceof byte[]) {
@@ -137,13 +137,13 @@ public abstract class AbstractEntityResultDataSource<T extends EntityResult> imp
         }
         return result_;
     }
-    
+
     protected Object getServiceRendererValue(final String fieldName, final Object value) {
         EntityResult obj2 = rendererData.get(fieldName);
         if (obj2 == null) {
             return null;
         }
-        if(rendererInfo == null || rendererInfo.get(fieldName) == null){
+        if (rendererInfo == null || rendererInfo.get(fieldName) == null) {
             return null;
         }
         Object obj3 = obj2.get(fieldName);
@@ -152,9 +152,9 @@ public abstract class AbstractEntityResultDataSource<T extends EntityResult> imp
         }
         List<?> v2 = (List<?>) obj3;
         int i = v2.indexOf(value);
-        if(i >= 0 && i < v2.size()) {
+        if (i >= 0 && i < v2.size()) {
             String valueColumn = this.rendererInfo.get(fieldName).getValueColumn();
-            Map<?,?> recordValues = obj2.getRecordValues(i);
+            Map<?, ?> recordValues = obj2.getRecordValues(i);
             return recordValues.get(valueColumn);
         }
         return null;

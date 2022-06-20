@@ -219,27 +219,29 @@ public class DynamicReportBuilderHelper {
                                         final FunctionTypeDto function, final ResourceBundle bundle) {
         Style footerStyle = getFooterStyle();
         DJValueFormatter valueFormatter;
-        switch (function.getType().name()) {
-            case "SUM":
-                valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.SUM, bundle);
-                dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.SUM, footerStyle, valueFormatter)
-                        .setGrandTotalLegend("");
-                break;
-            case "AVERAGE":
-                valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.AVERAGE, bundle);
-                dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.AVERAGE, footerStyle, valueFormatter)
-                        .setGrandTotalLegend("");
-                break;
-            case "MAX":
-                valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.MAX, bundle);
-                dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.HIGHEST, footerStyle, valueFormatter)
-                        .setGrandTotalLegend("");
-                break;
-            case "MIN":
-                valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.MIN, bundle);
-                dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.LOWEST, footerStyle, valueFormatter)
-                        .setGrandTotalLegend("");
-                break;
+        if (function != null && function.getType() != null) {
+            switch (function.getType().name()) {
+                case "SUM":
+                    valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.SUM, bundle);
+                    dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.SUM, footerStyle, valueFormatter)
+                            .setGrandTotalLegend("");
+                    break;
+                case "AVERAGE":
+                    valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.AVERAGE, bundle);
+                    dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.AVERAGE, footerStyle, valueFormatter)
+                            .setGrandTotalLegend("");
+                    break;
+                case "MAX":
+                    valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.MAX, bundle);
+                    dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.HIGHEST, footerStyle, valueFormatter)
+                            .setGrandTotalLegend("");
+                    break;
+                case "MIN":
+                    valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.MIN, bundle);
+                    dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.LOWEST, footerStyle, valueFormatter)
+                            .setGrandTotalLegend("");
+                    break;
+            }
         }
     }
 

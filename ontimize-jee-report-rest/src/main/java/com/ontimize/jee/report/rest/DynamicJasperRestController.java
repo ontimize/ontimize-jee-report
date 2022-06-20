@@ -73,7 +73,7 @@ public class DynamicJasperRestController {
             try {
                 List<FunctionTypeDto> list = service.getFunctionsName(params);
                 Map<String, Object> map = new HashMap<>();
-                map.put("list", list);
+                map.put("functions", list);
                 res.addRecord(map);
                 return new ResponseEntity<EntityResult>(res, HttpStatus.OK);
             } catch (DynamicReportException ex) {

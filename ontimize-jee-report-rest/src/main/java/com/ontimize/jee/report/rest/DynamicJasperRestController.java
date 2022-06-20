@@ -3,6 +3,7 @@ package com.ontimize.jee.report.rest;
 import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.common.dto.EntityResultMapImpl;
 import com.ontimize.jee.report.common.dto.FunctionParamsDto;
+import com.ontimize.jee.report.common.dto.FunctionTypeDto;
 import com.ontimize.jee.report.common.dto.ReportParamsDto;
 import com.ontimize.jee.report.common.exception.DynamicReportException;
 import com.ontimize.jee.report.common.services.IDynamicJasperService;
@@ -70,10 +71,9 @@ public class DynamicJasperRestController {
         EntityResult res = new EntityResultMapImpl();
         if (params != null) {
             try {
-                List<String> list = service.getFunctionsName(params);
-                list.add(TOTAL);
+                List<FunctionTypeDto> list = service.getFunctionsName(params);
                 Map<String, Object> map = new HashMap<>();
-                map.put("list", list);
+                map.put("functions", list);
                 res.addRecord(map);
                 return new ResponseEntity<EntityResult>(res, HttpStatus.OK);
             } catch (DynamicReportException ex) {

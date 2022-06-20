@@ -5,6 +5,7 @@ import ar.com.fdvs.dj.core.layout.ClassicLayoutManager;
 import ar.com.fdvs.dj.core.layout.LayoutManager;
 import ar.com.fdvs.dj.domain.DynamicReport;
 import com.ontimize.jee.report.common.dto.ColumnDto;
+import com.ontimize.jee.report.common.dto.FunctionTypeDto;
 import com.ontimize.jee.report.common.dto.OrderByDto;
 import com.ontimize.jee.report.common.dto.StyleParamsDto;
 import com.ontimize.jee.report.common.exception.DynamicReportException;
@@ -36,7 +37,7 @@ public abstract class ReportBase {
     protected Map params = new HashMap();
 
     public abstract DynamicReport buildReport(List<ColumnDto> columnsDto, String title, List<String> groups, String entity,
-                                              String service, Boolean vertical, List<String> functions, StyleParamsDto style, String subtitle,
+                                              String service, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto style, String subtitle,
                                               String language)
             throws DynamicReportException;
 
@@ -44,7 +45,7 @@ public abstract class ReportBase {
                                                String entity, String service) throws SecurityException;
 
     public InputStream generateReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
-                                      String service, Boolean vertical, List<String> functions, StyleParamsDto style, String subtitle,
+                                      String service, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto style, String subtitle,
                                       List<OrderByDto> orderBy, String language) throws DynamicReportException {
 
         DynamicReport dr = buildReport(columns, title, groups, entity, service, vertical, functions, style, subtitle,

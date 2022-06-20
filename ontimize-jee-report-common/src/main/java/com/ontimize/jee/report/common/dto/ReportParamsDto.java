@@ -10,7 +10,7 @@ public class ReportParamsDto {
     private List<OrderByDto> orderBy;
     private String service;
     private Boolean vertical;
-    private List<String> functions;
+    private List<FunctionTypeDto> functions;
     private StyleParamsDto style;
     private String subtitle;
     private List<ColumnDto> columns;
@@ -56,11 +56,11 @@ public class ReportParamsDto {
         this.vertical = vertical;
     }
 
-    public List<String> getFunctions() {
+    public List<FunctionTypeDto> getFunctions() {
         return functions;
     }
 
-    public void setFunctions(List<String> functions) {
+    public void setFunctions(List<FunctionTypeDto> functions) {
         this.functions = functions;
     }
 

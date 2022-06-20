@@ -70,14 +70,12 @@ public class PreferencesRestController {
     @RequestMapping(value = "/preferences", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public EntityResult getPreferences(@RequestParam("entity") Optional<String> entity,
                                        @RequestParam("service") Optional<String> service) {
-        List<String> columns = new ArrayList<>();
         Map<String, Object> map = new HashMap<>();
         if (!entity.isEmpty() && !service.isEmpty()) {
             String entityService = entity.get() + "-" + service.get();
             map.put("ENTITY", entityService);
         }
         List<String> attrList = new ArrayList<>();
-        PreferencesParamsDto preferences = new PreferencesParamsDto();
         attrList.add("ID");
         attrList.add("NAME");
         attrList.add("DESCRIPTION");
@@ -112,7 +110,7 @@ public class PreferencesRestController {
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-                String serializedParams = mapper.writeValueAsString(param);
+                String serializedParams = mapper.writeValueAsString(param.getReportParams());
 
                 Map<String, Object> attrMap = new HashMap<>();
                 attrMap.put("NAME", param.getName());

@@ -1,5 +1,6 @@
 package com.ontimize.jee.report.server;
 
+import com.ontimize.jee.report.common.exception.DynamicReportException;
 import com.ontimize.jee.server.rest.ORestController;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeansException;
@@ -20,24 +21,15 @@ public class ApplicationContextUtils implements ApplicationContextAware {
     
     private static ApplicationContextUtils instance;
     
-    private ApplicationContextUtils() {
+    public ApplicationContextUtils() {
         //no-op
     }
     
-    private static ApplicationContextUtils getInstance() {
-        if(instance == null) {
-           instance = new ApplicationContextUtils(); 
-        }
-        return instance;
-    }
-    
-    public Object getServiceBean(final String servicePath, final String serviceName) {
+    public Object getServiceBean(final String serviceName , final String servicePath) throws DynamicReportException {
 
-//        String[] beanNamesForType = applicationContext.getBeanNamesForType(ORestController.class);
-//        List<String> restController = Stream.of(beanNamesForType).filter((item) -> item.startsWith(serviceName.toLowerCase()))
-//                .collect(Collectors.toList());
-
-        //Method 1
+        Object serviceBean = null;
+        
+        //Method 1. Retrieve bean from controller 'path'
         if(!StringUtils.isBlank(servicePath)) {
             RequestMappingHandlerMapping requestMappingHandlerMapping = applicationContext
                     .getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping.class);
@@ -49,19 +41,90 @@ public class ApplicationContextUtils implements ApplicationContextAware {
                     .collect(Collectors.toList());
 
             if (requestMapHandlerMethodList.size() == 1) {
-                Class<?> restControllerBeanName = requestMapHandlerMethodList.get(0).getBeanType();
-                Object restControllerBean = applicationContext.getBean(restControllerBeanName);
-                if (restControllerBean instanceof ORestController) {
-                    Object service1 = ((ORestController<?>) restControllerBean).getService();
+                Class<?> restControllerBeanType = requestMapHandlerMethodList.get(0).getBeanType();
+                serviceBean = getBean(restControllerBeanType);
+            }
+        }
+        
+        //Method 2. Retrieve controller from service name and then the service bean
+        if(serviceBean == null && !StringUtils.isBlank(serviceName)) {
+            String[] beanNamesForType = applicationContext.getBeanNamesForType(ORestController.class);
+            List<String> restControllerNames = findCandidates(serviceName, beanNamesForType);
+            
+            if(restControllerNames.size() > 0) {
+                if(restControllerNames.size() == 1) {
+                    serviceBean = getBeanForName(restControllerNames.get(0));
+                } else {
+                    String beanName = this.fitBestControllerName(serviceName, restControllerNames);
+                    if(!StringUtils.isBlank(beanName)) {
+                        serviceBean = getBeanForName(beanName);
+                    }
                 }
             }
         }
         
-        return null;
+        // Method 3. Retrieve bean from service name
+        if(serviceBean == null) {
+            serviceBean = this.applicationContext.getBean(serviceName.concat("Service"));
+        }
+        
+        if(serviceBean == null) {
+            throw new DynamicReportException("Impossible to retrieve service to query data");
+        }
+        
+        return serviceBean;
     }
     
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        
+        this.applicationContext = applicationContext;
+    }
+    
+    
+    private Object getBeanForName(final String beanName) {
+        Object bean = null;
+        ORestController<?> oRestController = applicationContext.getBean(beanName, ORestController.class);
+        if (oRestController != null) {
+            bean = oRestController.getService();
+        }
+        return bean;
+    }
+    private Object getBean(final Class<?> beanClazz) {
+        Object bean = null;
+        Object restControllerBean = applicationContext.getBean(beanClazz);
+        if (restControllerBean instanceof ORestController) {
+            bean = ((ORestController<?>) restControllerBean).getService();
+        }
+        return bean;
+    }
+    
+    private List<String> findCandidates(final String serviceName, String[] beanNamesForType) {
+        List<String> restControllerNames = Stream.of(beanNamesForType).filter((item) -> item.startsWith(serviceName.toLowerCase()))
+                .collect(Collectors.toList());
+        if(restControllerNames.size() == 0) {
+            String aux = serviceName.substring(0, serviceName.length()-1);
+            if(aux.length() > 3) {
+                restControllerNames = findCandidates(aux, beanNamesForType);
+            }
+        }
+        return restControllerNames;
+    }
+    
+    private String fitBestControllerName(final String serviceName, List<String> restControllerNames) {
+        String beanName = null;
+        for(String name : restControllerNames) {
+            String aux = name.replaceAll("RestController", "");
+            if(serviceName.toLowerCase().equals(aux.toLowerCase())) {
+                beanName = name;
+                break;
+            }
+        }
+        if( beanName == null) {
+            String aux = serviceName.substring(0, serviceName.length()-1);
+            if(aux.length() > 3) {
+                beanName = fitBestControllerName(aux, restControllerNames);
+            }
+        }
+        return beanName;
     }
 }

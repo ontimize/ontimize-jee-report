@@ -9,6 +9,7 @@ public class ReportParamsDto {
     private List<String> groups;
     private List<OrderByDto> orderBy;
     private String service;
+    private String path;
     private Boolean vertical;
     private List<FunctionTypeDto> functions;
     private StyleParamsDto style;
@@ -46,6 +47,14 @@ public class ReportParamsDto {
 
     public void setService(String service) {
         this.service = service;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public Boolean getVertical() {

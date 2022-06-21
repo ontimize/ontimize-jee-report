@@ -23,14 +23,17 @@ import com.ontimize.jee.report.common.exception.DynamicReportException;
 import com.ontimize.jee.report.common.services.IDynamicJasperService;
 import com.ontimize.jee.report.common.util.EntityResultDataSource;
 import com.ontimize.jee.report.common.util.TypeMappingsUtils;
+import com.ontimize.jee.report.server.ApplicationContextUtils;
 import com.ontimize.jee.report.server.naming.DynamicJasperNaming;
 import com.ontimize.jee.report.server.services.util.ColumnMetadata;
 import com.ontimize.jee.report.server.services.util.DynamicJasperHelper;
 import com.ontimize.jee.report.server.services.util.DynamicReportBuilderHelper;
 import net.sf.jasperreports.engine.JRDataSource;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -44,12 +47,15 @@ import java.util.ResourceBundle;
 
 @Service("DynamicJasperService")
 @Lazy(value = true)
-public class DynamicJasperService extends ReportBase implements IDynamicJasperService {
+public class DynamicJasperService extends ReportBase implements IDynamicJasperService, InitializingBean {
 
     private ResourceBundle bundle;
 
     @Autowired
     private ApplicationContext applicationContext;
+    
+    private ApplicationContextUtils applicationContextUtils;
+    
     private DynamicJasperHelper dynamicJasperHelper;
 
     private DynamicReportBuilderHelper dynamicReportBuilderHelper;
@@ -68,7 +74,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
         }
 
         return this.generateReport(param.getColumns(), param.getTitle(), param.getGroups(), param.getEntity(),
-                param.getService(), param.getVertical(), param.getFunctions(), param.getStyle(), param.getSubtitle(),
+                param.getService(), param.getPath(), param.getVertical(), param.getFunctions(), param.getStyle(), param.getSubtitle(),
                 param.getOrderBy(), param.getLanguage());
 
     }
@@ -79,12 +85,13 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
             String entity = params.getEntity();
             String service = params.getService();
+            String path = params.getPath();
             List<String> columns = params.getColumns();
 
             List<FunctionTypeDto> functions = new ArrayList<>();
             Map<String, Object> map = new HashMap<>();
-            Object bean = this.applicationContext.getBean(service.concat("Service"));
-            EntityResult e = (EntityResult) ReflectionTools.invoke(bean, entity.toLowerCase().concat("Query"), map,
+            Object bean = this.getApplicationContextUtils().getServiceBean(service, path);
+            EntityResult e = (EntityResult) ReflectionTools.invoke(bean, entity.concat("Query"), map,
                     columns);
             for (String column : columns) {
                 int type = e.getColumnSQLType(column);
@@ -102,7 +109,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
     }
 
     public DynamicReport buildReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
-                                     String service, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto styles, String subtitle,
+                                     String service, String path, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto styles, String subtitle,
                                      String language) throws DynamicReportException {
 
         int numberGroups = 0;
@@ -119,8 +126,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
         // generic styles
         builderHelper.configureGenericStyles(drb, vertical, styles, columns.size(), bundle);
 
-        Map<String, ColumnMetadata> columnMetadataMap = this.getDynamicJasperHelper().getColumnMetadata(service, entity,
-                columns);
+        Map<String, ColumnMetadata> columnMetadataMap = this.getDynamicJasperHelper().getColumnMetadata(service, path,
+                entity, columns);
 
         boolean firstColumn = true;
         boolean totalFunction = false;
@@ -236,7 +243,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
     @Override
     public JRDataSource getDataSource(List<ColumnDto> columns, List<String> groups, List<OrderByDto> orderBy,
-                                      String entity, String service) throws SecurityException {
+                                      String entity, String service, String path) throws DynamicReportException {
 
         Map<String, Object> map = new HashMap<>();
         List<String> columns1 = this.getDynamicJasperHelper().getColumnsFromDto(columns);
@@ -273,9 +280,9 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
             });
         }
 
-        Object bean = this.applicationContext.getBean(service.concat("Service"));
+        Object bean = this.getApplicationContextUtils().getServiceBean(service, path);
         EntityResult erReportData = (EntityResult) ReflectionTools.invoke(bean,
-                entity.toLowerCase().concat("PaginationQuery"), map, columns1, pageSize, offset, sqlOrders);
+                entity.concat("PaginationQuery"), map, columns1, pageSize, offset, sqlOrders);
 
         EntityResultDataSource entityResultDataSource = new EntityResultDataSource(erReportData);
         dynamicJasperHelper.evaluateServiceRenderer(entityResultDataSource, columns);
@@ -307,18 +314,32 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
         return this.bundle;
     }
 
+    protected ApplicationContextUtils getApplicationContextUtils() {
+        return applicationContextUtils;
+    }
+
     protected DynamicJasperHelper getDynamicJasperHelper() {
-        if (this.dynamicJasperHelper == null) {
-            this.dynamicJasperHelper = new DynamicJasperHelper(this.applicationContext);
-        }
         return this.dynamicJasperHelper;
     }
 
     protected DynamicReportBuilderHelper getDynamicReportBuilderHelper() {
+        return this.dynamicReportBuilderHelper;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if(this.applicationContextUtils == null) {
+            this.applicationContextUtils = new ApplicationContextUtils();
+        }
+        if (this.dynamicJasperHelper == null) {
+            this.dynamicJasperHelper = new DynamicJasperHelper();
+        }
         if (this.dynamicReportBuilderHelper == null) {
             this.dynamicReportBuilderHelper = new DynamicReportBuilderHelper();
-            this.dynamicReportBuilderHelper.setDynamicJasperHelper(getDynamicJasperHelper());
         }
-        return this.dynamicReportBuilderHelper;
+
+        ((ApplicationContextAware) this.applicationContextUtils).setApplicationContext(this.applicationContext);
+        ((ApplicationContextAware) this.dynamicJasperHelper).setApplicationContext(this.applicationContext);
+        this.dynamicJasperHelper.setApplicationContextUtils(this.applicationContextUtils);
     }
 }

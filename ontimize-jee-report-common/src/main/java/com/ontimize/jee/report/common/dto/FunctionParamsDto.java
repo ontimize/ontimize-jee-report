@@ -7,6 +7,7 @@ public class FunctionParamsDto {
     private List<String> columns;
     private String entity;
     private String service;
+    private String path;
     private String language;
 
     public List<String> getColumns() {
@@ -31,6 +32,14 @@ public class FunctionParamsDto {
 
     public void setService(String service) {
         this.service = service;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public String getLanguage() {

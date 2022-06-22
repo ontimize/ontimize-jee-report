@@ -32,17 +32,7 @@ public class DynamicReportBuilderHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(DynamicReportBuilderHelper.class);
 
-    private DynamicJasperHelper dynamicJasperHelper;
-
     public DynamicReportBuilderHelper() {
-    }
-
-    public DynamicJasperHelper getDynamicJasperHelper() {
-        return dynamicJasperHelper;
-    }
-
-    public void setDynamicJasperHelper(DynamicJasperHelper dynamicJasperHelper) {
-        this.dynamicJasperHelper = dynamicJasperHelper;
     }
 
     public void configureTitle(final DynamicReportBuilder dynamicReportBuilder, final String title) {

@@ -37,24 +37,24 @@ public abstract class ReportBase {
     protected Map params = new HashMap();
 
     public abstract DynamicReport buildReport(List<ColumnDto> columnsDto, String title, List<String> groups, String entity,
-                                              String service, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto style, String subtitle,
+                                              String service, String path, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto style, String subtitle,
                                               String language)
             throws DynamicReportException;
 
     public abstract JRDataSource getDataSource(List<ColumnDto> columns, List<String> groups, List<OrderByDto> orderBy,
-                                               String entity, String service) throws SecurityException;
+                                               String entity, String service, String path) throws DynamicReportException;
 
     public InputStream generateReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
-                                      String service, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto style, String subtitle,
+                                      String service, String path, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto style, String subtitle,
                                       List<OrderByDto> orderBy, String language) throws DynamicReportException {
 
-        DynamicReport dr = buildReport(columns, title, groups, entity, service, vertical, functions, style, subtitle,
+        DynamicReport dr = buildReport(columns, title, groups, entity, service, path, vertical, functions, style, subtitle,
                 language);
 
         /**
          * We obtain the data source based on a collection of objects
          */
-        JRDataSource ds = getDataSource(columns, groups, orderBy, entity, service);
+        JRDataSource ds = getDataSource(columns, groups, orderBy, entity, service, path);
 
         /**
          * We create the JasperReport object that we pass as a parameter to

@@ -5,6 +5,7 @@ import java.util.List;
 public class ServiceRendererDto extends RendererDto {
 
     private String service;
+    private String path;
     private String entity;
     private String keyColumn;
     private String valueColumn;
@@ -18,6 +19,14 @@ public class ServiceRendererDto extends RendererDto {
 
     public void setService(String service) {
         this.service = service;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public String getEntity() {

@@ -53,9 +53,9 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
     @Autowired
     private ApplicationContext applicationContext;
-    
+
     private ApplicationContextUtils applicationContextUtils;
-    
+
     private DynamicJasperHelper dynamicJasperHelper;
 
     private DynamicReportBuilderHelper dynamicReportBuilderHelper;
@@ -74,8 +74,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
         }
 
         return this.generateReport(param.getColumns(), param.getTitle(), param.getGroups(), param.getEntity(),
-                param.getService(), param.getPath(), param.getVertical(), param.getFunctions(), param.getStyle(), param.getSubtitle(),
-                param.getOrderBy(), param.getLanguage());
+                param.getService(), param.getPath(), param.getVertical(), param.getFunctions(), param.getStyle(),
+                param.getSubtitle(), param.getOrderBy(), param.getLanguage());
 
     }
 
@@ -91,8 +91,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
             List<FunctionTypeDto> functions = new ArrayList<>();
             Map<String, Object> map = new HashMap<>();
             Object bean = this.getApplicationContextUtils().getServiceBean(service, path);
-            EntityResult e = (EntityResult) ReflectionTools.invoke(bean, entity.concat("Query"), map,
-                    columns);
+            EntityResult e = (EntityResult) ReflectionTools.invoke(bean, entity.concat("Query"), map, columns);
             for (String column : columns) {
                 int type = e.getColumnSQLType(column);
                 String className = TypeMappingsUtils.getClassName(type);
@@ -109,8 +108,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
     }
 
     public DynamicReport buildReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
-                                     String service, String path, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto styles, String subtitle,
-                                     String language) throws DynamicReportException {
+                                     String service, String path, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto styles,
+                                     String subtitle, String language) throws DynamicReportException {
 
         int numberGroups = 0;
         boolean functionColumn = false;
@@ -226,17 +225,22 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
             }
             drb.addColumn(column);
 
-            // Configure report grouping...
-            if (groups != null && groups.contains(column.getName())) {
-                DJGroup reportGroup = builderHelper.createReportGroup(column, styles, numberGroups);
-                drb.addGroup(reportGroup);
-                numberGroups += 1;
-            }
-
             firstColumn = false;
             functionColumn = false;
         }
+        // Configure report grouping...
+        if (groups != null) {
+            for (String columnGroup : groups) {
+                for (int i = 0; i < drb.getColumns().size(); i++) {
+                    if (drb.getColumn(i).getName().equals(columnGroup)) {
+                        DJGroup reportGroup = builderHelper.createReportGroup(drb.getColumn(i), styles, numberGroups);
+                        drb.addGroup(reportGroup);
+                        numberGroups += 1;
+                    }
+                }
 
+            }
+        }
         DynamicReport dr = drb.build();
         return dr;
     }
@@ -281,8 +285,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
         }
 
         Object bean = this.getApplicationContextUtils().getServiceBean(service, path);
-        EntityResult erReportData = (EntityResult) ReflectionTools.invoke(bean,
-                entity.concat("PaginationQuery"), map, columns1, pageSize, offset, sqlOrders);
+        EntityResult erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("PaginationQuery"), map,
+                columns1, pageSize, offset, sqlOrders);
 
         EntityResultDataSource entityResultDataSource = new EntityResultDataSource(erReportData);
         dynamicJasperHelper.evaluateServiceRenderer(entityResultDataSource, columns);
@@ -328,7 +332,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if(this.applicationContextUtils == null) {
+        if (this.applicationContextUtils == null) {
             this.applicationContextUtils = new ApplicationContextUtils();
         }
         if (this.dynamicJasperHelper == null) {

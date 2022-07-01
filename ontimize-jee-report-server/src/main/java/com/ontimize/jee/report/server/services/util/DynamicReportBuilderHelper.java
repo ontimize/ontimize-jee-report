@@ -1,5 +1,21 @@
 package com.ontimize.jee.report.server.services.util;
 
+import java.awt.Color;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Map;
+import java.util.ResourceBundle;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ontimize.jee.report.common.dto.FunctionTypeDto;
+import com.ontimize.jee.report.common.dto.StyleParamsDto;
+import com.ontimize.jee.report.common.dto.renderer.CurrencyRendererDto;
+import com.ontimize.jee.report.common.dto.renderer.RendererDto;
+import com.ontimize.jee.report.server.naming.DynamicJasperNaming;
+
 import ar.com.fdvs.dj.domain.AutoText;
 import ar.com.fdvs.dj.domain.CustomExpression;
 import ar.com.fdvs.dj.domain.DJCalculation;
@@ -17,16 +33,6 @@ import ar.com.fdvs.dj.domain.constants.VerticalAlign;
 import ar.com.fdvs.dj.domain.entities.DJGroup;
 import ar.com.fdvs.dj.domain.entities.columns.AbstractColumn;
 import ar.com.fdvs.dj.domain.entities.columns.PropertyColumn;
-import com.ontimize.jee.report.common.dto.FunctionTypeDto;
-import com.ontimize.jee.report.common.dto.StyleParamsDto;
-import com.ontimize.jee.report.server.naming.DynamicJasperNaming;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.awt.*;
-import java.util.Map;
-import java.util.ResourceBundle;
 
 public class DynamicReportBuilderHelper {
 
@@ -98,23 +104,24 @@ public class DynamicReportBuilderHelper {
                 AutoText.ALIGNMENT_CENTER);
     }
 
-    public DJValueFormatter getFunctionValueFormatter(String type, ResourceBundle bundle) {
+    public DJValueFormatter getFunctionValueFormatter(String type, ResourceBundle bundle, RendererDto renderer) {
         return new DJValueFormatter() {
 
             public Object evaluate(Object value, Map fields, Map variables, Map parameters) {
                 String valor = "";
+
                 switch (type) {
                     case DynamicJasperNaming.SUM:
-                        valor = bundle.getString("sum_text") + " : " + value;
+                        valor = bundle.getString("sum_text") + " : " + formatNumber(value, renderer);
                         break;
                     case DynamicJasperNaming.AVERAGE:
-                        valor = bundle.getString("average_text") + " : " + value;
+                        valor = bundle.getString("average_text") + " : " + formatNumber(value, renderer);
                         break;
                     case DynamicJasperNaming.MAX:
-                        valor = bundle.getString("max_text") + " : " + value;
+                        valor = bundle.getString("max_text") + " : " + formatNumber(value, renderer);
                         break;
                     case DynamicJasperNaming.MIN:
-                        valor = bundle.getString("min_text") + " : " + value;
+                        valor = bundle.getString("min_text") + " : " + formatNumber(value, renderer);
                         break;
                     case DynamicJasperNaming.TOTAL:
                         valor = bundle.getString("total_text") + " : " + value;
@@ -127,6 +134,27 @@ public class DynamicReportBuilderHelper {
                 return String.class.getName();
             }
         };
+    }
+
+    private String formatNumber(Object value, RendererDto renderer) {
+        NumberFormat numberFormat = NumberFormat.getNumberInstance();
+        DecimalFormat decimalFormat = (DecimalFormat) numberFormat;
+        decimalFormat.applyPattern("###.###");
+        decimalFormat.setMinimumFractionDigits(2);
+        decimalFormat.setMaximumFractionDigits(2);
+        String formatedValue = decimalFormat.format(value);
+        if (renderer != null && renderer instanceof CurrencyRendererDto) {
+            CurrencyRendererDto currencyrenderer = (CurrencyRendererDto) renderer;
+            String symbol = currencyrenderer.getCurrencySymbol();
+            if ("left".equals(currencyrenderer.getCurrencySymbolPosition())) {
+                return symbol + formatedValue;
+            } else {
+                return formatedValue + symbol;
+            }
+
+        }
+        return formatedValue;
+
     }
 
     public DJGroup createReportGroup(final AbstractColumn column, final StyleParamsDto styleArgs,
@@ -205,29 +233,42 @@ public class DynamicReportBuilderHelper {
         return footerStyle;
     }
 
+    public Style getTotalStyle() {
+        Style totalStyle = new Style();
+        totalStyle.setTextColor(Color.BLACK);
+        totalStyle.setHorizontalAlign(HorizontalAlign.JUSTIFY);
+        totalStyle.setBorderTop(Border.PEN_1_POINT());
+        totalStyle.getBorderTop().setColor(new Color(204, 204, 204));
+        Font footerFont = new Font();
+        footerFont.setBold(true);
+        totalStyle.setFont(footerFont);
+        totalStyle.setPaddingTop(30);
+        return totalStyle;
+    }
+
     public void configureReportFunction(final DynamicReportBuilder dynamicReportBuilder, final AbstractColumn column,
-                                        final FunctionTypeDto function, final ResourceBundle bundle) {
+                                        final RendererDto renderer, final FunctionTypeDto function, final ResourceBundle bundle) {
         Style footerStyle = getFooterStyle();
         DJValueFormatter valueFormatter;
         if (function != null && function.getType() != null) {
             switch (function.getType().name()) {
                 case "SUM":
-                    valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.SUM, bundle);
+                    valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.SUM, bundle, renderer);
                     dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.SUM, footerStyle, valueFormatter)
                             .setGrandTotalLegend("");
                     break;
                 case "AVERAGE":
-                    valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.AVERAGE, bundle);
+                    valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.AVERAGE, bundle, renderer);
                     dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.AVERAGE, footerStyle, valueFormatter)
                             .setGrandTotalLegend("");
                     break;
                 case "MAX":
-                    valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.MAX, bundle);
+                    valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.MAX, bundle, renderer);
                     dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.HIGHEST, footerStyle, valueFormatter)
                             .setGrandTotalLegend("");
                     break;
                 case "MIN":
-                    valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.MIN, bundle);
+                    valueFormatter = getFunctionValueFormatter(DynamicJasperNaming.MIN, bundle, renderer);
                     dynamicReportBuilder.addGlobalFooterVariable(column, DJCalculation.LOWEST, footerStyle, valueFormatter)
                             .setGrandTotalLegend("");
                     break;

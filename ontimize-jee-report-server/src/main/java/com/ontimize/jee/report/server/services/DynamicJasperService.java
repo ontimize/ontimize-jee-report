@@ -1,5 +1,43 @@
 package com.ontimize.jee.report.server.services;
 
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+
+import com.ontimize.jee.common.db.SQLStatementBuilder;
+import com.ontimize.jee.common.dto.EntityResult;
+import com.ontimize.jee.common.tools.ReflectionTools;
+import com.ontimize.jee.report.common.dto.ColumnDto;
+import com.ontimize.jee.report.common.dto.ColumnStyleParamsDto;
+import com.ontimize.jee.report.common.dto.FunctionParamsDto;
+import com.ontimize.jee.report.common.dto.FunctionTypeDto;
+import com.ontimize.jee.report.common.dto.FunctionTypeDto.Type;
+import com.ontimize.jee.report.common.dto.OrderByDto;
+import com.ontimize.jee.report.common.dto.ReportParamsDto;
+import com.ontimize.jee.report.common.dto.StyleParamsDto;
+import com.ontimize.jee.report.common.dto.renderer.RendererDto;
+import com.ontimize.jee.report.common.exception.DynamicReportException;
+import com.ontimize.jee.report.common.services.IDynamicJasperService;
+import com.ontimize.jee.report.common.util.EntityResultDataSource;
+import com.ontimize.jee.report.common.util.TypeMappingsUtils;
+import com.ontimize.jee.report.server.ApplicationContextUtils;
+import com.ontimize.jee.report.server.naming.DynamicJasperNaming;
+import com.ontimize.jee.report.server.services.util.ColumnMetadata;
+import com.ontimize.jee.report.server.services.util.DynamicJasperHelper;
+import com.ontimize.jee.report.server.services.util.DynamicReportBuilderHelper;
+
 import ar.com.fdvs.dj.domain.DJCalculation;
 import ar.com.fdvs.dj.domain.DJValueFormatter;
 import ar.com.fdvs.dj.domain.DynamicReport;
@@ -14,36 +52,7 @@ import ar.com.fdvs.dj.domain.entities.DJGroup;
 import ar.com.fdvs.dj.domain.entities.DJGroupVariable;
 import ar.com.fdvs.dj.domain.entities.columns.AbstractColumn;
 import ar.com.fdvs.dj.domain.entities.columns.PropertyColumn;
-import com.ontimize.jee.common.db.SQLStatementBuilder;
-import com.ontimize.jee.common.dto.EntityResult;
-import com.ontimize.jee.common.tools.ReflectionTools;
-import com.ontimize.jee.report.common.dto.*;
-import com.ontimize.jee.report.common.dto.FunctionTypeDto.Type;
-import com.ontimize.jee.report.common.exception.DynamicReportException;
-import com.ontimize.jee.report.common.services.IDynamicJasperService;
-import com.ontimize.jee.report.common.util.EntityResultDataSource;
-import com.ontimize.jee.report.common.util.TypeMappingsUtils;
-import com.ontimize.jee.report.server.ApplicationContextUtils;
-import com.ontimize.jee.report.server.naming.DynamicJasperNaming;
-import com.ontimize.jee.report.server.services.util.ColumnMetadata;
-import com.ontimize.jee.report.server.services.util.DynamicJasperHelper;
-import com.ontimize.jee.report.server.services.util.DynamicReportBuilderHelper;
 import net.sf.jasperreports.engine.JRDataSource;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
 
 @Service("DynamicJasperService")
 @Lazy(value = true)
@@ -186,7 +195,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
                 DJGroup g1 = new GroupBuilder().setCriteriaColumn((PropertyColumn) drb.getColumn(0))
                         .setGroupLayout(GroupLayout.EMPTY).build();
 
-                drb.getColumn(0).setWidth(50);
+                drb.getColumn(0).setWidth(80);
                 drb.addGroup(g1);
             }
             if (functions != null && !functions.isEmpty()) {
@@ -195,7 +204,11 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
                 // Configure aggregate functions...
                 for (FunctionTypeDto function : functions) {
                     if (function.getColumnName().equals(id)) {
-                        builderHelper.configureReportFunction(drb, column, function, bundle);
+                        RendererDto renderer = null;
+                        if (columnStyleParamsDto != null) {
+                            renderer = columnStyleParamsDto.getRenderer();
+                        }
+                        builderHelper.configureReportFunction(drb, column, renderer, function, bundle);
                         functionColumn = true;
                     } else if (function.getType().name().equals(bundle.getString("total"))) {
                         totalFunction = true;
@@ -204,11 +217,18 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
                 if (firstColumn) {
                     if (totalFunction) {
                         DJValueFormatter valueFormatter = builderHelper
-                                .getFunctionValueFormatter(DynamicJasperNaming.TOTAL, bundle);
+                                .getFunctionValueFormatter(DynamicJasperNaming.TOTAL, bundle, null);
                         // The column of row numbers is used to perform a correct calculation of the
                         // total number of rows
-                        drb.addGlobalFooterVariable(drb.getColumn(0), DJCalculation.COUNT, footerStyle, valueFormatter)
-                                .setGrandTotalLegend("");
+                        Style totalStyle = dynamicReportBuilderHelper.getTotalStyle();
+
+                        if (functionColumn && !styles.isRowNumber()) {
+                            drb.addGlobalFooterVariable(drb.getColumn(0), DJCalculation.COUNT, totalStyle,
+                                    valueFormatter).setGrandTotalLegend("");
+                        } else {
+                            drb.addGlobalFooterVariable(drb.getColumn(0), DJCalculation.COUNT, footerStyle,
+                                    valueFormatter).setGrandTotalLegend("");
+                        }
                     } else {
                         drb.addGlobalFooterVariable(
                                         new DJGroupVariable(drb.getColumn(0), DJCalculation.SYSTEM, footerStyle))
@@ -224,7 +244,6 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
             }
             drb.addColumn(column);
-
             firstColumn = false;
             functionColumn = false;
         }

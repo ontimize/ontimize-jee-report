@@ -1,11 +1,15 @@
-name: Generate a version in MVNCentral
+name: Manual deploy a snapshot in MVNCentral
 on:
-  pull_request:
-    types: [closed]
-    branches: [develop]
+  workflow_dispatch:
+    inputs:
+      version-suffix:
+        description: 'The suffix to add to Framework version'
+        required: true
+concurrency:
+  group: autodeploy-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
-  Generate-a-snapshot-in-MVNCentral:
-    if: github.event.pull_request.merged
+  Manual-deploy-a-snapshot-in-MVNCentral:
     runs-on: ubuntu-latest
     env:
       MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
@@ -25,4 +29,7 @@ jobs:
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
       - name: Publish to Apache Maven Central
-        run: mvn -B -U clean deploy -Pgenerate-version
+        run: |
+          mvn -B build-helper:parse-version versions:set \
+            -DnewVersion="\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.incrementalVersion}-${{github.event.inputs.version-suffix}}-SNAPSHOT"
+          mvn -B -U clean deploy -Pgenerate-version

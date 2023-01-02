@@ -4,7 +4,8 @@ jobs:
   Prepare-a-release-by-a-pull-request:
     runs-on: ubuntu-latest
     env:
-      GITHUB_TOKEN: ${{ secrets.REPO_SCOPED_TOKEN }}
+      #GITHUB_TOKEN: ${{ secrets.REPO_SCOPED_TOKEN }}  # If you want to be able to trigger actions that come from another action. Github has this behavior disabled by default.
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       CI_COMMIT_AUTHOR: ${{ secrets.CI_COMMIT_AUTHOR }}
       CI_COMMIT_MAIL: ${{ secrets.CI_COMMIT_MAIL }}
       ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}

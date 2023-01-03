@@ -1,13 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.ontimize.jee.report</groupId>
 		<artifactId>ontimize-jee-report</artifactId>
-		<version>3.1.0</version>
+		<version>3.2.0</version>
 	</parent>
 	<artifactId>ontimize-jee-report-common</artifactId>
-	
+
 	<organization>
 		<name>Imatia Innovation</name>
 		<url>http://imatia.com</url>
@@ -25,6 +26,18 @@
 			<organizationUrl>http://imatia.com</organizationUrl>
 		</developer>
 		<developer>
+			<name>Enrique Álvarez Pereira</name>
+			<email>enrique.alvarez@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Faustino Lage Rego</name>
+			<email>faustino.lage@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
 			<name>Joaquín Romero Riveiro</name>
 			<email>joaquin.romero@imatia.com</email>
 			<organization>Imatia Innovation</organization>
@@ -33,6 +46,18 @@
 		<developer>
 			<name>Jorge Díaz Seijo</name>
 			<email>jorge.diaz@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Pablo Martínez Kirsten</name>
+			<email>pablo.martinez@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Tomás Fuentes Facal</name>
+			<email>tomas.fuentes@imatia.com</email>
 			<organization>Imatia Innovation</organization>
 			<organizationUrl>http://imatia.com</organizationUrl>
 		</developer>
@@ -67,10 +92,28 @@
 			<groupId>com.ontimize.jee</groupId>
 			<artifactId>ontimize-jee-common</artifactId>
 		</dependency>
-		
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-fonts</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.mpobjects.jasperreports.font</groupId>
+			<artifactId>jasperreports-fonts-liberation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ar.com.fdvs</groupId>
+			<artifactId>DynamicJasper</artifactId>
+			<version>5.3.2</version>
+			<exclusions>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 </project>

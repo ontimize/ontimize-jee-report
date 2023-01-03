@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.ontimize.jee.report</groupId>
 		<artifactId>ontimize-jee-report</artifactId>
-		<version>3.1.0</version>
+		<version>3.2.0</version>
 	</parent>
 	<artifactId>ontimize-jee-report-server</artifactId>
 	
@@ -25,6 +25,18 @@
 			<organizationUrl>http://imatia.com</organizationUrl>
 		</developer>
 		<developer>
+			<name>Enrique Álvarez Pereira</name>
+			<email>enrique.alvarez@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Faustino Lage Rego</name>
+			<email>faustino.lage@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
 			<name>Joaquín Romero Riveiro</name>
 			<email>joaquin.romero@imatia.com</email>
 			<organization>Imatia Innovation</organization>
@@ -33,6 +45,18 @@
 		<developer>
 			<name>Jorge Díaz Seijo</name>
 			<email>jorge.diaz@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Pablo Martínez Kirsten</name>
+			<email>pablo.martinez@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Tomás Fuentes Facal</name>
+			<email>tomas.fuentes@imatia.com</email>
 			<organization>Imatia Innovation</organization>
 			<organizationUrl>http://imatia.com</organizationUrl>
 		</developer>
@@ -69,6 +93,10 @@
 		</dependency>
 		<dependency>
 			<groupId>com.ontimize.jee</groupId>
+			<artifactId>ontimize-jee-server-rest</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.ontimize.jee</groupId>
 			<artifactId>ontimize-jee-server</artifactId>
 		</dependency>
 		<dependency>
@@ -91,5 +119,12 @@
 			<groupId>net.lingala.zip4j</groupId>
 			<artifactId>zip4j</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
 	</dependencies>
 </project>

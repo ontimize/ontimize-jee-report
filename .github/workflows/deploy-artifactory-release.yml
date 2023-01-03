@@ -32,7 +32,6 @@ jobs:
         with:
           ref: ${{ env.BRANCH }}
           fetch-depth: 0
-          persist-credentials: false
       - name: Setup Java JDK and Maven
         uses: ontimize/setup-java-maven-gitAction@v2.4.4
         with:

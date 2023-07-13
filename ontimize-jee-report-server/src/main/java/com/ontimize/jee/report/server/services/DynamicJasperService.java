@@ -31,6 +31,7 @@ import com.ontimize.jee.report.common.dto.renderer.RendererDto;
 import com.ontimize.jee.report.common.exception.DynamicReportException;
 import com.ontimize.jee.report.common.services.IDynamicJasperService;
 import com.ontimize.jee.report.common.util.EntityResultDataSource;
+import com.ontimize.jee.report.common.util.FilterParameter;
 import com.ontimize.jee.report.common.util.TypeMappingsUtils;
 import com.ontimize.jee.report.server.ApplicationContextUtils;
 import com.ontimize.jee.report.server.naming.DynamicJasperNaming;
@@ -84,7 +85,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
         return this.generateReport(param.getColumns(), param.getTitle(), param.getGroups(), param.getEntity(),
                 param.getService(), param.getPath(), param.getVertical(), param.getFunctions(), param.getStyle(),
-                param.getSubtitle(), param.getOrderBy(), param.getLanguage());
+                param.getSubtitle(), param.getOrderBy(), param.getLanguage(), param.getFilters());
 
     }
 
@@ -117,8 +118,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
     }
 
     public DynamicReport buildReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
-                                     String service, String path, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto styles,
-                                     String subtitle, String language) throws DynamicReportException {
+            String service, String path, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto styles,
+            String subtitle, String language) throws DynamicReportException {
 
         int numberGroups = 0;
         boolean functionColumn = false;
@@ -154,18 +155,18 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
             if (columnStyleParamsDto != null && columnStyleParamsDto.getAlignment() != null) {
                 switch (columnStyleParamsDto.getAlignment()) {
-                    case "center":
-                        columnDataStyle.setHorizontalAlign(HorizontalAlign.CENTER);
-                        headerStyle.setHorizontalAlign(HorizontalAlign.CENTER);
-                        break;
-                    case "left":
-                        columnDataStyle.setHorizontalAlign(HorizontalAlign.LEFT);
-                        headerStyle.setHorizontalAlign(HorizontalAlign.LEFT);
-                        break;
-                    case "right":
-                        columnDataStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
-                        headerStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
-                        break;
+                case "center":
+                    columnDataStyle.setHorizontalAlign(HorizontalAlign.CENTER);
+                    headerStyle.setHorizontalAlign(HorizontalAlign.CENTER);
+                    break;
+                case "left":
+                    columnDataStyle.setHorizontalAlign(HorizontalAlign.LEFT);
+                    headerStyle.setHorizontalAlign(HorizontalAlign.LEFT);
+                    break;
+                case "right":
+                    columnDataStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
+                    headerStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
+                    break;
                 }
             }
 
@@ -231,7 +232,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
                         }
                     } else {
                         drb.addGlobalFooterVariable(
-                                        new DJGroupVariable(drb.getColumn(0), DJCalculation.SYSTEM, footerStyle))
+                                new DJGroupVariable(drb.getColumn(0), DJCalculation.SYSTEM, footerStyle))
                                 .setGrandTotalLegend("");
 
                     }
@@ -266,9 +267,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
     @Override
     public JRDataSource getDataSource(List<ColumnDto> columns, List<String> groups, List<OrderByDto> orderBy,
-                                      String entity, String service, String path) throws DynamicReportException {
-
-        Map<String, Object> map = new HashMap<>();
+            String entity, String service, String path, FilterParameter filters) throws DynamicReportException {
         List<String> columns1 = this.getDynamicJasperHelper().getColumnsFromDto(columns);
         Integer pageSize = Integer.MAX_VALUE;
         Integer offset = 0;
@@ -304,8 +303,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
         }
 
         Object bean = this.getApplicationContextUtils().getServiceBean(service, path);
-        EntityResult erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("PaginationQuery"), map,
-                columns1, pageSize, offset, sqlOrders);
+        EntityResult erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("PaginationQuery"),
+                filters.getFilter(), columns1, pageSize, offset, sqlOrders);
 
         EntityResultDataSource entityResultDataSource = new EntityResultDataSource(erReportData);
         dynamicJasperHelper.evaluateServiceRenderer(entityResultDataSource, columns);
@@ -322,15 +321,15 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
                 lang0 = language;
             }
             switch (lang0) {
-                case "es":
-                    locale = new Locale("es", "ES");
-                    break;
-                case "gl":
-                    locale = new Locale("gl", "ES");
-                    break;
-                default:
-                    locale = new Locale("en", "US");
-                    break;
+            case "es":
+                locale = new Locale("es", "ES");
+                break;
+            case "gl":
+                locale = new Locale("gl", "ES");
+                break;
+            default:
+                locale = new Locale("en", "US");
+                break;
             }
             bundle = ResourceBundle.getBundle("bundle/bundle", locale);
         }

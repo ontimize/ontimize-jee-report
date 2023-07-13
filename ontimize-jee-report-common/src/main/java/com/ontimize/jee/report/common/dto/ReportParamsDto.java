@@ -1,6 +1,9 @@
 package com.ontimize.jee.report.common.dto;
 
 import java.util.List;
+import java.util.Map;
+
+import com.ontimize.jee.report.common.util.FilterParameter;
 
 public class ReportParamsDto {
 
@@ -16,6 +19,7 @@ public class ReportParamsDto {
     private String subtitle;
     private List<ColumnDto> columns;
     private String language;
+    private FilterParameter filters;
 
     public String getEntity() {
         return entity;
@@ -113,5 +117,12 @@ public class ReportParamsDto {
         this.language = language;
     }
 
+    public FilterParameter getFilters() {
+        return filters;
+    }
+
+    public void setFilters(FilterParameter filters) {
+        this.filters = filters;
+    }
 
 }

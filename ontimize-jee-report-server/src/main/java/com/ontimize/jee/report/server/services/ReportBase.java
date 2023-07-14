@@ -15,9 +15,8 @@ import com.ontimize.jee.report.common.dto.FunctionTypeDto;
 import com.ontimize.jee.report.common.dto.OrderByDto;
 import com.ontimize.jee.report.common.dto.StyleParamsDto;
 import com.ontimize.jee.report.common.exception.DynamicReportException;
-import com.ontimize.jee.report.common.util.FilterParameter;
 import com.ontimize.jee.server.rest.BasicExpressionProcessor;
-
+import com.ontimize.jee.server.rest.FilterParameter;
 import com.ontimize.jee.server.rest.ORestController;
 import com.ontimize.jee.server.rest.ParseUtilsExt;
 
@@ -66,8 +65,6 @@ public abstract class ReportBase {
         DynamicReport dr = buildReport(columns, title, groups, entity, service, path, vertical, functions, style,
                 subtitle, language);
 
-        processFilterParameter(filters);
-
         /**
          * We obtain the data source based on a collection of objects
          */
@@ -113,81 +110,6 @@ public abstract class ReportBase {
 
     protected LayoutManager getLayoutManager() {
         return new ClassicLayoutManager();
-    }
-
-    protected void processFilterParameter(final FilterParameter filterParam) {
-
-        Map<?, ?> kvQueryParameter = filterParam.getFilter();
-        List<?> avQueryParameter = filterParam.getColumns();
-        HashMap<?, ?> hSqlTypes = filterParam.getSqltypes();
-
-        Map<Object, Object> processedKeysValues = this.createKeysValues(kvQueryParameter, hSqlTypes);
-        List<Object> processedAttributesValues = this.createAttributesValues(avQueryParameter, hSqlTypes);
-        filterParam.setKv(processedKeysValues);
-        filterParam.setColumns(processedAttributesValues);
-
-    }
-
-    protected Map<Object, Object> createKeysValues(Map<?, ?> kvQueryParam, Map<?, ?> hSqlTypes) {
-        Map<Object, Object> kv = new HashMap<>();
-        if ((kvQueryParam == null) || kvQueryParam.isEmpty()) {
-            return kv;
-        }
-
-        if (kvQueryParam.containsKey(ORestController.BASIC_EXPRESSION)) {
-            Object basicExpressionValue = kvQueryParam.remove(ORestController.BASIC_EXPRESSION);
-            this.processBasicExpression(SQLStatementBuilder.ExtendedSQLConditionValuesProcessor.EXPRESSION_KEY, kv,
-                    basicExpressionValue, hSqlTypes);
-        }
-
-        if (kvQueryParam.containsKey(ORestController.FILTER_EXPRESSION)) {
-            Object basicExpressionValue = kvQueryParam.remove(ORestController.FILTER_EXPRESSION);
-            this.processBasicExpression(SQLStatementBuilder.ExtendedSQLConditionValuesProcessor.FILTER_KEY, kv,
-                    basicExpressionValue, hSqlTypes);
-        }
-
-        for (Entry<?, ?> next : kvQueryParam.entrySet()) {
-            Object key = next.getKey();
-            Object value = next.getValue();
-            if ((hSqlTypes != null) && hSqlTypes.containsKey(key)) {
-                int sqlType = (Integer) hSqlTypes.get(key);
-                value = ParseUtilsExt.getValueForSQLType(value, sqlType);
-                if (value == null) {
-                    if (ParseUtilsExt.BASE64 == sqlType) {
-                        sqlType = Types.BINARY;
-                    }
-                    value = new NullValue(sqlType);
-                }
-            } else if (value == null) {
-                value = new NullValue();
-            }
-            kv.put(key, value);
-        }
-        return kv;
-    }
-
-    protected List<Object> createAttributesValues(List<?> avQueryParam, Map<?, ?> hSqlTypes) {
-        List<Object> av = new ArrayList<>();
-        if ((avQueryParam == null) || avQueryParam.isEmpty()) {
-            av.add("*");
-            return av;
-        }
-        av.addAll(avQueryParam);
-        return av;
-    }
-
-    protected void processBasicExpression(String key, Map<?, ?> keysValues, Object basicExpression,
-            Map<?, ?> hSqlTypes) {
-        if (basicExpression instanceof Map) {
-            try {
-                BasicExpression bE = BasicExpressionProcessor.getInstance().processBasicEspression(basicExpression,
-                        hSqlTypes);
-                ((Map<Object, Object>) keysValues).put(key, bE);
-            } catch (Exception error) {
-
-            }
-        }
-
     }
 
     protected InputStream convertReport(final JasperPrint fillReport) throws IOException {

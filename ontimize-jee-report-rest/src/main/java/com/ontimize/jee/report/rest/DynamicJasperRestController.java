@@ -7,6 +7,9 @@ import com.ontimize.jee.report.common.dto.FunctionTypeDto;
 import com.ontimize.jee.report.common.dto.ReportParamsDto;
 import com.ontimize.jee.report.common.exception.DynamicReportException;
 import com.ontimize.jee.report.common.services.IDynamicJasperService;
+import com.ontimize.jee.server.rest.FilterParameter;
+import com.ontimize.jee.server.rest.ORestController;
+
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,7 +28,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("${ontimize.report.url:/dynamicjasper}")
-public class DynamicJasperRestController {
+public class DynamicJasperRestController extends ORestController {
 
     /**
      * The Constant TOTAL.
@@ -46,7 +49,8 @@ public class DynamicJasperRestController {
         EntityResult res = new EntityResultMapImpl();
         if (param != null) {
             try {
-                InputStream is = service.createReport(param);
+
+                InputStream is = service.createReport(processFilterParameter(param));
                 byte[] file = IOUtils.toByteArray(is);
                 is.close();
                 Map<String, Object> map = new HashMap<>();
@@ -88,4 +92,18 @@ public class DynamicJasperRestController {
         }
     }
 
+    protected ReportParamsDto processFilterParameter(final ReportParamsDto param) {
+        FilterParameter filterParam = param.getFilters();
+        Map<?, ?> kvQueryParameter = filterParam.getFilter();
+        List<?> avQueryParameter = filterParam.getColumns();
+        HashMap<?, ?> hSqlTypes = filterParam.getSqltypes();
+
+        Map<Object, Object> processedKeysValues = this.createKeysValues(kvQueryParameter, hSqlTypes);
+        List<Object> processedAttributesValues = this.createAttributesValues(avQueryParameter, hSqlTypes);
+        filterParam.setKv(processedKeysValues);
+        filterParam.setColumns(processedAttributesValues);
+        param.setFilters(filterParam);
+        return param;
+
+    }
 }

@@ -3,7 +3,8 @@ package com.ontimize.jee.report.common.dto;
 import java.util.List;
 import java.util.Map;
 
-import com.ontimize.jee.report.common.util.FilterParameter;
+import com.ontimize.jee.server.rest.FilterParameter;
+
 
 public class ReportParamsDto {
 

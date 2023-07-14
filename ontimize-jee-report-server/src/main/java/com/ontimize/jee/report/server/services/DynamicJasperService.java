@@ -31,13 +31,13 @@ import com.ontimize.jee.report.common.dto.renderer.RendererDto;
 import com.ontimize.jee.report.common.exception.DynamicReportException;
 import com.ontimize.jee.report.common.services.IDynamicJasperService;
 import com.ontimize.jee.report.common.util.EntityResultDataSource;
-import com.ontimize.jee.report.common.util.FilterParameter;
 import com.ontimize.jee.report.common.util.TypeMappingsUtils;
 import com.ontimize.jee.report.server.ApplicationContextUtils;
 import com.ontimize.jee.report.server.naming.DynamicJasperNaming;
 import com.ontimize.jee.report.server.services.util.ColumnMetadata;
 import com.ontimize.jee.report.server.services.util.DynamicJasperHelper;
 import com.ontimize.jee.report.server.services.util.DynamicReportBuilderHelper;
+import com.ontimize.jee.server.rest.FilterParameter;
 
 import ar.com.fdvs.dj.domain.DJCalculation;
 import ar.com.fdvs.dj.domain.DJValueFormatter;

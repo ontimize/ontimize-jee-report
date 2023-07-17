@@ -21,6 +21,7 @@ public class ReportParamsDto {
     private List<ColumnDto> columns;
     private String language;
     private FilterParameter filters;
+    private Boolean advQuery;
 
     public String getEntity() {
         return entity;
@@ -124,6 +125,14 @@ public class ReportParamsDto {
 
     public void setFilters(FilterParameter filters) {
         this.filters = filters;
+    }
+
+    public Boolean getAdvQuery() {
+        return advQuery;
+    }
+
+    public void setAdvQuery(Boolean advQuery) {
+        this.advQuery = advQuery;
     }
 
 }

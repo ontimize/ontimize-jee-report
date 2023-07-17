@@ -55,11 +55,11 @@ public abstract class ReportBase {
             StyleParamsDto style, String subtitle, String language) throws DynamicReportException;
 
     public abstract JRDataSource getDataSource(List<ColumnDto> columns, List<String> groups, List<OrderByDto> orderBy,
-            String entity, String service, String path, FilterParameter filters) throws DynamicReportException;
+            String entity, String service, String path, FilterParameter filters, Boolean advQuery) throws DynamicReportException;
 
     public InputStream generateReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
             String service, String path, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto style,
-            String subtitle, List<OrderByDto> orderBy, String language, FilterParameter filters)
+            String subtitle, List<OrderByDto> orderBy, String language, FilterParameter filters, Boolean advQuery)
             throws DynamicReportException {
 
         DynamicReport dr = buildReport(columns, title, groups, entity, service, path, vertical, functions, style,
@@ -68,7 +68,7 @@ public abstract class ReportBase {
         /**
          * We obtain the data source based on a collection of objects
          */
-        JRDataSource ds = getDataSource(columns, groups, orderBy, entity, service, path, filters);
+        JRDataSource ds = getDataSource(columns, groups, orderBy, entity, service, path, filters, advQuery);
 
         /**
          * We create the JasperReport object that we pass as a parameter to

@@ -85,7 +85,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
         return this.generateReport(param.getColumns(), param.getTitle(), param.getGroups(), param.getEntity(),
                 param.getService(), param.getPath(), param.getVertical(), param.getFunctions(), param.getStyle(),
-                param.getSubtitle(), param.getOrderBy(), param.getLanguage(), param.getFilters());
+                param.getSubtitle(), param.getOrderBy(), param.getLanguage(), param.getFilters(), param.getAdvQuery());
 
     }
 
@@ -267,7 +267,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
     @Override
     public JRDataSource getDataSource(List<ColumnDto> columns, List<String> groups, List<OrderByDto> orderBy,
-            String entity, String service, String path, FilterParameter filters) throws DynamicReportException {
+            String entity, String service, String path, FilterParameter filters, Boolean advQuery)
+            throws DynamicReportException {
         List<String> columns1 = this.getDynamicJasperHelper().getColumnsFromDto(columns);
         Integer pageSize = Integer.MAX_VALUE;
         Integer offset = 0;
@@ -303,9 +304,14 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
         }
 
         Object bean = this.getApplicationContextUtils().getServiceBean(service, path);
-        EntityResult erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("PaginationQuery"),
-                filters.getFilter(), columns1, pageSize, offset, sqlOrders);
-
+        EntityResult erReportData;
+        if (advQuery) {
+            erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("PaginationQuery"),
+                    filters.getFilter(), columns1, pageSize, offset, sqlOrders);
+        } else {
+            erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("Query"),
+                    filters.getFilter(), columns1);
+        }
         EntityResultDataSource entityResultDataSource = new EntityResultDataSource(erReportData);
         dynamicJasperHelper.evaluateServiceRenderer(entityResultDataSource, columns);
 

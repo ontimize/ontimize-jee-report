@@ -1,25 +1,28 @@
 package com.ontimize.jee.report.server.services;
 
-import ar.com.fdvs.dj.core.DynamicJasperHelper;
-import ar.com.fdvs.dj.core.layout.ClassicLayoutManager;
-import ar.com.fdvs.dj.core.layout.LayoutManager;
-import ar.com.fdvs.dj.domain.DynamicReport;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import com.ontimize.jee.common.db.NullValue;
-import com.ontimize.jee.common.db.SQLStatementBuilder;
-import com.ontimize.jee.common.db.SQLStatementBuilder.BasicExpression;
-import com.ontimize.jee.common.db.SQLStatementBuilder.Expression;
-import com.ontimize.jee.common.exceptions.OntimizeJEEException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.ontimize.jee.report.common.dto.ColumnDto;
 import com.ontimize.jee.report.common.dto.FunctionTypeDto;
 import com.ontimize.jee.report.common.dto.OrderByDto;
 import com.ontimize.jee.report.common.dto.StyleParamsDto;
 import com.ontimize.jee.report.common.exception.DynamicReportException;
-import com.ontimize.jee.server.rest.BasicExpressionProcessor;
 import com.ontimize.jee.server.rest.FilterParameter;
-import com.ontimize.jee.server.rest.ORestController;
-import com.ontimize.jee.server.rest.ParseUtilsExt;
 
+import ar.com.fdvs.dj.core.DynamicJasperHelper;
+import ar.com.fdvs.dj.core.layout.ClassicLayoutManager;
+import ar.com.fdvs.dj.core.layout.LayoutManager;
+import ar.com.fdvs.dj.domain.DynamicReport;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExporterParameter;
@@ -28,20 +31,6 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public abstract class ReportBase {
 
@@ -55,7 +44,8 @@ public abstract class ReportBase {
             StyleParamsDto style, String subtitle, String language) throws DynamicReportException;
 
     public abstract JRDataSource getDataSource(List<ColumnDto> columns, List<String> groups, List<OrderByDto> orderBy,
-            String entity, String service, String path, FilterParameter filters, Boolean advQuery) throws DynamicReportException;
+            String entity, String service, String path, FilterParameter filters, Boolean advQuery)
+            throws DynamicReportException;
 
     public InputStream generateReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
             String service, String path, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto style,

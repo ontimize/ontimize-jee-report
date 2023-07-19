@@ -29,7 +29,7 @@ import com.ontimize.jee.server.rest.QueryParameter;
 
 @RestController
 @RequestMapping("${ontimize.report.url:/dynamicjasper}")
-public class DynamicJasperRestController extends ORestController {
+public class DynamicJasperRestController extends ORestController<IDynamicJasperService> {
 
     /**
      * The Constant TOTAL.

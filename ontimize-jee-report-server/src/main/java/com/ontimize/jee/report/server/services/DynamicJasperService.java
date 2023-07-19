@@ -314,7 +314,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
     private EntityResult fetchEntityResultData(String entity, Object bean, FilterParameter filters,
             List<String> columns1, Boolean advQuery, List<SQLStatementBuilder.SQLOrder> sqlOrders) {
         EntityResult erReportData;
-        if (advQuery) {
+        if (Boolean.TRUE.equals(advQuery)) {
             erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("PaginationQuery"),
                     filters != null ? filters.getFilter() : null, columns1, Integer.MAX_VALUE, 0, sqlOrders);
         } else {

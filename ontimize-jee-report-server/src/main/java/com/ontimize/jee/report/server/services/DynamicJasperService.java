@@ -270,31 +270,34 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
             String entity, String service, String path, FilterParameter filters, Boolean advQuery)
             throws DynamicReportException {
         List<String> columns1 = this.getDynamicJasperHelper().getColumnsFromDto(columns);
-        Integer pageSize = Integer.MAX_VALUE;
-        Integer offset = 0;
-        boolean order = false;
         List<SQLStatementBuilder.SQLOrder> sqlOrders = new ArrayList<>();
-        // If there are group columns, it is necessary to add to order by to allow
-        // jasper engine perform grouping well...
+
+        addGroupColumnsToOrderBy(groups, orderBy, sqlOrders);
+        addNonGroupColumnsToOrderBy(groups, orderBy, sqlOrders);
+
+        Object bean = this.getApplicationContextUtils().getServiceBean(service, path);
+        EntityResult erReportData = fetchEntityResultData(entity, bean, filters, columns1, advQuery, sqlOrders);
+
+        EntityResultDataSource entityResultDataSource = new EntityResultDataSource(erReportData);
+        dynamicJasperHelper.evaluateServiceRenderer(entityResultDataSource, columns);
+
+        return entityResultDataSource;
+    }
+
+    private void addGroupColumnsToOrderBy(List<String> groups, List<OrderByDto> orderBy,
+            List<SQLStatementBuilder.SQLOrder> sqlOrders) {
         if (groups != null && !groups.isEmpty()) {
             for (String col : groups) {
-                if (orderBy != null && !orderBy.isEmpty()) {
-
-                    OrderByDto orderByDto = orderBy.stream().filter(item -> item.getColumnId().equals(col)).findFirst()
-                            .orElse(null);
-                    if (orderByDto != null) {
-                        SQLStatementBuilder.SQLOrder sqlO = new SQLStatementBuilder.SQLOrder(col,
-                                orderByDto.isAscendent());
-                        sqlOrders.add(sqlO);
-                        continue;
-                    }
-                }
-                SQLStatementBuilder.SQLOrder sqlO = new SQLStatementBuilder.SQLOrder(col);
+                OrderByDto orderByDto = findOrderByDto(orderBy, col);
+                SQLStatementBuilder.SQLOrder sqlO = new SQLStatementBuilder.SQLOrder(col,
+                        orderByDto != null ? orderByDto.isAscendent() : true);
                 sqlOrders.add(sqlO);
-
             }
         }
-        // Second, add the rest of the columns to orderBy
+    }
+
+    private void addNonGroupColumnsToOrderBy(List<String> groups, List<OrderByDto> orderBy,
+            List<SQLStatementBuilder.SQLOrder> sqlOrders) {
         if (orderBy != null && !orderBy.isEmpty()) {
             orderBy.stream().filter(ord -> !groups.contains(ord.getColumnId())).forEach(ord -> {
                 SQLStatementBuilder.SQLOrder sqlOrder = new SQLStatementBuilder.SQLOrder(ord.getColumnId(),
@@ -302,22 +305,23 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
                 sqlOrders.add(sqlOrder);
             });
         }
+    }
 
-        Object bean = this.getApplicationContextUtils().getServiceBean(service, path);
+    private OrderByDto findOrderByDto(List<OrderByDto> orderBy, String columnId) {
+        return orderBy.stream().filter(item -> item.getColumnId().equals(columnId)).findFirst().orElse(null);
+    }
+
+    private EntityResult fetchEntityResultData(String entity, Object bean, FilterParameter filters,
+            List<String> columns1, Boolean advQuery, List<SQLStatementBuilder.SQLOrder> sqlOrders) {
         EntityResult erReportData;
         if (advQuery == null || !advQuery) {
-            erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("Query"), filters.getFilter(),
-                    columns1);
-
+            erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("Query"),
+                    filters != null ? filters.getFilter() : null, columns1);
         } else {
             erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("PaginationQuery"),
-                    filters.getFilter(), columns1, pageSize, offset, sqlOrders);
+                    filters != null ? filters.getFilter() : null, columns1, Integer.MAX_VALUE, 0, sqlOrders);
         }
-        EntityResultDataSource entityResultDataSource = new EntityResultDataSource(erReportData);
-        dynamicJasperHelper.evaluateServiceRenderer(entityResultDataSource, columns);
-
-        return entityResultDataSource;
-
+        return erReportData;
     }
 
     protected ResourceBundle getBundle(final String language) {

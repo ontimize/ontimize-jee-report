@@ -92,9 +92,9 @@ public class DynamicJasperRestController extends ORestController {
         }
     }
 
-    protected ReportParamsDto processFilterParameter(final ReportParamsDto param) throws Exception {
+    protected ReportParamsDto processFilterParameter(final ReportParamsDto param) throws DynamicReportException {
         if (param == null) {
-            throw new Exception("'ReportParams' not found!");
+            throw new DynamicReportException("'ReportParams' not found!");
         }
 
         FilterParameter filterParam = param.getFilters();

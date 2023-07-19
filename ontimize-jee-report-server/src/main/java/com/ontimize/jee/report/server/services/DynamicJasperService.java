@@ -305,12 +305,13 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
         Object bean = this.getApplicationContextUtils().getServiceBean(service, path);
         EntityResult erReportData;
-        if (advQuery) {
+        if (advQuery == null || !advQuery) {
+            erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("Query"), filters.getFilter(),
+                    columns1);
+
+        } else {
             erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("PaginationQuery"),
                     filters.getFilter(), columns1, pageSize, offset, sqlOrders);
-        } else {
-            erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("Query"),
-                    filters.getFilter(), columns1);
         }
         EntityResultDataSource entityResultDataSource = new EntityResultDataSource(erReportData);
         dynamicJasperHelper.evaluateServiceRenderer(entityResultDataSource, columns);

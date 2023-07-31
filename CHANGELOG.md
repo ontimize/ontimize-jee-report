@@ -16,5 +16,5 @@
 ### Added ✔️
 * **Report on-demand**: On-demand reports can now be created with the help of Jasper Reports via HTTP requests. The parameters for creating these reports can be stored in preferences for later use.
 
-[unreleased]: https://github.com/ontimize/ontimize-jee/compare/5.9.0...HEAD
-[3.2.0]: https://github.com/ontimize/ontimize-jee/compare/5.8.0...5.9.0
+[unreleased]: https://github.com/ontimize/ontimize-jee-report/compare/3.2.0...HEAD
+[3.2.0]: https://github.com/ontimize/ontimize-jee-report/tree/3.2.0

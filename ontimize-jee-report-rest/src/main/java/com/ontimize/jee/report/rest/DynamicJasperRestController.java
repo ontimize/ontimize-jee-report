@@ -1,12 +1,10 @@
 package com.ontimize.jee.report.rest;
 
-import com.ontimize.jee.common.dto.EntityResult;
-import com.ontimize.jee.common.dto.EntityResultMapImpl;
-import com.ontimize.jee.report.common.dto.FunctionParamsDto;
-import com.ontimize.jee.report.common.dto.FunctionTypeDto;
-import com.ontimize.jee.report.common.dto.ReportParamsDto;
-import com.ontimize.jee.report.common.exception.DynamicReportException;
-import com.ontimize.jee.report.common.services.IDynamicJasperService;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,14 +16,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.ontimize.jee.common.dto.EntityResult;
+import com.ontimize.jee.common.dto.EntityResultMapImpl;
+import com.ontimize.jee.report.common.dto.FunctionParamsDto;
+import com.ontimize.jee.report.common.dto.FunctionTypeDto;
+import com.ontimize.jee.report.common.dto.ReportParamsDto;
+import com.ontimize.jee.report.common.exception.DynamicReportException;
+import com.ontimize.jee.report.common.services.IDynamicJasperService;
+import com.ontimize.jee.server.rest.FilterParameter;
+import com.ontimize.jee.server.rest.ORestController;
+import com.ontimize.jee.server.rest.QueryParameter;
 
 @RestController
 @RequestMapping("${ontimize.report.url:/dynamicjasper}")
-public class DynamicJasperRestController {
+public class DynamicJasperRestController extends ORestController<IDynamicJasperService> {
 
     /**
      * The Constant TOTAL.
@@ -46,7 +50,7 @@ public class DynamicJasperRestController {
         EntityResult res = new EntityResultMapImpl();
         if (param != null) {
             try {
-                InputStream is = service.createReport(param);
+                InputStream is = service.createReport(processFilterParameter(param));
                 byte[] file = IOUtils.toByteArray(is);
                 is.close();
                 Map<String, Object> map = new HashMap<>();
@@ -86,6 +90,31 @@ public class DynamicJasperRestController {
             res.setMessage("Report function parameters value is empty.");
             return new ResponseEntity<EntityResult>(res, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    protected ReportParamsDto processFilterParameter(final ReportParamsDto param) throws DynamicReportException {
+        if (param == null) {
+            throw new DynamicReportException("'ReportParams' not found!");
+        }
+
+        FilterParameter filterParam = param.getFilters();
+        if (filterParam == null) {
+            filterParam = new QueryParameter();
+        }
+
+        Map<?, ?> kvQueryParameter = filterParam.getFilter();
+        List<?> avQueryParameter = filterParam.getColumns();
+        Map<?, ?> hSqlTypes = filterParam.getSqltypes();
+
+        Map<Object, Object> processedKeysValues = this.createKeysValues(kvQueryParameter, hSqlTypes);
+        List<Object> processedAttributesValues = this.createAttributesValues(avQueryParameter, hSqlTypes);
+
+        filterParam.setKv(processedKeysValues);
+        filterParam.setColumns(processedAttributesValues);
+
+        param.setFilters(filterParam);
+
+        return param;
     }
 
 }

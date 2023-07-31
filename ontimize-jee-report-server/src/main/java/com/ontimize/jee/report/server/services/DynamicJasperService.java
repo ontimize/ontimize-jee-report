@@ -37,6 +37,7 @@ import com.ontimize.jee.report.server.naming.DynamicJasperNaming;
 import com.ontimize.jee.report.server.services.util.ColumnMetadata;
 import com.ontimize.jee.report.server.services.util.DynamicJasperHelper;
 import com.ontimize.jee.report.server.services.util.DynamicReportBuilderHelper;
+import com.ontimize.jee.server.rest.FilterParameter;
 
 import ar.com.fdvs.dj.domain.DJCalculation;
 import ar.com.fdvs.dj.domain.DJValueFormatter;
@@ -84,7 +85,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
         return this.generateReport(param.getColumns(), param.getTitle(), param.getGroups(), param.getEntity(),
                 param.getService(), param.getPath(), param.getVertical(), param.getFunctions(), param.getStyle(),
-                param.getSubtitle(), param.getOrderBy(), param.getLanguage());
+                param.getSubtitle(), param.getOrderBy(), param.getLanguage(), param.getFilters(), param.getAdvQuery());
 
     }
 
@@ -117,8 +118,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
     }
 
     public DynamicReport buildReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
-                                     String service, String path, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto styles,
-                                     String subtitle, String language) throws DynamicReportException {
+            String service, String path, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto styles,
+            String subtitle, String language) throws DynamicReportException {
 
         int numberGroups = 0;
         boolean functionColumn = false;
@@ -154,18 +155,18 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
             if (columnStyleParamsDto != null && columnStyleParamsDto.getAlignment() != null) {
                 switch (columnStyleParamsDto.getAlignment()) {
-                    case "center":
-                        columnDataStyle.setHorizontalAlign(HorizontalAlign.CENTER);
-                        headerStyle.setHorizontalAlign(HorizontalAlign.CENTER);
-                        break;
-                    case "left":
-                        columnDataStyle.setHorizontalAlign(HorizontalAlign.LEFT);
-                        headerStyle.setHorizontalAlign(HorizontalAlign.LEFT);
-                        break;
-                    case "right":
-                        columnDataStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
-                        headerStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
-                        break;
+                case "center":
+                    columnDataStyle.setHorizontalAlign(HorizontalAlign.CENTER);
+                    headerStyle.setHorizontalAlign(HorizontalAlign.CENTER);
+                    break;
+                case "left":
+                    columnDataStyle.setHorizontalAlign(HorizontalAlign.LEFT);
+                    headerStyle.setHorizontalAlign(HorizontalAlign.LEFT);
+                    break;
+                case "right":
+                    columnDataStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
+                    headerStyle.setHorizontalAlign(HorizontalAlign.RIGHT);
+                    break;
                 }
             }
 
@@ -231,7 +232,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
                         }
                     } else {
                         drb.addGlobalFooterVariable(
-                                        new DJGroupVariable(drb.getColumn(0), DJCalculation.SYSTEM, footerStyle))
+                                new DJGroupVariable(drb.getColumn(0), DJCalculation.SYSTEM, footerStyle))
                                 .setGrandTotalLegend("");
 
                     }
@@ -266,35 +267,37 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
 
     @Override
     public JRDataSource getDataSource(List<ColumnDto> columns, List<String> groups, List<OrderByDto> orderBy,
-                                      String entity, String service, String path) throws DynamicReportException {
-
-        Map<String, Object> map = new HashMap<>();
+            String entity, String service, String path, FilterParameter filters, Boolean advQuery)
+            throws DynamicReportException {
         List<String> columns1 = this.getDynamicJasperHelper().getColumnsFromDto(columns);
-        Integer pageSize = Integer.MAX_VALUE;
-        Integer offset = 0;
-        boolean order = false;
         List<SQLStatementBuilder.SQLOrder> sqlOrders = new ArrayList<>();
-        // If there are group columns, it is necessary to add to order by to allow
-        // jasper engine perform grouping well...
+
+        addGroupColumnsToOrderBy(groups, orderBy, sqlOrders);
+        addNonGroupColumnsToOrderBy(groups, orderBy, sqlOrders);
+
+        Object bean = this.getApplicationContextUtils().getServiceBean(service, path);
+        EntityResult erReportData = fetchEntityResultData(entity, bean, filters, columns1, advQuery, sqlOrders);
+
+        EntityResultDataSource entityResultDataSource = new EntityResultDataSource(erReportData);
+        dynamicJasperHelper.evaluateServiceRenderer(entityResultDataSource, columns);
+
+        return entityResultDataSource;
+    }
+
+    private void addGroupColumnsToOrderBy(List<String> groups, List<OrderByDto> orderBy,
+            List<SQLStatementBuilder.SQLOrder> sqlOrders) {
         if (groups != null && !groups.isEmpty()) {
             for (String col : groups) {
-                if (orderBy != null && !orderBy.isEmpty()) {
-
-                    OrderByDto orderByDto = orderBy.stream().filter(item -> item.getColumnId().equals(col)).findFirst()
-                            .orElse(null);
-                    if (orderByDto != null) {
-                        SQLStatementBuilder.SQLOrder sqlO = new SQLStatementBuilder.SQLOrder(col,
-                                orderByDto.isAscendent());
-                        sqlOrders.add(sqlO);
-                        continue;
-                    }
-                }
-                SQLStatementBuilder.SQLOrder sqlO = new SQLStatementBuilder.SQLOrder(col);
+                OrderByDto orderByDto = findOrderByDto(orderBy, col);
+                SQLStatementBuilder.SQLOrder sqlO = new SQLStatementBuilder.SQLOrder(col,
+                        orderByDto != null ? orderByDto.isAscendent() : true);
                 sqlOrders.add(sqlO);
-
             }
         }
-        // Second, add the rest of the columns to orderBy
+    }
+
+    private void addNonGroupColumnsToOrderBy(List<String> groups, List<OrderByDto> orderBy,
+            List<SQLStatementBuilder.SQLOrder> sqlOrders) {
         if (orderBy != null && !orderBy.isEmpty()) {
             orderBy.stream().filter(ord -> !groups.contains(ord.getColumnId())).forEach(ord -> {
                 SQLStatementBuilder.SQLOrder sqlOrder = new SQLStatementBuilder.SQLOrder(ord.getColumnId(),
@@ -302,16 +305,23 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
                 sqlOrders.add(sqlOrder);
             });
         }
+    }
 
-        Object bean = this.getApplicationContextUtils().getServiceBean(service, path);
-        EntityResult erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("PaginationQuery"), map,
-                columns1, pageSize, offset, sqlOrders);
+    private OrderByDto findOrderByDto(List<OrderByDto> orderBy, String columnId) {
+        return orderBy.stream().filter(item -> item.getColumnId().equals(columnId)).findFirst().orElse(null);
+    }
 
-        EntityResultDataSource entityResultDataSource = new EntityResultDataSource(erReportData);
-        dynamicJasperHelper.evaluateServiceRenderer(entityResultDataSource, columns);
-
-        return entityResultDataSource;
-
+    private EntityResult fetchEntityResultData(String entity, Object bean, FilterParameter filters,
+            List<String> columns1, Boolean advQuery, List<SQLStatementBuilder.SQLOrder> sqlOrders) {
+        EntityResult erReportData;
+        if (Boolean.TRUE.equals(advQuery)) {
+            erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("PaginationQuery"),
+                    filters != null ? filters.getFilter() : null, columns1, Integer.MAX_VALUE, 0, sqlOrders);
+        } else {
+            erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("Query"),
+                    filters != null ? filters.getFilter() : null, columns1);
+        }
+        return erReportData;
     }
 
     protected ResourceBundle getBundle(final String language) {
@@ -322,15 +332,15 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
                 lang0 = language;
             }
             switch (lang0) {
-                case "es":
-                    locale = new Locale("es", "ES");
-                    break;
-                case "gl":
-                    locale = new Locale("gl", "ES");
-                    break;
-                default:
-                    locale = new Locale("en", "US");
-                    break;
+            case "es":
+                locale = new Locale("es", "ES");
+                break;
+            case "gl":
+                locale = new Locale("gl", "ES");
+                break;
+            default:
+                locale = new Locale("en", "US");
+                break;
             }
             bundle = ResourceBundle.getBundle("bundle/bundle", locale);
         }

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.ontimize.jee.report</groupId>
 		<artifactId>ontimize-jee-report</artifactId>
-		<version>3.2.0</version>
+		<version>3.3.0</version>
 	</parent>
 	<artifactId>ontimize-jee-report-rest</artifactId>
 	
@@ -91,14 +91,6 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>ontimize-jee-report-common</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.ontimize.jee</groupId>
-			<artifactId>ontimize-jee-server</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.ontimize.jee</groupId>
-			<artifactId>ontimize-jee-server-rest</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>

@@ -7,6 +7,7 @@
 <!-- ### Security 🛡️-->
 
 ## [Unreleased]
+## [3.3.0] - 2023-07-31
 ### Added ✔️
 * **Reports on-demand**: Add filters to query reports on-demand
 ### Changed 🛠️
@@ -17,4 +18,5 @@
 * **Report on-demand**: On-demand reports can now be created with the help of Jasper Reports via HTTP requests. The parameters for creating these reports can be stored in preferences for later use.
 
 [unreleased]: https://github.com/ontimize/ontimize-jee-report/compare/3.2.0...HEAD
+[3.3.0]: https://github.com/ontimize/ontimize-jee-report/compare/3.2.0...3.3.0
 [3.2.0]: https://github.com/ontimize/ontimize-jee-report/tree/3.2.0

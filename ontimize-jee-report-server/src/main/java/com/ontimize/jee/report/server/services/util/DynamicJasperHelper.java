@@ -136,10 +136,8 @@ public class DynamicJasperHelper implements ApplicationContextAware {
     }
 
     protected boolean hasRenderForColumn(final ColumnDto column) {
-        if (column != null && column.getColumnStyle() != null) {
-            if (column.getColumnStyle().getRenderer() instanceof Renderer) {
-                return Boolean.TRUE;
-            }
+        if (column != null && column.getColumnStyle() != null && column.getColumnStyle().getRenderer() instanceof Renderer) {
+            return Boolean.TRUE;
         }
         return Boolean.FALSE;
     }

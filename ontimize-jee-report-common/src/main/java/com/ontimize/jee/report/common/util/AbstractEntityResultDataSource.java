@@ -11,7 +11,6 @@ import net.sf.jasperreports.engine.JRField;
 
 import javax.swing.*;
 import java.awt.*;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Enumeration;
@@ -204,9 +203,8 @@ public abstract class AbstractEntityResultDataSource<T extends EntityResult> imp
         if(value instanceof Boolean){
             if(value == Boolean.TRUE) {
                 return renderer.getTrueValue();
-            } else if(value == Boolean.FALSE) {
-                return renderer.getFalseValue();
-            }
+            } 
+            return renderer.getFalseValue();
         } else if(value instanceof Number) {
             if(((Number) value).intValue() == 1) {
                 return renderer.getTrueValue();

@@ -1,6 +1,8 @@
 package com.ontimize.jee.report.common.util;
 
 import com.ontimize.jee.common.dto.EntityResult;
+import com.ontimize.jee.report.common.dto.renderer.BooleanRendererDto;
+import com.ontimize.jee.report.common.dto.renderer.Renderer;
 import com.ontimize.jee.report.common.dto.renderer.ServiceRendererDto;
 import com.ontimize.jee.report.common.reportstore.OntimizeField;
 import net.sf.jasperreports.engine.JRDataSource;
@@ -9,6 +11,7 @@ import net.sf.jasperreports.engine.JRField;
 
 import javax.swing.*;
 import java.awt.*;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Enumeration;
@@ -20,7 +23,7 @@ public abstract class AbstractEntityResultDataSource<T extends EntityResult> imp
 
     protected T result;
     protected Map<String, T> rendererData;
-    protected Map<String, ServiceRendererDto> rendererInfo;
+    protected Map<String, Renderer> rendererInfo;
     protected int index = -1;
     protected final int size;
 
@@ -35,7 +38,7 @@ public abstract class AbstractEntityResultDataSource<T extends EntityResult> imp
         this.rendererData = rendererData;
     }
 
-    public void setRendererInfo(Map<String, ServiceRendererDto> rendererInfo) {
+    public void setRendererInfo(Map<String, Renderer> rendererInfo) {
         this.rendererInfo = rendererInfo;
     }
 
@@ -59,8 +62,8 @@ public abstract class AbstractEntityResultDataSource<T extends EntityResult> imp
 
         if (Image.class.equals(fieldClass)) {
             return getImageValue(value);
-        } else if (rendererData != null && rendererData.containsKey(fieldName)) {
-            return getServiceRendererValue(fieldName, value);
+        } else if (rendererInfo != null && rendererInfo.containsKey(fieldName)) {
+            return getRendererValue(fieldName, value);
         }
         return value;
     }
@@ -138,25 +141,57 @@ public abstract class AbstractEntityResultDataSource<T extends EntityResult> imp
         return result_;
     }
 
-    protected Object getServiceRendererValue(final String fieldName, final Object value) {
-        EntityResult obj2 = rendererData.get(fieldName);
-        if (obj2 == null) {
-            return null;
-        }
+    protected Object getRendererValue(final String fieldName, final Object value) {
         if (rendererInfo == null || rendererInfo.get(fieldName) == null) {
             return null;
         }
-        Object obj3 = obj2.get(fieldName);
+        
+        Renderer renderer = this.rendererInfo.get(fieldName);
+        if(renderer instanceof ServiceRendererDto) {
+            return getServiceRendererValue(fieldName, value);
+        } else if( renderer instanceof BooleanRendererDto) {
+            return getBooleanRendererValue((BooleanRendererDto) renderer, value);
+        }
+        return null;
+    }
+
+    protected Object getServiceRendererValue(final String fieldName, final Object value) {
+        EntityResult entityResult = rendererData.get(fieldName);
+        if (entityResult == null) {
+            return null;
+        }
+        Object obj3 = entityResult.get(fieldName);
         if (!(obj3 instanceof List)) {
             return null;
         }
         List<?> v2 = (List<?>) obj3;
         int i = v2.indexOf(value);
         if (i >= 0 && i < v2.size()) {
-            String valueColumn = this.rendererInfo.get(fieldName).getValueColumn();
-            Map<?, ?> recordValues = obj2.getRecordValues(i);
+            ServiceRendererDto renderer = (ServiceRendererDto) this.rendererInfo.get(fieldName);
+            String valueColumn = renderer.getValueColumn();
+            Map<?, ?> recordValues = entityResult.getRecordValues(i);
             return recordValues.get(valueColumn);
         }
         return null;
+    }
+
+    protected Object getBooleanRendererValue(final BooleanRendererDto renderer, final Object value) {
+        if(value == null) {
+            return value;
+        }
+        if("string".equals(renderer.getRenderType())) {
+            if("yes".equals(value.toString().toLowerCase()) || "true".equals(value.toString().toLowerCase())) {
+                return renderer.getTrueValue();
+            } else if("no".equals(value.toString().toLowerCase()) || "false".equals(value.toString().toLowerCase())) {
+                return renderer.getFalseValue();
+            }
+        } else if("number".equals(renderer.getRenderType())){
+            if("0".equals(value.toString())) {
+                return renderer.getTrueValue();
+            } else if("1".equals(value.toString())) {
+                return renderer.getFalseValue();
+            }
+        }
+        return value;
     }
 }

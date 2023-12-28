@@ -4,6 +4,8 @@ import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.common.tools.ReflectionTools;
 import com.ontimize.jee.report.common.dto.ColumnDto;
 import com.ontimize.jee.report.common.dto.ColumnStyleParamsDto;
+import com.ontimize.jee.report.common.dto.renderer.BooleanRendererDto;
+import com.ontimize.jee.report.common.dto.renderer.Renderer;
 import com.ontimize.jee.report.common.dto.renderer.RendererDto;
 import com.ontimize.jee.report.common.dto.renderer.ServiceRendererDto;
 import com.ontimize.jee.report.common.exception.DynamicReportException;
@@ -15,6 +17,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,13 +51,10 @@ public class DynamicJasperHelper implements ApplicationContextAware {
         for (ColumnDto col : columns) {
             String id = col.getId();
             int type = defaultSqlColumnTypes.get(id);
-            ServiceRendererDto serviceRendererDto = retrieveServiceRenderForColumn(col);
-            if (serviceRendererDto != null) {
-                Map<String, Integer> rendererSqlColumnTypes =
-                        getSQLColumnTypes(serviceRendererDto.getService(), serviceRendererDto.getPath(),
-                                serviceRendererDto.getEntity(), serviceRendererDto.getColumns());
-                type = rendererSqlColumnTypes.get(serviceRendererDto.getValueColumn());
+            if(hasRenderForColumn(col)){
+                type = retrieveTypeFromRenderer(col);
             }
+            
             String classname = TypeMappingsUtils.getClassName(type);
             ColumnMetadata columnMetadata = new ColumnMetadata(id, type, classname);
             columnMetadataMap.put(id, columnMetadata);
@@ -117,12 +117,49 @@ public class DynamicJasperHelper implements ApplicationContextAware {
                     renderData.put(serviceRendererDto.getKeyColumn(), eR_renderer);
                     entityResultDataSource.setRendererData(renderData);
 
-                    Map<String, ServiceRendererDto> renderInfo = new HashMap<>();
+                    Map<String, Renderer> renderInfo = new HashMap<>();
                     renderInfo.put(serviceRendererDto.getKeyColumn(), serviceRendererDto);
                     entityResultDataSource.setRendererInfo(renderInfo);
+                } else if(renderer instanceof BooleanRendererDto) {
+                    BooleanRendererDto booleanRendererDto = (BooleanRendererDto) renderer;
+                    
+                    Map<String, Renderer> renderInfo = new HashMap<>();
+                    renderInfo.put(columnDto.getId(), booleanRendererDto);
+                    entityResultDataSource.setRendererInfo(renderInfo);
+                    
                 }
             }
         }
+    }
+
+    protected boolean hasRenderForColumn(final ColumnDto column) {
+        if (column != null && column.getColumnStyle() != null) {
+            if (column.getColumnStyle().getRenderer() instanceof Renderer) {
+                return Boolean.TRUE;
+            }
+        }
+        return Boolean.FALSE;
+    }
+    
+    protected int retrieveTypeFromRenderer(final ColumnDto column) throws DynamicReportException {
+        int type = -1;
+        if (column != null && column.getColumnStyle() != null) {
+            if (column.getColumnStyle().getRenderer() instanceof ServiceRendererDto) {
+                ServiceRendererDto serviceRendererDto = (ServiceRendererDto) column.getColumnStyle().getRenderer();
+                Map<String, Integer> rendererSqlColumnTypes =
+                        getSQLColumnTypes(serviceRendererDto.getService(), serviceRendererDto.getPath(),
+                                serviceRendererDto.getEntity(), serviceRendererDto.getColumns());
+                type = rendererSqlColumnTypes.get(serviceRendererDto.getValueColumn());
+            } else if(column.getColumnStyle().getRenderer() instanceof BooleanRendererDto) {
+                BooleanRendererDto booleanRendererDto = (BooleanRendererDto) column.getColumnStyle().getRenderer();
+                if(BooleanRendererDto.STRING_TYPE.equals(booleanRendererDto.getRenderType())) {
+                    type = Types.VARCHAR;
+                } else if(BooleanRendererDto.NUMBER_TYPE.equals(booleanRendererDto.getRenderType())) {
+                    type = Types.INTEGER;
+                }
+            }
+        }
+        return type;
     }
 
     protected ServiceRendererDto retrieveServiceRenderForColumn(final ColumnDto column) {

@@ -1,10 +1,6 @@
 package com.ontimize.jee.report.server.services.util;
 
-import com.ontimize.jee.report.common.dto.renderer.CurrencyRendererDto;
-import com.ontimize.jee.report.common.dto.renderer.DateRendererDto;
-import com.ontimize.jee.report.common.dto.renderer.IntegerRendererDto;
-import com.ontimize.jee.report.common.dto.renderer.RealRendererDto;
-import com.ontimize.jee.report.common.dto.renderer.RendererDto;
+import com.ontimize.jee.report.common.dto.renderer.*;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.DateFormat;
@@ -48,7 +44,7 @@ public class ColumnPatternHelper {
         } else if (LocalDateTime.class.isAssignableFrom(type)) {
             DateRendererDto renderer = rendererDto instanceof DateRendererDto ? (DateRendererDto) rendererDto : null;
             pattern = dateTimePattern(renderer, locale);
-        }
+        } 
 
         return pattern;
     }

@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         property = "type"
 )
 @JsonSubTypes({
-//        @JsonSubTypes.Type(value = IntegerRendererDto.class, name = "boolean"),
+        @JsonSubTypes.Type(value = BooleanRendererDto.class, name = "boolean"),
         @JsonSubTypes.Type(value = CurrencyRendererDto.class, name = "currency"),
         @JsonSubTypes.Type(value = DateRendererDto.class, name = "date"),
 //        @JsonSubTypes.Type(value = IntegerRendererDto.class, name = "image"),
@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 //        @JsonSubTypes.Type(value = IntegerRendererDto.class, name = "percentage"),
         @JsonSubTypes.Type(value = RealRendererDto.class, name = "real"),
         @JsonSubTypes.Type(value = ServiceRendererDto.class, name = "service"),
+        @JsonSubTypes.Type(value = TranslateRendererDto.class, name = "translate"),
 //        @JsonSubTypes.Type(value = ServiceRendererDto.class, name = "time")
 })
 public interface Renderer {

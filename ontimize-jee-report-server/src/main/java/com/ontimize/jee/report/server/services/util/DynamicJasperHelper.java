@@ -52,7 +52,10 @@ public class DynamicJasperHelper implements ApplicationContextAware {
             String id = col.getId();
             int type = defaultSqlColumnTypes.get(id);
             if(hasRenderForColumn(col)){
-                type = retrieveTypeFromRenderer(col);
+                int auxType = retrieveTypeFromRenderer(col);
+                if(auxType != -1) {
+                    type = auxType;
+                }
             }
             
             String classname = TypeMappingsUtils.getClassName(type);
@@ -115,17 +118,17 @@ public class DynamicJasperHelper implements ApplicationContextAware {
 
                     Map<String, EntityResult> renderData = new HashMap<>();
                     renderData.put(serviceRendererDto.getKeyColumn(), eR_renderer);
-                    entityResultDataSource.setRendererData(renderData);
+                    entityResultDataSource.addRendererData(renderData);
 
                     Map<String, Renderer> renderInfo = new HashMap<>();
                     renderInfo.put(serviceRendererDto.getKeyColumn(), serviceRendererDto);
-                    entityResultDataSource.setRendererInfo(renderInfo);
+                    entityResultDataSource.addRendererInfo(renderInfo);
                 } else if(renderer instanceof BooleanRendererDto) {
                     BooleanRendererDto booleanRendererDto = (BooleanRendererDto) renderer;
                     
                     Map<String, Renderer> renderInfo = new HashMap<>();
                     renderInfo.put(columnDto.getId(), booleanRendererDto);
-                    entityResultDataSource.setRendererInfo(renderInfo);
+                    entityResultDataSource.addRendererInfo(renderInfo);
                     
                 }
             }

@@ -32,14 +32,36 @@ public abstract class AbstractEntityResultDataSource<T extends EntityResult> imp
 
         this.size = result.calculateRecordNumber();
         this.index = -1;
+        this.rendererData = new HashMap<>();
+        this.rendererInfo = new HashMap<>();
     }
 
     public void setRendererData(Map<String, T> rendererData) {
         this.rendererData = rendererData;
     }
 
+    public void addRendererData(Map<String, T> rendererData) {
+        if(rendererData != null && !rendererData.isEmpty()) {
+            this.rendererData.putAll(rendererData);
+        }
+    }
+    
+    public void clearRendererData() {
+        this.rendererData.clear();
+    }
+
     public void setRendererInfo(Map<String, Renderer> rendererInfo) {
         this.rendererInfo = rendererInfo;
+    }
+
+    public void addRendererInfo(Map<String, Renderer> rendererInfo) {
+        if(rendererInfo != null && !rendererInfo.isEmpty()) {
+            this.rendererInfo.putAll(rendererInfo);
+        }
+    }
+
+    public void clearRendererInfo() {
+        this.rendererInfo.clear();
     }
 
     @Override
@@ -179,16 +201,16 @@ public abstract class AbstractEntityResultDataSource<T extends EntityResult> imp
         if(value == null) {
             return value;
         }
-        if("string".equals(renderer.getRenderType())) {
-            if("yes".equals(value.toString().toLowerCase()) || "true".equals(value.toString().toLowerCase())) {
+        if(value instanceof Boolean){
+            if(value == Boolean.TRUE) {
                 return renderer.getTrueValue();
-            } else if("no".equals(value.toString().toLowerCase()) || "false".equals(value.toString().toLowerCase())) {
+            } else if(value == Boolean.FALSE) {
                 return renderer.getFalseValue();
             }
-        } else if("number".equals(renderer.getRenderType())){
-            if("0".equals(value.toString())) {
+        } else if(value instanceof Number) {
+            if(((Number) value).intValue() == 1) {
                 return renderer.getTrueValue();
-            } else if("1".equals(value.toString())) {
+            } else if(((Number) value).intValue() == 0) {
                 return renderer.getFalseValue();
             }
         }

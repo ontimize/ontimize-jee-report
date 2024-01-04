@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import com.ontimize.jee.server.rest.AdvancedQueryParameter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -314,12 +315,21 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
     private EntityResult fetchEntityResultData(String entity, Object bean, FilterParameter filters,
             List<String> columns1, Boolean advQuery, List<SQLStatementBuilder.SQLOrder> sqlOrders) {
         EntityResult erReportData;
+        Map<Object, Object> filterMap = filters != null ? filters.getFilter() : null;
+        
         if (Boolean.TRUE.equals(advQuery)) {
+            int offset = filters instanceof AdvancedQueryParameter ? ((AdvancedQueryParameter) filters).getOffset() : 0;
+            int pageSize = filters instanceof AdvancedQueryParameter ? ((AdvancedQueryParameter) filters).getPageSize() : Integer.MAX_VALUE;
             erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("PaginationQuery"),
-                    filters != null ? filters.getFilter() : null, columns1, Integer.MAX_VALUE, 0, sqlOrders);
+                    filterMap, columns1, pageSize, offset, sqlOrders);
         } else {
-            erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("Query"),
-                    filters != null ? filters.getFilter() : null, columns1);
+            if(sqlOrders != null && sqlOrders.size()>0) {
+                erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("Query"),
+                        filterMap, columns1, sqlOrders);    
+            } else {
+                erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("Query"),
+                        filterMap, columns1);
+            }
         }
         return erReportData;
     }

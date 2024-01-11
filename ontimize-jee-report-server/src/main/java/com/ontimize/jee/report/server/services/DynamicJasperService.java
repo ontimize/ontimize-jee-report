@@ -318,10 +318,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
         Map<Object, Object> filterMap = filters != null ? filters.getFilter() : null;
         
         if (Boolean.TRUE.equals(advQuery)) {
-            int offset = filters instanceof AdvancedQueryParameter ? ((AdvancedQueryParameter) filters).getOffset() : 0;
-            int pageSize = filters instanceof AdvancedQueryParameter ? ((AdvancedQueryParameter) filters).getPageSize() : Integer.MAX_VALUE;
             erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("PaginationQuery"),
-                    filterMap, columns1, pageSize, offset, sqlOrders);
+                    filterMap, columns1, Integer.MAX_VALUE, 0, sqlOrders);
         } else {
             if(sqlOrders != null && sqlOrders.size()>0) {
                 erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("Query"),

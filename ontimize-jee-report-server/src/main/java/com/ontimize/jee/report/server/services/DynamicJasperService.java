@@ -1,22 +1,19 @@
 package com.ontimize.jee.report.server.services;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-
-import com.ontimize.jee.server.rest.AdvancedQueryParameter;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-
+import ar.com.fdvs.dj.domain.DJCalculation;
+import ar.com.fdvs.dj.domain.DJValueFormatter;
+import ar.com.fdvs.dj.domain.DynamicReport;
+import ar.com.fdvs.dj.domain.Style;
+import ar.com.fdvs.dj.domain.builders.ColumnBuilder;
+import ar.com.fdvs.dj.domain.builders.DynamicReportBuilder;
+import ar.com.fdvs.dj.domain.builders.GroupBuilder;
+import ar.com.fdvs.dj.domain.constants.GroupLayout;
+import ar.com.fdvs.dj.domain.constants.HorizontalAlign;
+import ar.com.fdvs.dj.domain.constants.VerticalAlign;
+import ar.com.fdvs.dj.domain.entities.DJGroup;
+import ar.com.fdvs.dj.domain.entities.DJGroupVariable;
+import ar.com.fdvs.dj.domain.entities.columns.AbstractColumn;
+import ar.com.fdvs.dj.domain.entities.columns.PropertyColumn;
 import com.ontimize.jee.common.db.SQLStatementBuilder;
 import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.common.tools.ReflectionTools;
@@ -39,26 +36,28 @@ import com.ontimize.jee.report.server.services.util.ColumnMetadata;
 import com.ontimize.jee.report.server.services.util.DynamicJasperHelper;
 import com.ontimize.jee.report.server.services.util.DynamicReportBuilderHelper;
 import com.ontimize.jee.server.rest.FilterParameter;
-
-import ar.com.fdvs.dj.domain.DJCalculation;
-import ar.com.fdvs.dj.domain.DJValueFormatter;
-import ar.com.fdvs.dj.domain.DynamicReport;
-import ar.com.fdvs.dj.domain.Style;
-import ar.com.fdvs.dj.domain.builders.ColumnBuilder;
-import ar.com.fdvs.dj.domain.builders.DynamicReportBuilder;
-import ar.com.fdvs.dj.domain.builders.GroupBuilder;
-import ar.com.fdvs.dj.domain.constants.GroupLayout;
-import ar.com.fdvs.dj.domain.constants.HorizontalAlign;
-import ar.com.fdvs.dj.domain.constants.VerticalAlign;
-import ar.com.fdvs.dj.domain.entities.DJGroup;
-import ar.com.fdvs.dj.domain.entities.DJGroupVariable;
-import ar.com.fdvs.dj.domain.entities.columns.AbstractColumn;
-import ar.com.fdvs.dj.domain.entities.columns.PropertyColumn;
 import net.sf.jasperreports.engine.JRDataSource;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 @Service("DynamicJasperService")
 @Lazy(value = true)
 public class DynamicJasperService extends ReportBase implements IDynamicJasperService, InitializingBean {
+    
+    private static final String QUERY_KEY = "Query";
 
     private ResourceBundle bundle;
 
@@ -102,7 +101,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
             List<FunctionTypeDto> functions = new ArrayList<>();
             Map<String, Object> map = new HashMap<>();
             Object bean = this.getApplicationContextUtils().getServiceBean(service, path);
-            EntityResult e = (EntityResult) ReflectionTools.invoke(bean, entity.concat("Query"), map, columns);
+            EntityResult e = (EntityResult) ReflectionTools.invoke(bean, entity.concat(QUERY_KEY), map, columns);
             for (String column : columns) {
                 int type = e.getColumnSQLType(column);
                 String className = TypeMappingsUtils.getClassName(type);
@@ -291,7 +290,7 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
             for (String col : groups) {
                 OrderByDto orderByDto = findOrderByDto(orderBy, col);
                 SQLStatementBuilder.SQLOrder sqlO = new SQLStatementBuilder.SQLOrder(col,
-                        orderByDto != null ? orderByDto.isAscendent() : true);
+                        orderByDto != null ? orderByDto.isAscendent() : Boolean.TRUE);
                 sqlOrders.add(sqlO);
             }
         }
@@ -321,11 +320,11 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
             erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("PaginationQuery"),
                     filterMap, columns1, Integer.MAX_VALUE, 0, sqlOrders);
         } else {
-            if(sqlOrders != null && sqlOrders.size()>0) {
-                erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("Query"),
+            if(sqlOrders != null && !sqlOrders.isEmpty()) {
+                erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat(QUERY_KEY),
                         filterMap, columns1, sqlOrders);    
             } else {
-                erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat("Query"),
+                erReportData = (EntityResult) ReflectionTools.invoke(bean, entity.concat(QUERY_KEY),
                         filterMap, columns1);
             }
         }

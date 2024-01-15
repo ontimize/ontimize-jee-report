@@ -541,7 +541,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
             Integer id = (Integer) resData.get(this.nameConvention.convertName("ID"));
             keyMap.put(this.nameConvention.convertName("ID"), id);
             byte[] compiledReport = Files.readAllBytes(compileFolder.resolve(rDef.getMainReportFileName() + DatabaseReportStoreEngine.JASPER));
-            attrMap.put("COMPILED", compiledReport);
+            attrMap.put(this.nameConvention.convertName("COMPILED"), compiledReport);
             this.daoHelper.update(this.reportDao, attrMap, keyMap);
             attrMap.clear();
 

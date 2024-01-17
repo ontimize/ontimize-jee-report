@@ -4,6 +4,7 @@ import com.ontimize.jee.common.db.SQLStatementBuilder.SQLOrder;
 import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.common.dto.EntityResultMapImpl;
 import com.ontimize.jee.common.tools.CheckingTools;
+import com.ontimize.jee.common.tools.EntityResultTools;
 import com.ontimize.jee.common.tools.PathTools;
 import com.ontimize.jee.common.tools.ReflectionTools;
 import com.ontimize.jee.common.util.remote.BytesBlock;
@@ -140,12 +141,14 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
     /**
      * Instantiates a new file report store.
      */
+
+    @Autowired
+    private INameConvention nameConvention;
+
     public DatabaseReportStoreEngine() {
         super();
     }
 
-    @Autowired
-    private INameConvention nameConvention;
     /*
      * (non-Javadoc)
      * @see com.ontimize.jee.server.services.reportstore.IReportStoreService#addReport(com.ontimize.jee.common.services.reportstore.IReportDefinition, java.io.InputStream)
@@ -153,7 +156,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public EntityResult addReport(IReportDefinition rDef, InputStream reportSource) throws ReportStoreException {
-        Path reportFolder = null;
+//        Path reportFolder = null;
         try {
             CheckingTools.failIfNull(rDef, DatabaseReportStoreEngine.ERROR_NO_REPORT_DEFINITION);
             CheckingTools.failIfNull(rDef.getId(), DatabaseReportStoreEngine.ERROR_NO_REPORT_KEY);
@@ -162,14 +165,15 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
             byte[] zip = IOUtils.toByteArray(reportSource);
             attrMap.put(this.nameConvention.convertName("ZIP"), zip);
             EntityResult res = this.daoHelper.insert(this.reportDao, attrMap);
+            this.convertToUpperColumnsEntityResult(res);
             this.compileReport(rDef.getId(), rDef);
             return res;
         } catch (ReportStoreException error) {
-            PathTools.deleteFolderSafe(reportFolder);
+//            PathTools.deleteFolderSafe(reportFolder);
             throw error;
         } catch (Exception ex) {
             try {
-                PathTools.deleteFolderSafe(reportFolder);
+//                PathTools.deleteFolderSafe(reportFolder);
             } catch (Exception ex2) {
                 logger.warn("", ex2);
             }
@@ -227,12 +231,14 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
         keyMap.put(this.nameConvention.convertName("UUID"), rDef.getId());
         attrList.add(this.nameConvention.convertName("ID"));
         EntityResult res = this.daoHelper.query(this.reportDao, keyMap, attrList);
+        this.convertToUpperColumnsEntityResult(res);
         Map<?, ?> resData = res.getRecordValues(0);
         Integer id = (Integer) resData.get(this.nameConvention.convertName("ID"));
 
         keyMap.clear();
         keyMap.put(this.nameConvention.convertName("ID"), id);
-        Map<String, Object> attrValues = this.parseReportAttributes(rDef);
+        Map<String, Object> attrValues = new HashMap<>();
+        attrValues = this.parseReportAttributes(rDef);
         return this.daoHelper.update(this.reportDao, attrValues, keyMap);
     }
 
@@ -250,6 +256,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
         keyMap.put(this.nameConvention.convertName("UUID"), reportId);
         attrList.add(this.nameConvention.convertName("ID"));
         EntityResult res = this.daoHelper.query(this.reportDao, keyMap, attrList);
+        this.convertToUpperColumnsEntityResult(res);
         Map<?, ?> resData = res.getRecordValues(0);
         Integer id = (Integer) resData.get(this.nameConvention.convertName("ID"));
 
@@ -257,6 +264,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
         keyMap.clear();
         keyMap.put(this.nameConvention.convertName("REPORT_ID"), id);
         res = this.daoHelper.query(this.reportParameterDao, keyMap, attrList);
+        this.convertToUpperColumnsEntityResult(res);
         if (!res.entrySet().isEmpty()) {
             int size = res.calculateRecordNumber();
             for (int i = 0; i < size; i++) {
@@ -296,6 +304,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
         attrList.add(this.nameConvention.convertName("MAIN_REPORT_FILENAME"));
         keyMap.put(this.nameConvention.convertName("UUID"), reportId);
         EntityResult res = this.daoHelper.query(this.reportDao, keyMap, attrList);
+        this.convertToUpperColumnsEntityResult(res);
         IReportDefinition rDef = this.parseReportEntityResult(res);
 
         // Retrieve report parameters data
@@ -309,6 +318,10 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
         attrList.add(this.nameConvention.convertName("VALUE_CLASS"));
         keyMap.put(this.nameConvention.convertName("REPORT_ID"), id);
         res = this.daoHelper.query(this.reportParameterDao, keyMap, attrList);
+        this.convertToUpperColumnsEntityResult(res);
+        if (res.calculateRecordNumber() == 0 ){
+            this.convertToUpperSQLTypesEntityResult(res);
+        }
         if (!res.entrySet().isEmpty()) {
             List<ReportParameter> params = this.parseReportParameterEntityResult(res);
             for (int i = 0; i < params.size(); i++) {
@@ -343,7 +356,28 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
         Map<String, Object> keyMap = new HashMap<>();
 
         EntityResult res = this.daoHelper.query(this.reportDao, keyMap, attrList);
+        convertToUpperColumnsEntityResult(res);
         return res;
+    }
+
+    public void convertToUpperColumnsEntityResult(EntityResult res){
+
+        List<String> columns = new ArrayList<>(res.keySet());
+        for (String column : columns) {
+            EntityResultTools.renameColumn(res, column, column.toUpperCase());
+        }
+    }
+
+    public void convertToUpperSQLTypesEntityResult(EntityResult res){
+
+        List<String> columns = new ArrayList<>(res.getColumnSQLTypes().keySet());
+
+        for (String column : columns) {
+            Object typeToRename = res.getColumnSQLTypes().remove(column);
+            if (typeToRename != null){
+                res.getColumnSQLTypes().put(column.toUpperCase(),typeToRename);
+            }
+        }
     }
 
     /*
@@ -363,16 +397,26 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 
         try {
             // Retrieve the compiled report from the database (REPORT.COMPILED)
-            Map<String, Object> keyMap = new HashMap<>();
+            Map<String, Object> keyMap = new HashMap<String, Object>();
             keyMap.put(this.nameConvention.convertName("UUID"), reportId);
             List<String> attrList = new ArrayList<>();
             attrList.add(this.nameConvention.convertName("COMPILED"));
             EntityResult res = this.daoHelper.query(this.reportDao, keyMap, attrList);
+            this.convertToUpperColumnsEntityResult(res);
             Map<?, ?> resData = res.getRecordValues(0);
 
             // Parse the byte array to JasperReport object
-            BytesBlock bytesBlock = (BytesBlock) resData.get(this.nameConvention.convertName("COMPILED"));
-            byte[] byteArray = bytesBlock.getBytes();
+
+            byte[] byteArray;
+
+            byte[] zip;
+            if (resData.get("COMPILED") instanceof BytesBlock){
+                BytesBlock zipBlock = (BytesBlock) resData.get("COMPILED");
+                byteArray = zipBlock.getBytes();
+            }else{
+                byteArray = (byte[]) resData.get("COMPILED");
+            }
+
             InputStream compiledReport = new ByteArrayInputStream(byteArray);
             JasperReport jasperReport = (JasperReport) JRLoader.loadObject(compiledReport);
 
@@ -506,17 +550,24 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 
             // Retrieve the report zip folder from the database (REPORT.ZIP)
             Map<String, Object> keyMap = new HashMap<>();
-            keyMap.put(this.nameConvention.convertName("UUID"), rDef.getId());
+            keyMap.put(nameConvention.convertName("UUID"), rDef.getId());
             List<String> attrList = new ArrayList<>();
-            attrList.add(this.nameConvention.convertName("ID"));
-            attrList.add(this.nameConvention.convertName("ZIP"));
+            attrList.add(nameConvention.convertName("ID"));
+            attrList.add(nameConvention.convertName("ZIP"));
             EntityResult res = this.daoHelper.query(this.reportDao, keyMap, attrList);
+            this.convertToUpperColumnsEntityResult(res);
             Map<?, ?> resData = res.getRecordValues(0);
             keyMap.clear();
 
             // Store the report zip folder in temporary folder
-            BytesBlock zipBlock = (BytesBlock) resData.get(this.nameConvention.convertName("ZIP"));
-            byte[] zip = zipBlock.getBytes();
+
+            byte[] zip;
+            if (resData.get("ZIP") instanceof BytesBlock){
+                BytesBlock zipBlock = (BytesBlock) resData.get("ZIP");
+                zip = zipBlock.getBytes();
+            }else{
+                zip = (byte[]) resData.get("ZIP");
+            }
             InputStream is = new ByteArrayInputStream(zip);
             try (OutputStream os = Files.newOutputStream(reportFile)) {
                 IOUtils.copy(is, os);
@@ -538,7 +589,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 
             // Store the compiled report in the database (REPORT.COMPILED)
             Map<String, Object> attrMap = new HashMap<>();
-            Integer id = (Integer) resData.get(this.nameConvention.convertName("ID"));
+            Integer id = (Integer) resData.get("ID");
             keyMap.put(this.nameConvention.convertName("ID"), id);
             byte[] compiledReport = Files.readAllBytes(compileFolder.resolve(rDef.getMainReportFileName() + DatabaseReportStoreEngine.JASPER));
             attrMap.put(this.nameConvention.convertName("COMPILED"), compiledReport);
@@ -686,7 +737,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
      * @return the report attributes map (key, value)
      */
     private Map<String, Object> parseReportAttributes(IReportDefinition rDef) {
-        Map<String, Object> attrMap = new HashMap<>();
+        Map<String, Object> attrMap = new HashMap<String, Object>();
         attrMap.put(this.nameConvention.convertName("UUID"), rDef.getId());
         attrMap.put(this.nameConvention.convertName("NAME"), rDef.getName());
         attrMap.put(this.nameConvention.convertName("DESCRIPTION"), rDef.getDescription());
@@ -762,10 +813,11 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 
         for (int i = 0; i < size; i++) {
             Map<?, ?> resData = res.getRecordValues(i);
-            name = (String) resData.get(this.nameConvention.convertName("NAME"));
-            description = (String) resData.get(this.nameConvention.convertName("DESCRIPTION"));
-            valueClass = (String) resData.get(this.nameConvention.convertName("VALUE_CLASS"));
-            nestedType = (String) resData.get(this.nameConvention.convertName("NESTED_TYPE"));
+            name = (String) resData.get("NAME");
+            description = (String) resData.get("DESCRIPTION");
+            valueClass = (String) resData.get("VALUE_CLASS");
+            nestedType = (String) resData.get("NESTED_TYPE");
+
             param = new ReportParameter(name, description, valueClass, nestedType);
             paramList.add(param);
         }

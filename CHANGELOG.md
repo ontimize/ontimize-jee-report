@@ -6,7 +6,9 @@
 <!-- ### Fixed 🐛-->
 <!-- ### Security 🛡️-->
 
-## [Unreleased]
+## [Unreleased] 
+### Fixed 🐛
+* **DatabaseReportStoreEngine**: Fix report store on databases with lowercase columns.
 ### Fixed 🐛
 **DatabaseReportStoreEngine**: Modified the capitalized name of the columns of the reports, now, the names of the columns will be linked to the name-convention of the application.
 **Sonar**: Fixx some sonar issues.

@@ -7,6 +7,9 @@
 <!-- ### Security 🛡️-->
 
 ## [Unreleased]
+### Fixed 🐛
+**DatabaseReportStoreEngine**: Modified the capitalized name of the columns of the reports, now, the names of the columns will be linked to the name-convention of the application.
+**Sonar**: Fixx some sonar issues.
 ## [3.3.0] - 2023-07-31
 ### Added ✔️
 * **Reports on-demand**: Add filters to query reports on-demand

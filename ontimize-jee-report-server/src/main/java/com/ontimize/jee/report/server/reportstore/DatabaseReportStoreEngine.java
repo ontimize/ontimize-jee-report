@@ -149,8 +149,6 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
         super();
     }
 
-    @Autowired
-    private INameConvention nameConvention;
     /*
      * (non-Javadoc)
      * @see com.ontimize.jee.server.services.reportstore.IReportStoreService#addReport(com.ontimize.jee.common.services.reportstore.IReportDefinition, java.io.InputStream)

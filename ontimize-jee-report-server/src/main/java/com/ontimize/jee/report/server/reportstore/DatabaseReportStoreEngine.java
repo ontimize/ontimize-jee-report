@@ -309,7 +309,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 
         // Retrieve report parameters data
         Map<?, ?> resData = res.getRecordValues(0);
-        Integer id = (Integer) resData.get(this.nameConvention.convertName("ID"));
+        Integer id = (Integer) resData.get("ID");
         attrList.clear();
         keyMap.clear();
         attrList.add(this.nameConvention.convertName("NAME"));

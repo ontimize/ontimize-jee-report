@@ -337,6 +337,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
 
         res.clear();
         res.addRecord(this.fillResponse(rDef));
+        this.convertToUpperColumnsEntityResult(res);
         return res;
     }
 
@@ -789,11 +790,11 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
         String uuid, name, description, type, mainReportFilename;
         Map<?, ?> resData = res.getRecordValues(0);
 
-        uuid = (String) resData.get(this.nameConvention.convertName("UUID"));
-        name = (String) resData.get(this.nameConvention.convertName("NAME"));
-        description = (String) resData.get(this.nameConvention.convertName("DESCRIPTION"));
-        type = (String) resData.get(this.nameConvention.convertName("REPORT_TYPE"));
-        mainReportFilename = (String) resData.get(this.nameConvention.convertName("MAIN_REPORT_FILENAME"));
+        uuid = (String) resData.get("UUID");
+        name = (String) resData.get("NAME");
+        description = (String) resData.get("DESCRIPTION");
+        type = (String) resData.get("REPORT_TYPE");
+        mainReportFilename = (String) resData.get("MAIN_REPORT_FILENAME");
         rDef = new BasicReportDefinition(uuid, name, description, type, mainReportFilename);
         return rDef;
     }

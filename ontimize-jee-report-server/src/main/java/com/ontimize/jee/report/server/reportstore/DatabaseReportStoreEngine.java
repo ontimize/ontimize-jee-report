@@ -258,7 +258,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
         EntityResult res = this.daoHelper.query(this.reportDao, keyMap, attrList);
         this.convertToUpperColumnsEntityResult(res);
         Map<?, ?> resData = res.getRecordValues(0);
-        Integer id = (Integer) resData.get(this.nameConvention.convertName("ID"));
+        Integer id = (Integer) resData.get("ID");
 
         // Check if there's parameters for this reportId (FK restriction)
         keyMap.clear();
@@ -269,7 +269,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
             int size = res.calculateRecordNumber();
             for (int i = 0; i < size; i++) {
                 resData = res.getRecordValues(i);
-                Integer paramId = (Integer) resData.get(this.nameConvention.convertName("ID"));
+                Integer paramId = (Integer) resData.get("ID");
                 keyMap.clear();
                 keyMap.put(this.nameConvention.convertName("ID"), paramId);
                 this.daoHelper.delete(this.reportParameterDao, keyMap);

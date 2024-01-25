@@ -213,7 +213,7 @@ public class DynamicReportBuilderHelper {
         Font headerFont = new Font();
         headerFont.setBold(true);
         headerStyle.setFont(headerFont);
-        headerStyle.setPaddingBottom(-10);
+        headerStyle.setPaddingBottom(10);
         headerStyle.setPaddingTop(4);
         headerStyle.setBorderBottom(Border.PEN_1_POINT());
         headerStyle.getBorderBottom().setColor(new Color(204, 204, 204));

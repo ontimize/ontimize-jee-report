@@ -233,7 +233,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
         EntityResult res = this.daoHelper.query(this.reportDao, keyMap, attrList);
         this.convertToUpperColumnsEntityResult(res);
         Map<?, ?> resData = res.getRecordValues(0);
-        Integer id = (Integer) resData.get(this.nameConvention.convertName("ID"));
+        Integer id = (Integer) resData.get("ID");
 
         keyMap.clear();
         keyMap.put(this.nameConvention.convertName("ID"), id);

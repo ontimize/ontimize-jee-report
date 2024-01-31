@@ -20,8 +20,10 @@ public class TypeMappingsUtils {
     STRING_PATH = "java.lang.String",
             BOOLEAN_PATH = "java.lang.Boolean",
             OBJECT_PATH = "java.lang.Object",
+            FLOAT_PATH = "java.lang.Float",
             DOUBLE_PATH = "java.lang.Double",
             DATE_PATH = "java.util.Date",
+            TIMESTAMP_PATH = "ava.sql.Timestamp",
             INTEGER_PATH = "java.lang.Integer";
 
     @SuppressWarnings("rawtypes")
@@ -114,6 +116,33 @@ public class TypeMappingsUtils {
         return getClassName(getSQLType(type));
     }
 
+    public static int getSQLTypeFromClassName(final String className) {
+        switch (className) {
+            case STRING_PATH:
+                return Types.VARCHAR;
+
+            case INTEGER_PATH:
+                return Types.INTEGER;
+
+            case BOOLEAN_PATH:
+                return Types.BOOLEAN;
+
+            case FLOAT_PATH:
+                return Types.FLOAT;
+                
+            case DOUBLE_PATH:
+                return Types.DOUBLE;
+
+            case DATE_PATH:
+                return Types.DATE;
+                
+            case TIMESTAMP_PATH:
+                return Types.TIMESTAMP;
+
+        }
+        return Types.OTHER;
+    }
+    
     public static int getSQLType(String type) {
         int returned = Types.OTHER;
         if (type.equalsIgnoreCase(STRING)) {

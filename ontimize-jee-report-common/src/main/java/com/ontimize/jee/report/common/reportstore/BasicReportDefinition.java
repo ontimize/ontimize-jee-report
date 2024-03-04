@@ -1,5 +1,6 @@
 package com.ontimize.jee.report.common.reportstore;
 
+import com.ontimize.jee.common.util.remote.BytesBlock;
 import com.ontimize.jee.report.common.services.IReportDefinition;
 
 import java.io.Serializable;
@@ -39,6 +40,8 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
      */
     private String mainReportFileName;
 
+    private BytesBlock zip;
+
     /**
      * The report parameters.
      */
@@ -62,7 +65,7 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
      * @param type        the type
      */
     public BasicReportDefinition(Serializable id, String name, String description, String type,
-                                 String mainReportFileName) {
+            String mainReportFileName, BytesBlock zip) {
         super();
         this.id = id;
         this.name = name;
@@ -71,10 +74,24 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
         this.mainReportFileName = mainReportFileName;
         this.parameters = new ArrayList<ReportParameter>();
         this.otherInfo = new HashMap<>();
+        this.zip = zip;
     }
 
     public BasicReportDefinition(Serializable id, String name, String description, String type,
-                                 String mainReportFileName, List<ReportParameter> parameters) {
+            String mainReportFileName) {
+        super();
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.type = type;
+        this.mainReportFileName = mainReportFileName;
+        this.parameters = new ArrayList<ReportParameter>();
+        this.otherInfo = new HashMap<>();
+
+    }
+
+    public BasicReportDefinition(Serializable id, String name, String description, String type,
+            String mainReportFileName, List<ReportParameter> parameters) {
         super();
         this.id = id;
         this.name = name;
@@ -163,7 +180,9 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
 
     /*
      * (non-Javadoc)
-     * @see com.ontimize.jee.common.services.reportstore.IReportDefinition#getMainReportFileName()
+     * 
+     * @see com.ontimize.jee.common.services.reportstore.IReportDefinition#
+     * getMainReportFileName()
      */
     @Override
     public String getMainReportFileName() {
@@ -177,6 +196,14 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
      */
     public void setMainReportFileName(String mainReportFileName) {
         this.mainReportFileName = mainReportFileName;
+    }
+
+    public BytesBlock getZip() {
+        return zip;
+    }
+
+    public void setZip(BytesBlock zip) {
+        this.zip = zip;
     }
 
     /**
@@ -239,6 +266,7 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
 
     /*
      * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
 

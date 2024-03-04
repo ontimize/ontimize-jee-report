@@ -877,4 +877,11 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
         return map;
     }
 
+    @Override
+    public EntityResult updateReportDefinition(IReportDefinition rDef, InputStream reportSource)
+            throws ReportStoreException, IOException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

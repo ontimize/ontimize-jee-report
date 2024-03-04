@@ -221,7 +221,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
      */
     @Transactional
     @Override
-    public EntityResult updateReportDefinition(IReportDefinition rDef) throws ReportStoreException {
+    public EntityResult updateReportDefinition(IReportDefinition rDef, InputStream reportSource) throws ReportStoreException, IOException {
         CheckingTools.failIfNull(rDef, DatabaseReportStoreEngine.ERROR_NO_REPORT_DEFINITION);
         CheckingTools.failIfNull(rDef.getId(), DatabaseReportStoreEngine.ERROR_NO_REPORT_KEY);
 
@@ -239,6 +239,8 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
         keyMap.put(this.nameConvention.convertName("ID"), id);
         Map<String, Object> attrValues = new HashMap<>();
         attrValues = this.parseReportAttributes(rDef);
+        byte[] zip = IOUtils.toByteArray(reportSource);
+        attrValues.put(this.nameConvention.convertName("ZIP"), zip);
         return this.daoHelper.update(this.reportDao, attrValues, keyMap);
     }
 
@@ -301,6 +303,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
         attrList.add(this.nameConvention.convertName("NAME"));
         attrList.add(this.nameConvention.convertName("DESCRIPTION"));
         attrList.add(this.nameConvention.convertName("REPORT_TYPE"));
+        attrList.add(this.nameConvention.convertName("ZIP"));
         attrList.add(this.nameConvention.convertName("MAIN_REPORT_FILENAME"));
         keyMap.put(this.nameConvention.convertName("UUID"), reportId);
         EntityResult res = this.daoHelper.query(this.reportDao, keyMap, attrList);
@@ -760,6 +763,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
         map.put(this.nameConvention.convertName("DESCRIPTION"), rDef.getDescription());
         map.put(this.nameConvention.convertName("MAIN_REPORT_FILENAME"), rDef.getMainReportFileName());
         map.put(this.nameConvention.convertName("REPORT_TYPE"), rDef.getType());
+        map.put(this.nameConvention.convertName("ZIP"), rDef.getZip());
         map.put("PARAMETERS", rDef.getParameters());
         return map;
     }
@@ -788,6 +792,7 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
     private IReportDefinition parseReportEntityResult(EntityResult res) {
         IReportDefinition rDef;
         String uuid, name, description, type, mainReportFilename;
+        BytesBlock zip;
         Map<?, ?> resData = res.getRecordValues(0);
 
         uuid = (String) resData.get("UUID");
@@ -795,7 +800,8 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
         description = (String) resData.get("DESCRIPTION");
         type = (String) resData.get("REPORT_TYPE");
         mainReportFilename = (String) resData.get("MAIN_REPORT_FILENAME");
-        rDef = new BasicReportDefinition(uuid, name, description, type, mainReportFilename);
+        zip= (BytesBlock) resData.get("ZIP");
+        rDef = new BasicReportDefinition(uuid, name, description, type, mainReportFilename, zip);
         return rDef;
     }
 
@@ -829,6 +835,12 @@ public class DatabaseReportStoreEngine implements IReportStoreEngine, Applicatio
     public void updateSettings() {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public EntityResult updateReportDefinition(IReportDefinition rDef) throws ReportStoreException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

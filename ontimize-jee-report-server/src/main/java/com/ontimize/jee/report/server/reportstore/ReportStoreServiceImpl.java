@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -43,8 +44,8 @@ public class ReportStoreServiceImpl implements IReportStoreServiceServer, Applic
      * @see com.ontimize.jee.server.services.report.IReportStoreService#updateReportDefinition(java.lang.Object, com.ontimize.jee.server.services.report.IReportDefinition)
      */
     @Override
-    public EntityResult updateReportDefinition(IReportDefinition rDef) throws ReportStoreException {
-        return this.getImplementation().updateReportDefinition(rDef);
+    public EntityResult updateReportDefinition(IReportDefinition rDef, InputStream reportSource) throws ReportStoreException, IOException {
+        return this.getImplementation().updateReportDefinition(rDef, reportSource);
     }
 
     /*

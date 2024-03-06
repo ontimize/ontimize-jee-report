@@ -7,6 +7,7 @@
 <!-- ### Security 🛡️-->
 
 ## [Unreleased]
+## [3.4.0] - 2024-02-23
 ### Added ✔️
 * **JaCoCo**: Add JaCoCo coverage on Sonar
 ### Changed 🛠️
@@ -24,6 +25,7 @@
 ### Added ✔️
 * **Report on-demand**: On-demand reports can now be created with the help of Jasper Reports via HTTP requests. The parameters for creating these reports can be stored in preferences for later use.
 
-[unreleased]: https://github.com/ontimize/ontimize-jee-report/compare/3.3.0...HEAD
+[unreleased]: https://github.com/ontimize/ontimize-jee-report/compare/3.4.0...HEAD
+[3.4.0]: https://github.com/ontimize/ontimize-jee-report/compare/3.3.0...3.4.0
 [3.3.0]: https://github.com/ontimize/ontimize-jee-report/compare/3.2.0...3.3.0
 [3.2.0]: https://github.com/ontimize/ontimize-jee-report/tree/3.2.0

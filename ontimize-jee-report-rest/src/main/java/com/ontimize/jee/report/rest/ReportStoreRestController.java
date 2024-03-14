@@ -16,6 +16,8 @@ import com.ontimize.jee.server.rest.FilterParameter;
 import com.ontimize.jee.server.rest.ORestController;
 import com.ontimize.jee.server.rest.ParseUtilsExt;
 import com.ontimize.jee.server.rest.QueryParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.ComponentScan;
@@ -44,6 +46,8 @@ import java.util.concurrent.ExecutionException;
 @ComponentScan(basePackageClasses = {IReportStoreService.class})
 public class ReportStoreRestController extends ORestController<IReportStoreService> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReportStoreRestController.class);
+
     @Qualifier("ReportStoreService")
     @Autowired
     private IReportStoreService reportStoreService;
@@ -66,6 +70,9 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
             }
 
             String id = UUID.randomUUID().toString();
+            if(files == null || files.length == 0 ){
+                throw new IOException("No report file found");
+            }
             String mainReportFilename = files[0].getOriginalFilename().split("\\.")[0] + ".jrxml";
 
             IReportDefinition rdef = new BasicReportDefinition(id, extraData.get("name").toString(), extraData.get("description").toString(),
@@ -73,15 +80,12 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
             InputStream reportSource = new ByteArrayInputStream(files[0].getBytes());
 
             return this.reportStoreService.addReport(rdef, reportSource);
-        } catch (ReportStoreException e) {
-            e.printStackTrace();
+        } catch (ReportStoreException | IOException e) {
+            LOGGER.error("Error adding report", e);
             res.setCode(EntityResult.OPERATION_WRONG);
+            res.setMessage("Error adding report! " + e.getMessage());
             return res;
-        } catch (IOException e) {
-            e.printStackTrace();
-            res.setCode(EntityResult.OPERATION_WRONG);
-            return res;
-        }
+        } 
     }
 
     @SuppressWarnings("unchecked")
@@ -102,19 +106,11 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
 
             CompletableFuture<EntityResult> future = this.reportStoreService.fillReport(id, params, null, outputType, otherType, keysValues);
             res = future.get();
-        } catch (ReportStoreException e) {
-            e.printStackTrace();
-            res.setMessage(e.getMessage());
+        } catch (ReportStoreException | InterruptedException | ExecutionException e) {
+            LOGGER.error("Error filling report", e);
             res.setCode(EntityResult.OPERATION_WRONG);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            res.setMessage(e.getMessage());
-            res.setCode(EntityResult.OPERATION_WRONG);
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-            res.setMessage(e.getMessage());
-            res.setCode(EntityResult.OPERATION_WRONG);
-        }
+            res.setMessage("Error filling report! " + e.getMessage());
+        } 
 
         return res;
     }
@@ -125,8 +121,9 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
         try {
             return this.reportStoreService.removeReport(id);
         } catch (ReportStoreException e) {
-            e.printStackTrace();
+            LOGGER.error("Error removing report", e);
             res.setCode(EntityResult.OPERATION_WRONG);
+            res.setMessage("Error removing report! " + e.getMessage());
             return res;
         }
     }
@@ -137,8 +134,9 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
         try {
             return this.reportStoreService.listAllReports();
         } catch (ReportStoreException e) {
-            e.printStackTrace();
+            LOGGER.error("Error listing reports", e);
             res.setCode(EntityResult.OPERATION_WRONG);
+            res.setMessage("Error listing reports! " + e.getMessage());
             return res;
         }
     }
@@ -149,8 +147,9 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
         try {
             return this.reportStoreService.getReportDefinition(id);
         } catch (ReportStoreException e) {
-            e.printStackTrace();
+            LOGGER.error("Error retrieving report", e);
             res.setCode(EntityResult.OPERATION_WRONG);
+            res.setMessage("Error retrieving report! " + e.getMessage());
             return res;
         }
     }
@@ -177,8 +176,9 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
 
             return this.reportStoreService.updateReportDefinition(rdef);
         } catch (ReportStoreException e) {
-            e.printStackTrace();
+            LOGGER.error("Error updating report", e);
             res.setCode(EntityResult.OPERATION_WRONG);
+            res.setMessage("Error updating report! " + e.getMessage());
             return res;
         }
     }

@@ -3,7 +3,6 @@ package com.ontimize.jee.report.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.common.dto.EntityResultMapImpl;
-import com.ontimize.jee.common.util.remote.BytesBlock;
 import com.ontimize.jee.report.common.dto.ReportStoreParamValueDto;
 import com.ontimize.jee.report.common.dto.ReportStoreParamsDto;
 import com.ontimize.jee.report.common.exception.ReportStoreException;
@@ -32,19 +31,17 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+
 
 @RestController
 @RequestMapping("/reportstore")
-@ComponentScan(basePackageClasses = { IReportStoreService.class })
+@ComponentScan(basePackageClasses = {IReportStoreService.class})
 public class ReportStoreRestController extends ORestController<IReportStoreService> {
 
     @Qualifier("ReportStoreService")
@@ -57,7 +54,10 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
 
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/addReport", method = RequestMethod.POST)
-    public EntityResult addReport(@RequestParam("file") MultipartFile[] files, @RequestParam("data") String data) {
+    public EntityResult addReport(
+            @RequestParam("file") MultipartFile[] files,
+            @RequestParam("data") String data
+    ) {
         EntityResult res = new EntityResultMapImpl();
         try {
             Map<String, Object> extraData = new HashMap<>();
@@ -68,8 +68,8 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
             String id = UUID.randomUUID().toString();
             String mainReportFilename = files[0].getOriginalFilename().split("\\.")[0] + ".jrxml";
 
-            IReportDefinition rdef = new BasicReportDefinition(id, extraData.get("name").toString(),
-                    extraData.get("description").toString(), extraData.get("type").toString(), mainReportFilename);
+            IReportDefinition rdef = new BasicReportDefinition(id, extraData.get("name").toString(), extraData.get("description").toString(),
+                    extraData.get("type").toString(), mainReportFilename);
             InputStream reportSource = new ByteArrayInputStream(files[0].getBytes());
 
             return this.reportStoreService.addReport(rdef, reportSource);
@@ -87,7 +87,7 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/fillReport/{id}", method = RequestMethod.POST)
     public EntityResult fillReport(@PathVariable("id") String id,
-            @RequestBody(required = true) ReportStoreParamsDto bodyParams) {
+                                   @RequestBody(required = true) ReportStoreParamsDto bodyParams) {
         EntityResult res = new EntityResultMapImpl();
         ReportOutputType outputType;
         String otherType = "pdf";
@@ -100,8 +100,7 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
                 keysValues = processFilterParameter(bodyParams).getFilters().getFilter();
             }
 
-            CompletableFuture<EntityResult> future = this.reportStoreService.fillReport(id, params, null, outputType,
-                    otherType, keysValues);
+            CompletableFuture<EntityResult> future = this.reportStoreService.fillReport(id, params, null, outputType, otherType, keysValues);
             res = future.get();
         } catch (ReportStoreException e) {
             e.printStackTrace();
@@ -132,7 +131,7 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
         }
     }
 
-    @RequestMapping(value = "/listReports", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/listReports", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
     public EntityResult listReports() {
         EntityResult res = new EntityResultMapImpl();
         try {
@@ -144,8 +143,7 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
         }
     }
 
-    @RequestMapping(value = "/getReport/{id}", method = RequestMethod.GET, produces = {
-            MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/getReport/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
     public EntityResult getReport(@PathVariable("id") String id) {
         EntityResult res = new EntityResultMapImpl();
         try {
@@ -157,72 +155,33 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
         }
     }
 
-    public String getJrxmlFileNameFromZip(InputStream zipInputStream) {
-        String jrxmlFileName = null; 
-        try (ZipInputStream zis = new ZipInputStream(zipInputStream)) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                if (!entry.isDirectory() && entry.getName().endsWith(".jrxml")) {
-                    jrxmlFileName = entry.getName();
-                    break; 
-                }
-                zis.closeEntry();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return jrxmlFileName;
-    }
-
-    @RequestMapping(value = "/updateReport/{id}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
-    public EntityResult updateReport(@PathVariable("id") String id, @RequestBody(required = true) Map<String, Object> bodyParams) throws IOException {
+    @RequestMapping(value = "/updateReport/{id}", method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public EntityResult updateReport(@PathVariable("id") String id,
+                                     @RequestBody(required = true) Map<String, String> bodyParams) {
         EntityResult res = new EntityResultMapImpl();
         try {
             IReportDefinition rDef = this.parseReportEntityResult(this.reportStoreService.getReportDefinition(id));
             Map<String, Object> attr = this.fillResponse(rDef);
 
-            // Actualizar atributos simples
             if (bodyParams.containsKey("NAME"))
-                attr.replace("NAME", bodyParams.get("NAME").toString());
+                attr.replace("NAME", bodyParams.get("NAME"));
             if (bodyParams.containsKey("DESCRIPTION"))
-                attr.replace("DESCRIPTION", bodyParams.get("DESCRIPTION").toString());
+                attr.replace("DESCRIPTION", bodyParams.get("DESCRIPTION"));
             if (bodyParams.containsKey("REPORT_TYPE"))
-                attr.replace("REPORT_TYPE", bodyParams.get("REPORT_TYPE").toString());
+                attr.replace("REPORT_TYPE", bodyParams.get("REPORT_TYPE"));
             if (bodyParams.containsKey("MAIN_REPORT_FILENAME"))
-                attr.replace("MAIN_REPORT_FILENAME", bodyParams.get("MAIN_REPORT_FILENAME").toString());
+                attr.replace("MAIN_REPORT_FILENAME", bodyParams.get("MAIN_REPORT_FILENAME"));
 
-            InputStream fileInputStream = null;
-            // Manejo especial para FILES
-            if (bodyParams.containsKey("FILES")) {
-               fileInputStream=decodeBase64ToInputStream(bodyParams.get("FILES").toString());
-            }
+            IReportDefinition rdef = new BasicReportDefinition(id, attr.get("NAME").toString(), attr.get("DESCRIPTION").toString(),
+                    attr.get("REPORT_TYPE").toString(), attr.get("MAIN_REPORT_FILENAME").toString());
 
-            IReportDefinition rdef = new BasicReportDefinition(id, attr.get("NAME").toString(),
-                    attr.get("DESCRIPTION").toString(), attr.get("REPORT_TYPE").toString(),
-                    getJrxmlFileNameFromZip(fileInputStream));
-
-            // Pasar fileInputStream en lugar de null
-            return this.reportStoreService.updateReportDefinition(rdef, fileInputStream);
+            return this.reportStoreService.updateReportDefinition(rdef);
         } catch (ReportStoreException e) {
             e.printStackTrace();
             res.setCode(EntityResult.OPERATION_WRONG);
             return res;
         }
     }
-    public static InputStream decodeBase64ToInputStream(String base64String) {
-        
-        String encodedFile = base64String.substring(base64String.indexOf(",") + 1);
-
-        // Decodificar la cadena Base64 a un array de bytes
-        byte[] decodedBytes = Base64.getDecoder().decode(encodedFile);
-
-        // Convertir el array de bytes en un InputStream
-        InputStream inputStream = new ByteArrayInputStream(decodedBytes);
-
-        return inputStream;
-    }
-
 
     @SuppressWarnings("unchecked")
     private IReportDefinition parseReportEntityResult(EntityResult res) {
@@ -256,16 +215,15 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
 
     private Object parseParameter(ReportParameter reportParameter, ReportStoreParamValueDto paramValueDto) {
         Integer sqlType = null;
-        if (paramValueDto.getSqlType() != null) {
+        if(paramValueDto.getSqlType() != null) {
             sqlType = paramValueDto.getSqlType();
         } else {
             sqlType = TypeMappingsUtils.getSQLTypeFromClassName(reportParameter.getValueClass());
         }
         return ParseUtilsExt.getValueForSQLType(paramValueDto.getValue(), sqlType.intValue());
     }
-
-    protected Map<String, Object> processReportParameters(final String id, final ReportStoreParamsDto paramsDto)
-            throws ReportStoreException {
+    
+    protected Map<String, Object> processReportParameters(final String id, final ReportStoreParamsDto paramsDto) throws ReportStoreException {
         Map<String, Object> params = new HashMap<String, Object>();
         if (paramsDto.getParameters() != null && !paramsDto.getParameters().isEmpty()) {
             IReportDefinition rDef = this.parseReportEntityResult(this.reportStoreService.getReportDefinition(id));
@@ -273,9 +231,8 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
             List<ReportStoreParamValueDto> params1 = paramsDto.getParameters();
             for (int i = 0; i < reportParameters.size(); i++) {
                 ReportParameter currentRepParam = reportParameters.get(i);
-                ReportStoreParamValueDto paramValueDto = params1.stream()
-                        .filter(item -> item.getName().equals(currentRepParam.getName())).findFirst().orElse(null);
-                if (paramValueDto != null) {
+                ReportStoreParamValueDto paramValueDto = params1.stream().filter(item -> item.getName().equals(currentRepParam.getName())).findFirst().orElse(null);
+                if(paramValueDto != null) {
                     params.put(currentRepParam.getName(), this.parseParameter(currentRepParam, paramValueDto));
                 }
             }
@@ -283,8 +240,7 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
         return params;
     }
 
-    protected ReportStoreParamsDto processFilterParameter(final ReportStoreParamsDto param)
-            throws ReportStoreException {
+    protected ReportStoreParamsDto processFilterParameter(final ReportStoreParamsDto param) throws ReportStoreException {
         if (param == null) {
             throw new ReportStoreException("'ReportStoreParams' not found!");
         }

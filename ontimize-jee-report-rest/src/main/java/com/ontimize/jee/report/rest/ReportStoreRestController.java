@@ -70,7 +70,7 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
             }
 
             String id = UUID.randomUUID().toString();
-            if(files == null || files.length == 0 ){
+            if(files == null || !(files.length > 0) || files[0] == null ){
                 throw new IOException("No report file found");
             }
             String mainReportFilename = files[0].getOriginalFilename().split("\\.")[0] + ".jrxml";
@@ -108,6 +108,9 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
             res = future.get();
         } catch (ReportStoreException | InterruptedException | ExecutionException e) {
             LOGGER.error("Error filling report", e);
+            if(e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             res.setCode(EntityResult.OPERATION_WRONG);
             res.setMessage("Error filling report! " + e.getMessage());
         } 

@@ -16,12 +16,15 @@ import com.ontimize.jee.server.rest.FilterParameter;
 import com.ontimize.jee.server.rest.ORestController;
 import com.ontimize.jee.server.rest.ParseUtilsExt;
 import com.ontimize.jee.server.rest.QueryParameter;
+import org.apache.commons.compress.utils.FileNameUtils;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -73,11 +76,13 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
             if(files == null || !(files.length > 0) || files[0] == null ){
                 throw new IOException("No report file found");
             }
-            String mainReportFilename = files[0].getOriginalFilename().split("\\.")[0] + ".jrxml";
+            MultipartFile multipartFile = files[0];
+            String fileName = StringUtils.isEmpty(multipartFile.getOriginalFilename()) ? "reportFile" : multipartFile.getOriginalFilename();
+            String mainReportFilename = FileNameUtils.getBaseName(fileName) + ".jrxml";
 
             IReportDefinition rdef = new BasicReportDefinition(id, extraData.get("name").toString(), extraData.get("description").toString(),
                     extraData.get("type").toString(), mainReportFilename);
-            InputStream reportSource = new ByteArrayInputStream(files[0].getBytes());
+            InputStream reportSource = new ByteArrayInputStream(multipartFile.getBytes());
 
             return this.reportStoreService.addReport(rdef, reportSource);
         } catch (ReportStoreException | IOException e) {
@@ -267,4 +272,5 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
 
         return param;
     }
+
 }

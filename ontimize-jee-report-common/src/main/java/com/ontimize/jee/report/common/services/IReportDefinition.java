@@ -1,6 +1,5 @@
 package com.ontimize.jee.report.common.services;
 
-import com.ontimize.jee.common.util.remote.BytesBlock;
 import com.ontimize.jee.report.common.reportstore.ReportParameter;
 
 import java.util.List;
@@ -59,8 +58,6 @@ public interface IReportDefinition {
      * @return the report parameters
      */
     List<ReportParameter> getParameters();
-    
-    BytesBlock getZip();
 
     /**
      * Sets the report parameters.

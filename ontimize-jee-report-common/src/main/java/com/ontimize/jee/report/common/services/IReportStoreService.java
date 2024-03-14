@@ -4,7 +4,6 @@ import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.report.common.exception.ReportStoreException;
 import com.ontimize.jee.report.common.reportstore.ReportOutputType;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -29,9 +28,8 @@ public interface IReportStoreService {
      * @param reportId the report id
      * @param rDef     the r def
      * @throws ReportStoreException the report store exception
-     * @throws IOException 
      */
-    EntityResult updateReportDefinition(IReportDefinition rDef, InputStream reportSource) throws ReportStoreException, IOException;
+    EntityResult updateReportDefinition(IReportDefinition rDef) throws ReportStoreException;
 
     /**
      * Removes the report.

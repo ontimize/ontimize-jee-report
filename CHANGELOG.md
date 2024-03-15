@@ -7,6 +7,19 @@
 <!-- ### Security 🛡️-->
 
 ## [Unreleased]
+### Fixed 🐛
+* **Report store**: Fixed problems when using parameters of Jasper Report. It was added new `ReportStoreParamsDto` object into `fillReport` API method for allowing customization of parameters as types, formattings, etc.
+### Breaking changes
+* The `/fillReport/{id}` method of `ReportStoreRestController` has changed from:
+```
+public EntityResult fillReport(@PathVariable("id") String id,
+                                   @RequestBody(required = true) Map<String, Object> bodyParams)
+```
+to:
+```
+public EntityResult fillReport(@PathVariable("id") String id,
+                                   @RequestBody(required = true) ReportStoreParamsDto bodyParams)
+```
 ## [3.4.0] - 2024-02-23
 ### Added ✔️
 * **JaCoCo**: Add JaCoCo coverage on Sonar

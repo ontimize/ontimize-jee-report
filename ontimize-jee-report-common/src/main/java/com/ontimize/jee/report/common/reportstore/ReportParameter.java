@@ -5,51 +5,51 @@ public class ReportParameter {
     /**
      * The name.
      */
-    private String name;
+    private String reportParameterName;
 
     /**
      * The description.
      */
-    private String description;
+    private String reportParameterDescription;
 
     /**
      * The value class.
      */
-    private String valueClass;
+    private String reportParameterValueClass;
 
     /**
      * The nested type.
      */
-    private String type;
+    private String reportParameterType;
 
     public ReportParameter(String name, String description, String valueClass, String type) {
         super();
-        this.name = name;
-        this.description = description;
-        this.valueClass = valueClass;
-        this.type = type;
+        this.reportParameterName = name;
+        this.reportParameterDescription = description;
+        this.reportParameterValueClass = valueClass;
+        this.reportParameterType = type;
     }
 
-    public String getName() {
-        return name;
+    public String getReportParameterName() {
+        return reportParameterName;
     }
 
-    public String getDescription() {
-        return description;
+    public String getReportParameterDescription() {
+        return reportParameterDescription;
     }
 
-    public String getValueClass() {
-        return valueClass;
+    public String getReportParameterValueClass() {
+        return reportParameterValueClass;
     }
 
-    public String getType() {
-        return type;
+    public String getReportParameterType() {
+        return reportParameterType;
     }
 
     @Override
     public String toString() {
-        return "ReportParameter [name=" + name + ", description=" + description + ", valueClass=" + valueClass
-                + ", type=" + type + "]";
+        return "ReportParameter [reportParameterName=" + reportParameterName + ", reportParameterDescription=" + reportParameterDescription + ", reportParameterValueClass=" + reportParameterValueClass
+                + ", reportParameterType=" + reportParameterType + "]";
     }
 
 }

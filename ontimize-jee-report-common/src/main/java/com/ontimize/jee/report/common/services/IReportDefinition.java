@@ -11,32 +11,32 @@ import java.util.Map;
 public interface IReportDefinition {
 
     /**
-     * Gets the id.
+     * Gets the reportId.
      *
-     * @return the id
+     * @return the reportId
      */
-    Object getId();
+    Object getReportId();
 
     /**
-     * Gets the name.
+     * Gets the reportName.
      *
-     * @return the name
+     * @return the reportName
      */
-    String getName();
+    String getReportName();
 
     /**
-     * Gets the description.
+     * Gets the reportDescription.
      *
-     * @return the description
+     * @return the reportDescription
      */
-    String getDescription();
+    String getReportDescription();
 
     /**
-     * Gets the report type.
+     * Gets the reportType.
      *
-     * @return the report type
+     * @return the reporType
      */
-    String getType();
+    String getReportType();
 
     /**
      * Gets the other info.
@@ -50,7 +50,7 @@ public interface IReportDefinition {
      *
      * @return the main report file name
      */
-    String getMainReportFileName();
+    String getReportFileName();
 
     /**
      * Gets the report parameters.

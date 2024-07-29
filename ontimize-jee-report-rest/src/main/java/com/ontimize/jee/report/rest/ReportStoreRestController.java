@@ -16,8 +16,7 @@ import com.ontimize.jee.server.rest.FilterParameter;
 import com.ontimize.jee.server.rest.ORestController;
 import com.ontimize.jee.server.rest.ParseUtilsExt;
 import com.ontimize.jee.server.rest.QueryParameter;
-import org.apache.commons.compress.utils.FileNameUtils;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +77,7 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
             }
             MultipartFile multipartFile = files[0];
             String fileName = StringUtils.isEmpty(multipartFile.getOriginalFilename()) ? "reportFile" : multipartFile.getOriginalFilename();
-            String mainReportFilename = FileNameUtils.getBaseName(fileName) + ".jrxml";
+            String mainReportFilename = FilenameUtils.getBaseName(fileName) + ".jrxml";
 
             IReportDefinition rdef = new BasicReportDefinition(id, extraData.get("name").toString(), extraData.get("description").toString(),
                     extraData.get("type").toString(), mainReportFilename);
@@ -90,7 +89,7 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
             res.setCode(EntityResult.OPERATION_WRONG);
             res.setMessage("Error adding report! " + e.getMessage());
             return res;
-        } 
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -118,7 +117,7 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
             }
             res.setCode(EntityResult.OPERATION_WRONG);
             res.setMessage("Error filling report! " + e.getMessage());
-        } 
+        }
 
         return res;
     }
@@ -170,17 +169,17 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
             IReportDefinition rDef = this.parseReportEntityResult(this.reportStoreService.getReportDefinition(id));
             Map<String, Object> attr = this.fillResponse(rDef);
 
-            if (bodyParams.containsKey("NAME"))
-                attr.replace("NAME", bodyParams.get("NAME"));
+            if (bodyParams.containsKey("REPORTNAME"))
+                attr.replace("REPORTNAME", bodyParams.get("REPORTNAME"));
             if (bodyParams.containsKey("DESCRIPTION"))
-                attr.replace("DESCRIPTION", bodyParams.get("DESCRIPTION"));
-            if (bodyParams.containsKey("REPORT_TYPE"))
-                attr.replace("REPORT_TYPE", bodyParams.get("REPORT_TYPE"));
-            if (bodyParams.containsKey("MAIN_REPORT_FILENAME"))
-                attr.replace("MAIN_REPORT_FILENAME", bodyParams.get("MAIN_REPORT_FILENAME"));
+                attr.replace("REPORTDESCRIPTION", bodyParams.get("REPORTDESCRIPTION"));
+            if (bodyParams.containsKey("REPORTTYPE"))
+                attr.replace("REPORTTYPE", bodyParams.get("REPORTTYPE"));
+            if (bodyParams.containsKey("REPORTFILENAME"))
+                attr.replace("REPORTFILENAME", bodyParams.get("REPORTFILENAME"));
 
-            IReportDefinition rdef = new BasicReportDefinition(id, attr.get("NAME").toString(), attr.get("DESCRIPTION").toString(),
-                    attr.get("REPORT_TYPE").toString(), attr.get("MAIN_REPORT_FILENAME").toString());
+            IReportDefinition rdef = new BasicReportDefinition(id, attr.get("REPORTNAME").toString(), attr.get("REPORTDESCRIPTION").toString(),
+                    attr.get("REPORTTYPE").toString(), attr.get("REPORTFILENAME").toString());
 
             return this.reportStoreService.updateReportDefinition(rdef);
         } catch (ReportStoreException e) {
@@ -197,11 +196,11 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
         String uuid, name, description, type, mainReportFilename;
 
         Map<?, ?> resData = res.getRecordValues(0);
-        uuid = (String) resData.get("UUID");
-        name = (String) resData.get("NAME");
-        description = (String) resData.get("DESCRIPTION");
-        type = (String) resData.get("REPORT_TYPE");
-        mainReportFilename = (String) resData.get("MAIN_REPORT_FILENAME");
+        uuid = (String) resData.get("REPORTUUID");
+        name = (String) resData.get("REPORTNAME");
+        description = (String) resData.get("REPORTDESCRIPTION");
+        type = (String) resData.get("REPORTTYPE");
+        mainReportFilename = (String) resData.get("REPORTFILENAME");
 
         rDef = new BasicReportDefinition(uuid, name, description, type, mainReportFilename);
         rDef.setParameters((List<ReportParameter>) resData.get("PARAMETERS"));
@@ -211,11 +210,11 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
 
     private Map<String, Object> fillResponse(IReportDefinition reportDefinition) {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("UUID", reportDefinition.getId());
-        map.put("NAME", reportDefinition.getName());
-        map.put("DESCRIPTION", reportDefinition.getDescription());
-        map.put("MAIN_REPORT_FILENAME", reportDefinition.getMainReportFileName());
-        map.put("REPORT_TYPE", reportDefinition.getType());
+        map.put("REPORTUUID", reportDefinition.getReportId());
+        map.put("REPORTNAME", reportDefinition.getReportName());
+        map.put("REPORTDESCRIPTION", reportDefinition.getReportDescription());
+        map.put("REPORTFILENAME", reportDefinition.getReportFileName());
+        map.put("REPORTTYPE", reportDefinition.getReportType());
         map.put("PARAMETERS", reportDefinition.getParameters());
 
         return map;
@@ -226,11 +225,11 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
         if(paramValueDto.getSqlType() != null) {
             sqlType = paramValueDto.getSqlType();
         } else {
-            sqlType = TypeMappingsUtils.getSQLTypeFromClassName(reportParameter.getValueClass());
+            sqlType = TypeMappingsUtils.getSQLTypeFromClassName(reportParameter.getReportParameterValueClass());
         }
         return ParseUtilsExt.getValueForSQLType(paramValueDto.getValue(), sqlType.intValue());
     }
-    
+
     protected Map<String, Object> processReportParameters(final String id, final ReportStoreParamsDto paramsDto) throws ReportStoreException {
         Map<String, Object> params = new HashMap<String, Object>();
         if (paramsDto.getParameters() != null && !paramsDto.getParameters().isEmpty()) {
@@ -239,9 +238,9 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
             List<ReportStoreParamValueDto> params1 = paramsDto.getParameters();
             for (int i = 0; i < reportParameters.size(); i++) {
                 ReportParameter currentRepParam = reportParameters.get(i);
-                ReportStoreParamValueDto paramValueDto = params1.stream().filter(item -> item.getName().equals(currentRepParam.getName())).findFirst().orElse(null);
+                ReportStoreParamValueDto paramValueDto = params1.stream().filter(item -> item.getName().equals(currentRepParam.getReportParameterName())).findFirst().orElse(null);
                 if(paramValueDto != null) {
-                    params.put(currentRepParam.getName(), this.parseParameter(currentRepParam, paramValueDto));
+                    params.put(currentRepParam.getReportParameterName(), this.parseParameter(currentRepParam, paramValueDto));
                 }
             }
         }

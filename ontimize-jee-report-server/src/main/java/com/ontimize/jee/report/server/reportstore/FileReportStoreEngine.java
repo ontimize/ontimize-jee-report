@@ -110,27 +110,27 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
     /**
      * The Constant PROPERTY_TYPE.
      */
-    private static final String PROPERTY_TYPE = "type";
+    private static final String PROPERTY_TYPE = "reporttype";
 
     /**
      * The Constant PROPERTY_DESCRIPTION.
      */
-    private static final String PROPERTY_DESCRIPTION = "description";
+    private static final String PROPERTY_DESCRIPTION = "reportdescription";
 
     /**
      * The Constant PROPERTY_NAME.
      */
-    private static final String PROPERTY_NAME = "name";
+    private static final String PROPERTY_NAME = "reportname";
 
     /**
      * The Constant PROPERTY_ID.
      */
-    private static final String PROPERTY_ID = "id";
+    private static final String PROPERTY_ID = "reportid";
 
     /**
      * The Constant PROPERTY_ID.
      */
-    private static final String PROPERTY_MAINREPORTFILENAME = "mainreportfilename";
+    private static final String PROPERTY_REPORTFILENAME = "reportfilename";
 
     /**
      * The Constant PROPERTY_PARAMETERS.
@@ -199,9 +199,9 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
         Path reportFolder = null;
         try {
             CheckingTools.failIfNull(rDef, FileReportStoreEngine.ERROR_NO_REPORT_DEFINITION);
-            CheckingTools.failIfNull(rDef.getId(), FileReportStoreEngine.ERROR_NO_REPORT_KEY);
-            reportFolder = this.getReportFolder(rDef.getId());
-            Path reportFile = this.getReportFile(reportFolder, rDef.getId());
+            CheckingTools.failIfNull(rDef.getReportId(), FileReportStoreEngine.ERROR_NO_REPORT_KEY);
+            reportFolder = this.getReportFolder(rDef.getReportId());
+            Path reportFile = this.getReportFile(reportFolder, rDef.getReportId());
             CheckingTools.failIf(Files.exists(reportFile), FileReportStoreEngine.ERROR_REPORT_ID_ALREADY_EXISTS);
 
             this.safeCreateDirectories(reportFolder);
@@ -211,11 +211,11 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
             }
 
             this.saveReportProperties(reportFolder, rDef);
-            this.compileReport(rDef.getId(), rDef);
+            this.compileReport(rDef.getReportId(), rDef);
 
             EntityResult res = new EntityResultMapImpl();
             res.setCode(0);
-            res.put("id", rDef.getId());
+            res.put("id", rDef.getReportId());
             return res;
         } catch (ReportStoreException error) {
             PathTools.deleteFolderSafe(reportFolder);
@@ -272,9 +272,9 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
     public EntityResult updateReportDefinition(IReportDefinition rDef) throws ReportStoreException {
         try {
             CheckingTools.failIfNull(rDef, FileReportStoreEngine.ERROR_NO_REPORT_DEFINITION);
-            CheckingTools.failIfNull(rDef.getId(), FileReportStoreEngine.ERROR_NO_REPORT_KEY);
-            Path reportFolder = this.getReportFolder(rDef.getId());
-            Path reportPropertiesFile = this.getReportPropertiesFile(reportFolder, rDef.getId());
+            CheckingTools.failIfNull(rDef.getReportId(), FileReportStoreEngine.ERROR_NO_REPORT_KEY);
+            Path reportFolder = this.getReportFolder(rDef.getReportId());
+            Path reportPropertiesFile = this.getReportPropertiesFile(reportFolder, rDef.getReportId());
             CheckingTools.failIf(!Files.exists(reportPropertiesFile), FileReportStoreEngine.ERROR_REPORT_ID_NOT_EXISTS);
             this.saveReportProperties(reportFolder, rDef);
 
@@ -322,9 +322,9 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
             IReportDefinition rDef = this.loadReportProperties(reportFolder, reportId);
             List<ReportParameter> params = rDef.getParameters();
             for (int i = 0; i < params.size(); i++) {
-                if (params.get(i).getName().equalsIgnoreCase("service")
-                        || params.get(i).getName().equalsIgnoreCase("entity")
-                        || params.get(i).getName().equalsIgnoreCase("pagesize")) {
+                if (params.get(i).getReportParameterName().equalsIgnoreCase("service")
+                        || params.get(i).getReportParameterName().equalsIgnoreCase("entity")
+                        || params.get(i).getReportParameterName().equalsIgnoreCase("pagesize")) {
                     params.remove(i);
                     i--;
                 }
@@ -395,7 +395,7 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
         InputStream is = null;
 
         try {
-            Path compiledReport = compiled.resolve(rDef.getMainReportFileName().concat(".jasper"));
+            Path compiledReport = compiled.resolve(rDef.getReportFileName().concat(".jasper"));
             InputStream stream = Files.newInputStream(compiledReport);
             JasperReport jasperReport = (JasperReport) JRLoader.loadObject(stream);
 
@@ -630,13 +630,13 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
      * @throws IOException Signals that an I/O exception has occurred.
      */
     private void saveReportProperties(Path reportFolder, IReportDefinition rDef) throws IOException {
-        Path reportPropertiesFile = this.getReportPropertiesFile(reportFolder, rDef.getId());
+        Path reportPropertiesFile = this.getReportPropertiesFile(reportFolder, rDef.getReportId());
         Properties prop = new Properties();
-        MapTools.safePut(prop, FileReportStoreEngine.PROPERTY_ID, rDef.getId().toString());
-        MapTools.safePut(prop, FileReportStoreEngine.PROPERTY_NAME, rDef.getName());
-        MapTools.safePut(prop, FileReportStoreEngine.PROPERTY_DESCRIPTION, rDef.getDescription());
-        MapTools.safePut(prop, FileReportStoreEngine.PROPERTY_TYPE, rDef.getType());
-        MapTools.safePut(prop, FileReportStoreEngine.PROPERTY_MAINREPORTFILENAME, rDef.getMainReportFileName());
+        MapTools.safePut(prop, FileReportStoreEngine.PROPERTY_ID, rDef.getReportId().toString());
+        MapTools.safePut(prop, FileReportStoreEngine.PROPERTY_NAME, rDef.getReportName());
+        MapTools.safePut(prop, FileReportStoreEngine.PROPERTY_DESCRIPTION, rDef.getReportDescription());
+        MapTools.safePut(prop, FileReportStoreEngine.PROPERTY_TYPE, rDef.getReportType());
+        MapTools.safePut(prop, FileReportStoreEngine.PROPERTY_REPORTFILENAME, rDef.getReportFileName());
         MapTools.safePut(prop, FileReportStoreEngine.PROPERTY_PARAMETERS, rDef.getParameters().toString());
         if (rDef.getOtherInfo() != null) {
             for (Entry<String, String> entry : rDef.getOtherInfo().entrySet()) {
@@ -682,9 +682,9 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
                 prop.getProperty(FileReportStoreEngine.PROPERTY_NAME),
                 prop.getProperty(FileReportStoreEngine.PROPERTY_DESCRIPTION),
                 prop.getProperty(FileReportStoreEngine.PROPERTY_TYPE),
-                prop.getProperty(FileReportStoreEngine.PROPERTY_MAINREPORTFILENAME),
+                prop.getProperty(FileReportStoreEngine.PROPERTY_REPORTFILENAME),
                 reportParams);
-        reportDefinition.setMainReportFileName(prop.getProperty(FileReportStoreEngine.PROPERTY_MAINREPORTFILENAME));
+        reportDefinition.setReportFileName(prop.getProperty(FileReportStoreEngine.PROPERTY_REPORTFILENAME));
 
         for (Entry<Object, Object> entry : prop.entrySet()) {
             String key = (String) entry.getKey();
@@ -850,11 +850,11 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
     private IReportDefinition parseReportEntityResult(EntityResult res) {
         IReportDefinition rDef;
         String uuid, name, description, type, mainReportFilename;
-        uuid = (String) ((ArrayList<?>) res.get("UUID")).get(0);
-        name = (String) ((ArrayList<?>) res.get("NAME")).get(0);
-        description = (String) ((ArrayList<?>) res.get("DESCRIPTION")).get(0);
-        type = (String) ((ArrayList<?>) res.get("REPORT_TYPE")).get(0);
-        mainReportFilename = (String) ((ArrayList<?>) res.get("MAIN_REPORT_FILENAME")).get(0);
+        uuid = (String) ((ArrayList<?>) res.get("REPORTUUID")).get(0);
+        name = (String) ((ArrayList<?>) res.get("REPORTNAME")).get(0);
+        description = (String) ((ArrayList<?>) res.get("REPORTDESCRIPTION")).get(0);
+        type = (String) ((ArrayList<?>) res.get("REPORTTYPE")).get(0);
+        mainReportFilename = (String) ((ArrayList<?>) res.get("REPORTFILENAME")).get(0);
         rDef = new BasicReportDefinition(uuid, name, description, type, mainReportFilename);
         return rDef;
     }
@@ -868,11 +868,11 @@ public class FileReportStoreEngine implements IReportStoreEngine, ApplicationCon
      */
     private Map<String, Object> fillResponse(IReportDefinition rDef) {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("UUID", rDef.getId());
-        map.put("NAME", rDef.getName());
-        map.put("DESCRIPTION", rDef.getDescription());
-        map.put("MAIN_REPORT_FILENAME", rDef.getMainReportFileName());
-        map.put("REPORT_TYPE", rDef.getType());
+        map.put("REPORTUUID", rDef.getReportId());
+        map.put("REPORTNAME", rDef.getReportName());
+        map.put("REPORTDESCRIPTION", rDef.getReportDescription());
+        map.put("REPORTFILENAME", rDef.getReportFileName());
+        map.put("REPORTTYPE", rDef.getReportType());
         map.put("PARAMETERS", rDef.getParameters());
         return map;
     }

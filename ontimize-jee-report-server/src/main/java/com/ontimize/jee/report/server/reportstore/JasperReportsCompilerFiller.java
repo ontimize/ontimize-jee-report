@@ -181,7 +181,7 @@ public class JasperReportsCompilerFiller implements IReportCompiler, IReportFill
             this.fillParameters(con, bundle, locale, params);// Extra parameters: Connection, bundle, locale...
 
             // TODO tal vez sea mejor a fichero por temas de memoria si se dispara un informe
-            Path reportCompiled = compiledReportFolder.resolve(reportDefinition.getMainReportFileName() + JasperReportsCompilerFiller.JASPER);
+            Path reportCompiled = compiledReportFolder.resolve(reportDefinition.getReportFileName() + JasperReportsCompilerFiller.JASPER);
             CheckingTools.failIf(!Files.exists(reportCompiled), "E_REQUIRED_VALID_COMPILEDREPORTFILE", new Object[0]);
             JasperPrint fillReport = JasperFillManager.fillReport(reportCompiled.toString(), params);
 

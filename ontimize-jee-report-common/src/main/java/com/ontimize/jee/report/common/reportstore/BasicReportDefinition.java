@@ -15,29 +15,29 @@ import java.util.Map;
 public class BasicReportDefinition implements IReportDefinition, Serializable {
 
     /**
-     * The id.
+     * The reportId.
      */
-    private Serializable id;
+    private Serializable reportId;
 
     /**
      * The name.
      */
-    private String name;
+    private String reportName;
 
     /**
      * The description.
      */
-    private String description;
+    private String reportDescription;
 
     /**
      * The type.
      */
-    private String type;
+    private String reportType;
 
     /**
      * The main report file name.
      */
-    private String mainReportFileName;
+    private String reportFileName;
 
     /**
      * The report parameters.
@@ -61,26 +61,26 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
      * @param description the description
      * @param type        the type
      */
-    public BasicReportDefinition(Serializable id, String name, String description, String type,
-                                 String mainReportFileName) {
+    public BasicReportDefinition(Serializable reportId, String reportName, String reportDescription, String reportType,
+                                 String reportFileName) {
         super();
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.type = type;
-        this.mainReportFileName = mainReportFileName;
+        this.reportId = reportId;
+        this.reportName = reportName;
+        this.reportDescription = reportDescription;
+        this.reportType = reportType;
+        this.reportFileName = reportFileName;
         this.parameters = new ArrayList<ReportParameter>();
         this.otherInfo = new HashMap<>();
     }
 
-    public BasicReportDefinition(Serializable id, String name, String description, String type,
-                                 String mainReportFileName, List<ReportParameter> parameters) {
+    public BasicReportDefinition(Serializable reportId, String reportName, String reportDescription, String reportType,
+                                 String reportFileName, List<ReportParameter> parameters) {
         super();
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.type = type;
-        this.mainReportFileName = mainReportFileName;
+        this.reportId = reportId;
+        this.reportName = reportName;
+        this.reportDescription = reportDescription;
+        this.reportType = reportType;
+        this.reportFileName = reportFileName;
         this.parameters = parameters;
         this.otherInfo = new HashMap<>();
     }
@@ -91,8 +91,8 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
      * @return the id
      */
     @Override
-    public Serializable getId() {
-        return this.id;
+    public Serializable getReportId() {
+        return this.reportId;
     }
 
     /**
@@ -100,8 +100,8 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
      *
      * @param id the id to set
      */
-    public void setId(Serializable id) {
-        this.id = id;
+    public void setReportid(Serializable reportId) {
+        this.reportId = reportId;
     }
 
     /**
@@ -110,8 +110,8 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
      * @return the name
      */
     @Override
-    public String getName() {
-        return this.name;
+    public String getReportName() {
+        return this.reportName;
     }
 
     /**
@@ -119,27 +119,27 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
      *
      * @param name the name to set
      */
-    public void setName(String name) {
-        this.name = name;
+    public void setReportName(String reportName) {
+        this.reportName = reportName;
     }
 
     /**
-     * Gets the description.
+     * Gets the reportDescription.
      *
-     * @return the description
+     * @return the reportDescription
      */
     @Override
-    public String getDescription() {
-        return this.description;
+    public String getReportDescription() {
+        return this.reportDescription;
     }
 
     /**
-     * Sets the description.
+     * Sets the reportDescription.
      *
-     * @param description the description to set
+     * @param reportDescription the reportDescription to set
      */
-    public void setDescription(String description) {
-        this.description = description;
+    public void setReportDescription(String reportDescription) {
+        this.reportDescription = reportDescription;
     }
 
     /**
@@ -148,17 +148,17 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
      * @return the type
      */
     @Override
-    public String getType() {
-        return this.type;
+    public String getReportType() {
+        return this.reportType;
     }
 
     /**
-     * Sets the type.
+     * Sets the reportType.
      *
-     * @param type the type to set
+     * @param reportType the reportType to set
      */
-    public void setType(String type) {
-        this.type = type;
+    public void setReportType(String reportType) {
+        this.reportType = reportType;
     }
 
     /*
@@ -166,17 +166,17 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
      * @see com.ontimize.jee.common.services.reportstore.IReportDefinition#getMainReportFileName()
      */
     @Override
-    public String getMainReportFileName() {
-        return this.mainReportFileName;
+    public String getReportFileName() {
+        return this.reportFileName;
     }
 
     /**
-     * Sets the main report file name.
+     * Sets the report file name.
      *
-     * @param mainReportFileName the new main report file name
+     * @param mainReportFileName the new report file name
      */
-    public void setMainReportFileName(String mainReportFileName) {
-        this.mainReportFileName = mainReportFileName;
+    public void setReportFileName(String reportFileName) {
+        this.reportFileName = reportFileName;
     }
 
     /**
@@ -233,8 +233,8 @@ public class BasicReportDefinition implements IReportDefinition, Serializable {
 
     @Override
     public String toString() {
-        return "BasicReportDefinition [id=" + id + ", name=" + name + ", description=" + description + ", type=" + type
-                + ", mainReportFileName=" + mainReportFileName + ", parameters=" + parameters + "]";
+        return "BasicReportDefinition [reportid=" + reportId + ", name=" + reportName + ", description=" + reportDescription + ", type=" + reportType
+                + ", reportFilename=" + reportFileName + ", parameters=" + parameters + "]";
     }
 
     /*

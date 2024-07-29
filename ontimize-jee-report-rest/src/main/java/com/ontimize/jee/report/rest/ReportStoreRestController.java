@@ -16,8 +16,7 @@ import com.ontimize.jee.server.rest.FilterParameter;
 import com.ontimize.jee.server.rest.ORestController;
 import com.ontimize.jee.server.rest.ParseUtilsExt;
 import com.ontimize.jee.server.rest.QueryParameter;
-import org.apache.commons.compress.utils.FileNameUtils;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +77,7 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
             }
             MultipartFile multipartFile = files[0];
             String fileName = StringUtils.isEmpty(multipartFile.getOriginalFilename()) ? "reportFile" : multipartFile.getOriginalFilename();
-            String mainReportFilename = FileNameUtils.getBaseName(fileName) + ".jrxml";
+            String mainReportFilename = FilenameUtils.getBaseName(fileName) + ".jrxml";
 
             IReportDefinition rdef = new BasicReportDefinition(id, extraData.get("name").toString(), extraData.get("description").toString(),
                     extraData.get("type").toString(), mainReportFilename);

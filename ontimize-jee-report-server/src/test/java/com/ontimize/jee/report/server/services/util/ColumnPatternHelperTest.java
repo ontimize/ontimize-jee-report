@@ -158,7 +158,7 @@ public class ColumnPatternHelperTest {
         DateFormat format = getDateFormat(Date.class, renderer, Locale.ENGLISH);
         Assertions.assertEquals("Jun 28, 2022", format.format(targetDate));
         format = getDateFormat(Date.class, renderer, es_locale);
-        Assertions.assertEquals("28 jun. 2022", format.format(targetDate));
+        Assertions.assertEquals("28 jun 2022", format.format(targetDate));
     }
 
     @Test
@@ -210,21 +210,21 @@ public class ColumnPatternHelperTest {
         format = getDateFormat(Date.class, renderer, Locale.ENGLISH);
         Assertions.assertEquals("Jun 28, 2022", format.format(targetDate));
         format = getDateFormat(Date.class, renderer, es_locale);
-        Assertions.assertEquals("28 de jun. de 2022", format.format(targetDate));
+        Assertions.assertEquals("28 de jun de 2022", format.format(targetDate));
 
         // Case 'lll'
         renderer.setFormat("lll");
         format = getDateFormat(Date.class, renderer, Locale.ENGLISH);
         Assertions.assertEquals("Jun 28, 2022 1:24 PM", format.format(targetDate));
         format = getDateFormat(Date.class, renderer, es_locale);
-        Assertions.assertEquals("28 de jun. de 2022 13:24", format.format(targetDate));
+        Assertions.assertEquals("28 de jun de 2022 13:24", format.format(targetDate));
 
         // Case 'llll'
         renderer.setFormat("llll");
         format = getDateFormat(Date.class, renderer, Locale.ENGLISH);
         Assertions.assertEquals("Tue, Jun 28, 2022 1:24 PM", format.format(targetDate));
         format = getDateFormat(Date.class, renderer, es_locale);
-        Assertions.assertEquals("mar., 28 de jun. de 2022 13:24", format.format(targetDate));
+        Assertions.assertEquals("mar, 28 de jun de 2022 13:24", format.format(targetDate));
     }
 
     private DateFormat getDateFormat(Class<?> dateClass, DateRendererDto renderer, Locale locale) {
@@ -244,7 +244,7 @@ public class ColumnPatternHelperTest {
         DateFormat format = getDateFormat(LocalDateTime.class, renderer, Locale.ENGLISH);
         Assertions.assertEquals("Jun 28, 2022, 1:24 PM", format.format(targetDate));
         format = getDateFormat(LocalDateTime.class, renderer, es_locale);
-        Assertions.assertEquals("28 jun. 2022 13:24", format.format(targetDate));
+        Assertions.assertEquals("28 jun 2022 13:24", format.format(targetDate));
     }
 
 }

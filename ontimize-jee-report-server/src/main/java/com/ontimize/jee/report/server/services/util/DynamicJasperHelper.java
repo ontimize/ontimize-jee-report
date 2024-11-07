@@ -1,5 +1,6 @@
 package com.ontimize.jee.report.server.services.util;
 
+import com.ontimize.jee.common.db.SQLStatementBuilder;
 import com.ontimize.jee.common.dto.EntityResult;
 import com.ontimize.jee.common.tools.ReflectionTools;
 import com.ontimize.jee.report.common.dto.ColumnDto;
@@ -12,6 +13,7 @@ import com.ontimize.jee.report.common.exception.DynamicReportException;
 import com.ontimize.jee.report.common.util.EntityResultDataSource;
 import com.ontimize.jee.report.common.util.TypeMappingsUtils;
 import com.ontimize.jee.report.server.ApplicationContextUtils;
+import com.ontimize.jee.server.rest.FilterParameter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -44,20 +46,21 @@ public class DynamicJasperHelper implements ApplicationContextAware {
         return pattern;
     }
 
-    public Map<String, ColumnMetadata> getColumnMetadata(final String service, final String path, final String entity, final List<ColumnDto> columns) throws DynamicReportException {
+    public Map<String, ColumnMetadata> getColumnMetadata(final String service, final String path, final String entity, final List<ColumnDto> columns,
+                                                         FilterParameter filters, Boolean advQuery) throws DynamicReportException {
         Map<String, ColumnMetadata> columnMetadataMap = new HashMap<>();
         List<String> stringColumns = getColumnsFromDto(columns);
-        Map<String, Integer> defaultSqlColumnTypes = getSQLColumnTypes(service, path, entity, stringColumns);
+        Map<String, Integer> defaultSqlColumnTypes = getSQLColumnTypes(service, path, entity, stringColumns, filters, advQuery);
         for (ColumnDto col : columns) {
             String id = col.getId();
-            int type = defaultSqlColumnTypes.get(id);
+            int type = defaultSqlColumnTypes.containsKey(id) ? defaultSqlColumnTypes.get(id) : Types.OTHER;
             if(hasRenderForColumn(col)){
                 int auxType = retrieveTypeFromRenderer(col);
                 if(auxType != -1) {
                     type = auxType;
                 }
             }
-            
+
             String classname = TypeMappingsUtils.getClassName(type);
             ColumnMetadata columnMetadata = new ColumnMetadata(id, type, classname);
             columnMetadataMap.put(id, columnMetadata);
@@ -66,13 +69,22 @@ public class DynamicJasperHelper implements ApplicationContextAware {
     }
 
 
-    public Map<String, Integer> getSQLColumnTypes(final String service, final String path, final String entity, final List<String> columns) throws DynamicReportException {
+    public Map<String, Integer> getSQLColumnTypes(final String service, final String path, final String entity,
+                                                  final List<String> columns, FilterParameter filters, Boolean advQuery) throws DynamicReportException {
         Map<String, Integer> sqlTypes = new HashMap<>();
         Object bean = this.getApplicationContextUtils().getServiceBean(service, path);
-        EntityResult entityResult = (EntityResult) ReflectionTools.invoke(bean,
-                entity.concat("Query"),
-                new HashMap<>(),
-                columns);
+
+        Map<Object, Object> kv = (filters != null && filters.getFilter()!=null) ? filters.getFilter() : new HashMap<>();
+
+        EntityResult entityResult;
+        if (Boolean.TRUE.equals(advQuery)) {
+            List<SQLStatementBuilder.SQLOrder> sqlOrders = new ArrayList<>();
+            entityResult = (EntityResult) ReflectionTools.invoke(bean, entity.concat("PaginationQuery"),
+                    kv, columns, Integer.MAX_VALUE, 0, sqlOrders);
+        } else {
+            entityResult = (EntityResult) ReflectionTools.invoke(bean,
+                    entity.concat("Query"), kv, columns);
+        }
 
         if (entityResult.getCode() == EntityResult.OPERATION_SUCCESSFUL) {
             return entityResult.getColumnSQLTypes();
@@ -125,11 +137,11 @@ public class DynamicJasperHelper implements ApplicationContextAware {
                     entityResultDataSource.addRendererInfo(renderInfo);
                 } else if(renderer instanceof BooleanRendererDto) {
                     BooleanRendererDto booleanRendererDto = (BooleanRendererDto) renderer;
-                    
+
                     Map<String, Renderer> renderInfo = new HashMap<>();
                     renderInfo.put(columnDto.getId(), booleanRendererDto);
                     entityResultDataSource.addRendererInfo(renderInfo);
-                    
+
                 }
             }
         }
@@ -141,7 +153,7 @@ public class DynamicJasperHelper implements ApplicationContextAware {
         }
         return Boolean.FALSE;
     }
-    
+
     protected int retrieveTypeFromRenderer(final ColumnDto column) throws DynamicReportException {
         int type = -1;
         if (column != null && column.getColumnStyle() != null) {
@@ -149,7 +161,7 @@ public class DynamicJasperHelper implements ApplicationContextAware {
                 ServiceRendererDto serviceRendererDto = (ServiceRendererDto) column.getColumnStyle().getRenderer();
                 Map<String, Integer> rendererSqlColumnTypes =
                         getSQLColumnTypes(serviceRendererDto.getService(), serviceRendererDto.getPath(),
-                                serviceRendererDto.getEntity(), serviceRendererDto.getColumns());
+                                serviceRendererDto.getEntity(), serviceRendererDto.getColumns(), null, false);
                 type = rendererSqlColumnTypes.get(serviceRendererDto.getValueColumn());
             } else if(column.getColumnStyle().getRenderer() instanceof BooleanRendererDto) {
                 BooleanRendererDto booleanRendererDto = (BooleanRendererDto) column.getColumnStyle().getRenderer();

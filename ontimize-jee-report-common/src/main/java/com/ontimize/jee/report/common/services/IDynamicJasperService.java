@@ -13,12 +13,9 @@ import java.util.List;
 
 public interface IDynamicJasperService {
 
-    public DynamicReport buildReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
-                                     String service, String path, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto styles, String subtitle,
-                                     String language)
-            throws DynamicReportException;
+    public DynamicReport buildReport(ReportParamsDto reportParamsDto) throws DynamicReportException;
 
-    public InputStream createReport(ReportParamsDto param) throws DynamicReportException;
+    public InputStream createReport(ReportParamsDto reportParamsDto) throws DynamicReportException;
 
     public List<FunctionTypeDto> getFunctionsName(FunctionParamsDto params) throws DynamicReportException;
 }

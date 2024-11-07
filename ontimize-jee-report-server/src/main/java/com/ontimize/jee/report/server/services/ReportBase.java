@@ -1,5 +1,25 @@
 package com.ontimize.jee.report.server.services;
 
+import ar.com.fdvs.dj.core.DynamicJasperHelper;
+import ar.com.fdvs.dj.core.layout.ClassicLayoutManager;
+import ar.com.fdvs.dj.core.layout.LayoutManager;
+import ar.com.fdvs.dj.domain.DynamicReport;
+import com.ontimize.jee.report.common.dto.ColumnDto;
+import com.ontimize.jee.report.common.dto.OrderByDto;
+import com.ontimize.jee.report.common.dto.ReportParamsDto;
+import com.ontimize.jee.report.common.exception.DynamicReportException;
+import com.ontimize.jee.server.rest.FilterParameter;
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
@@ -9,29 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.ontimize.jee.report.common.dto.ColumnDto;
-import com.ontimize.jee.report.common.dto.FunctionTypeDto;
-import com.ontimize.jee.report.common.dto.OrderByDto;
-import com.ontimize.jee.report.common.dto.StyleParamsDto;
-import com.ontimize.jee.report.common.exception.DynamicReportException;
-import com.ontimize.jee.server.rest.FilterParameter;
-
-import ar.com.fdvs.dj.core.DynamicJasperHelper;
-import ar.com.fdvs.dj.core.layout.ClassicLayoutManager;
-import ar.com.fdvs.dj.core.layout.LayoutManager;
-import ar.com.fdvs.dj.domain.DynamicReport;
-import net.sf.jasperreports.engine.JRDataSource;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporterParameter;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.export.JRPdfExporter;
-import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
-
 public abstract class ReportBase {
 
     protected static final Log log = LogFactory.getLog(ReportBase.class);
@@ -39,25 +36,31 @@ public abstract class ReportBase {
     protected JasperReport jr;
     protected Map params = new HashMap();
 
-    public abstract DynamicReport buildReport(List<ColumnDto> columnsDto, String title, List<String> groups,
-            String entity, String service, String path, Boolean vertical, List<FunctionTypeDto> functions,
-            StyleParamsDto style, String subtitle, String language) throws DynamicReportException;
+    public ReportBase() {
+        // no-op
+    }
+    public abstract DynamicReport buildReport(final ReportParamsDto reportParamsDto) throws DynamicReportException;
 
     public abstract JRDataSource getDataSource(List<ColumnDto> columns, List<String> groups, List<OrderByDto> orderBy,
             String entity, String service, String path, FilterParameter filters, Boolean advQuery)
             throws DynamicReportException;
 
-    public InputStream generateReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
-            String service, String path, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto style,
-            String subtitle, List<OrderByDto> orderBy, String language, FilterParameter filters, Boolean advQuery)
-            throws DynamicReportException {
+    public InputStream generateReport(final ReportParamsDto reportParamsDto)
+        throws DynamicReportException {
 
-        DynamicReport dr = buildReport(columns, title, groups, entity, service, path, vertical, functions, style,
-                subtitle, language);
+        DynamicReport dr = buildReport(reportParamsDto);
 
         /**
          * We obtain the data source based on a collection of objects
          */
+        List<ColumnDto> columns = reportParamsDto.getColumns();
+        List<String> groups = reportParamsDto.getGroups();
+        List<OrderByDto> orderBy = reportParamsDto.getOrderBy();
+        String entity = reportParamsDto.getEntity();
+        String service = reportParamsDto.getService();
+        String path = reportParamsDto.getPath();
+        FilterParameter filters = reportParamsDto.getFilters();
+        Boolean advQuery = reportParamsDto.getAdvQuery();
         JRDataSource ds = getDataSource(columns, groups, orderBy, entity, service, path, filters, advQuery);
 
         /**

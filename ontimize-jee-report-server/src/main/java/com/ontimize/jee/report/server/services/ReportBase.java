@@ -36,7 +36,7 @@ public abstract class ReportBase {
     protected JasperReport jr;
     protected Map params = new HashMap();
 
-    public ReportBase() {
+    protected ReportBase() {
         // no-op
     }
     public abstract DynamicReport buildReport(final ReportParamsDto reportParamsDto) throws DynamicReportException;

@@ -388,8 +388,8 @@ public class DynamicJasperService extends ReportBase implements IDynamicJasperSe
             this.dynamicReportBuilderHelper = new DynamicReportBuilderHelper();
         }
 
-        ((ApplicationContextAware) this.applicationContextUtils).setApplicationContext(this.applicationContext);
-        ((ApplicationContextAware) this.dynamicJasperHelper).setApplicationContext(this.applicationContext);
+        this.applicationContextUtils.setApplicationContext(this.applicationContext);
+        this.dynamicJasperHelper.setApplicationContext(this.applicationContext);
         this.dynamicJasperHelper.setApplicationContextUtils(this.applicationContextUtils);
     }
 }

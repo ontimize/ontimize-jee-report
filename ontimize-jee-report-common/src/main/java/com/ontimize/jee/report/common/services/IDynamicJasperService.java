@@ -1,11 +1,9 @@
 package com.ontimize.jee.report.common.services;
 
 import ar.com.fdvs.dj.domain.DynamicReport;
-import com.ontimize.jee.report.common.dto.ColumnDto;
 import com.ontimize.jee.report.common.dto.FunctionParamsDto;
 import com.ontimize.jee.report.common.dto.FunctionTypeDto;
 import com.ontimize.jee.report.common.dto.ReportParamsDto;
-import com.ontimize.jee.report.common.dto.StyleParamsDto;
 import com.ontimize.jee.report.common.exception.DynamicReportException;
 
 import java.io.InputStream;

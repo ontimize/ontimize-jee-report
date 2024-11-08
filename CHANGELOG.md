@@ -11,37 +11,37 @@
 * **Report store**: Fixed problems when using parameters of Jasper Report. It was added new `ReportStoreParamsDto` object into `fillReport` API method for allowing customization of parameters as types, formattings, etc.
 ### Breaking changes
 * The `/fillReport/{id}` method of `ReportStoreRestController` has changed from:
-```
+```java
 public EntityResult fillReport(@PathVariable("id") String id,
                                    @RequestBody(required = true) Map<String, Object> bodyParams)
 ```
 to:
-```
+```java
 public EntityResult fillReport(@PathVariable("id") String id,
                                    @RequestBody(required = true) ReportStoreParamsDto bodyParams)
 ```
 
 * The `buildReport` method of `IDynamicJasperService` interface has changed from:
-```
+```java
 public DynamicReport buildReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
                                  String service, String path, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto styles, String subtitle,
                                  String language)
         throws DynamicReportException;
 ```
 to:
-```
+```java
 public DynamicReport buildReport(ReportParamsDto reportParamsDto) throws DynamicReportException;
 ```
 
 * The `generateReport` method of `ReportBase` abstract class has changed from:
-```
+```java
 public InputStream generateReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
             String service, String path, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto style,
             String subtitle, List<OrderByDto> orderBy, String language, FilterParameter filters, Boolean advQuery)
             throws DynamicReportException
 ```
 to:
-```
+```java
 public InputStream generateReport(final ReportParamsDto reportParamsDto)
         throws DynamicReportException
 ```

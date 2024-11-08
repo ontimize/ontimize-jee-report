@@ -20,6 +20,32 @@ to:
 public EntityResult fillReport(@PathVariable("id") String id,
                                    @RequestBody(required = true) ReportStoreParamsDto bodyParams)
 ```
+
+* The `buildReport` method of `IDynamicJasperService` interface has changed from:
+```
+public DynamicReport buildReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
+                                 String service, String path, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto styles, String subtitle,
+                                 String language)
+        throws DynamicReportException;
+```
+to:
+```
+public DynamicReport buildReport(ReportParamsDto reportParamsDto) throws DynamicReportException;
+```
+
+* The `generateReport` method of `ReportBase` abstract class has changed from:
+```
+public InputStream generateReport(List<ColumnDto> columns, String title, List<String> groups, String entity,
+            String service, String path, Boolean vertical, List<FunctionTypeDto> functions, StyleParamsDto style,
+            String subtitle, List<OrderByDto> orderBy, String language, FilterParameter filters, Boolean advQuery)
+            throws DynamicReportException
+```
+to:
+```
+public InputStream generateReport(final ReportParamsDto reportParamsDto)
+        throws DynamicReportException
+```
+
 ## [3.4.0] - 2024-02-23
 ### Added ✔️
 * **JaCoCo**: Add JaCoCo coverage on Sonar

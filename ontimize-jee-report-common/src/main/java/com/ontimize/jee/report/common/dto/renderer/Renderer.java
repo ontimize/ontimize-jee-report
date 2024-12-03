@@ -24,4 +24,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 public interface Renderer {
 
     String getType();
+
+    String getFormat();
 }

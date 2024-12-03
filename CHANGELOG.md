@@ -9,6 +9,7 @@
 ## [Unreleased]
 ### Fixed 🐛
 * **Report store**: Fixed problems when using parameters of Jasper Report. It was added new `ReportStoreParamsDto` object into `fillReport` API method for allowing customization of parameters as types, formattings, etc.
+* **Report on demand**: Fixed problem when using BigDecimals when filling reports.
 ### Breaking changes
 * The `/fillReport/{id}` method of `ReportStoreRestController` has changed from:
 ```java

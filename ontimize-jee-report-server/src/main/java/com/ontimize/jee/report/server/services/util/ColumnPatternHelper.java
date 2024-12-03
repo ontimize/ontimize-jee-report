@@ -25,26 +25,29 @@ public class ColumnPatternHelper {
 
     public static String getPatternForClass(Class<?> type, final RendererDto rendererDto, final Locale locale) {
         String pattern = null;
-        if (Long.class.isAssignableFrom(type)
+         if (Long.class.isAssignableFrom(type)
                 || Integer.class.isAssignableFrom(type)) {
             IntegerRendererDto renderer = rendererDto instanceof IntegerRendererDto ? (IntegerRendererDto) rendererDto : null;
             pattern = integerPattern(renderer);
         } else if (Number.class.isAssignableFrom(type)) {
-            if (rendererDto instanceof CurrencyRendererDto) {
-                pattern = currencyPattern((CurrencyRendererDto) rendererDto);
-            } else if (rendererDto instanceof RealRendererDto) {
-                pattern = realPattern((RealRendererDto) rendererDto);
-            } else {
-                pattern = defaultRealPattern;
-            }
-        } else if (Date.class.isAssignableFrom(type)
+             if (rendererDto != null && !StringUtils.isBlank(rendererDto.getFormat())) {
+                 // If the format is not empty, we use it and has priority over the other formats.
+                 pattern = rendererDto.getFormat();
+             } else if (rendererDto instanceof CurrencyRendererDto) {
+                 pattern = currencyPattern((CurrencyRendererDto) rendererDto);
+             } else if (rendererDto instanceof RealRendererDto) {
+                 pattern = realPattern((RealRendererDto) rendererDto);
+             } else {
+                 pattern = defaultRealPattern;
+             }
+         } else if (Date.class.isAssignableFrom(type)
                 || LocalDate.class.isAssignableFrom(type)) {
             DateRendererDto renderer = rendererDto instanceof DateRendererDto ? (DateRendererDto) rendererDto : null;
             pattern = datePattern(renderer, locale);
         } else if (LocalDateTime.class.isAssignableFrom(type)) {
             DateRendererDto renderer = rendererDto instanceof DateRendererDto ? (DateRendererDto) rendererDto : null;
             pattern = dateTimePattern(renderer, locale);
-        } 
+        }
 
         return pattern;
     }

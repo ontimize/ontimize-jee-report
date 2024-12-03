@@ -1,5 +1,6 @@
 package com.ontimize.jee.report.common.util;
 
+import java.math.BigDecimal;
 import java.sql.Types;
 import java.util.Collection;
 import java.util.Date;
@@ -16,6 +17,7 @@ public class TypeMappingsUtils {
             DOUBLE = "Double",
             DATE = "Date",
             INTEGER = "Integer",
+            BIGDECIMAL = "BigDecimal",
 
     STRING_PATH = "java.lang.String",
             BOOLEAN_PATH = "java.lang.Boolean",
@@ -24,7 +26,8 @@ public class TypeMappingsUtils {
             DOUBLE_PATH = "java.lang.Double",
             DATE_PATH = "java.util.Date",
             TIMESTAMP_PATH = "ava.sql.Timestamp",
-            INTEGER_PATH = "java.lang.Integer";
+            INTEGER_PATH = "java.lang.Integer",
+            BIGDECIMAL_PATH = "java.math.BigDecimal";
 
     @SuppressWarnings("rawtypes")
     public static Class getClass(int type) {
@@ -47,9 +50,11 @@ public class TypeMappingsUtils {
             case Types.DOUBLE:
             case Types.DECIMAL:
             case Types.REAL:
-            case Types.NUMERIC:
             case Types.FLOAT:
                 return Double.class;
+
+            case Types.NUMERIC:
+                return BigDecimal.class;
 
             case Types.DATE:
             case Types.TIME:
@@ -92,9 +97,11 @@ public class TypeMappingsUtils {
             case Types.DOUBLE:
             case Types.DECIMAL:
             case Types.REAL:
-            case Types.NUMERIC:
             case Types.FLOAT:
                 return DOUBLE_PATH;
+
+            case Types.NUMERIC:
+                return BIGDECIMAL_PATH;
 
             case Types.DATE:
             case Types.TIME:
@@ -129,20 +136,23 @@ public class TypeMappingsUtils {
 
             case FLOAT_PATH:
                 return Types.FLOAT;
-                
+
             case DOUBLE_PATH:
                 return Types.DOUBLE;
 
+            case BIGDECIMAL_PATH:
+                return Types.NUMERIC;
+
             case DATE_PATH:
                 return Types.DATE;
-                
+
             case TIMESTAMP_PATH:
                 return Types.TIMESTAMP;
 
         }
         return Types.OTHER;
     }
-    
+
     public static int getSQLType(String type) {
         int returned = Types.OTHER;
         if (type.equalsIgnoreCase(STRING)) {
@@ -153,7 +163,9 @@ public class TypeMappingsUtils {
             returned = Types.BINARY;
         } else if (type.equalsIgnoreCase(DOUBLE)) {
             returned = Types.DOUBLE;
-        } else if (type.equalsIgnoreCase(DATE)) {
+        } else if (type.equalsIgnoreCase(BIGDECIMAL)) {
+            returned = Types.NUMERIC;
+        }else if (type.equalsIgnoreCase(DATE)) {
             returned = Types.DATE;
         } else if (type.equalsIgnoreCase(INTEGER)) {
             returned = Types.INTEGER;

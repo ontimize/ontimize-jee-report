@@ -49,6 +49,11 @@ import java.util.concurrent.ExecutionException;
 public class ReportStoreRestController extends ORestController<IReportStoreService> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportStoreRestController.class);
+    public static final String DESCRIPTION = "DESCRIPTION";
+    public static final String REPORT_TYPE = "REPORT_TYPE";
+    public static final String NAME = "NAME";
+    public static final String MAIN_REPORT_FILENAME = "MAIN_REPORT_FILENAME";
+    public static final String PARAMETERS = "PARAMETERS";
 
     @Qualifier("ReportStoreService")
     @Autowired
@@ -169,17 +174,17 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
             IReportDefinition rDef = this.parseReportEntityResult(this.reportStoreService.getReportDefinition(id));
             Map<String, Object> attr = this.fillResponse(rDef);
 
-            if (bodyParams.containsKey("NAME"))
-                attr.replace("NAME", bodyParams.get("NAME"));
-            if (bodyParams.containsKey("DESCRIPTION"))
-                attr.replace("DESCRIPTION", bodyParams.get("DESCRIPTION"));
-            if (bodyParams.containsKey("REPORT_TYPE"))
-                attr.replace("REPORT_TYPE", bodyParams.get("REPORT_TYPE"));
-            if (bodyParams.containsKey("MAIN_REPORT_FILENAME"))
-                attr.replace("MAIN_REPORT_FILENAME", bodyParams.get("MAIN_REPORT_FILENAME"));
+            if (bodyParams.containsKey(NAME))
+                attr.replace(NAME, bodyParams.get(NAME));
+            if (bodyParams.containsKey(DESCRIPTION))
+                attr.replace(DESCRIPTION, bodyParams.get(DESCRIPTION));
+            if (bodyParams.containsKey(REPORT_TYPE))
+                attr.replace(REPORT_TYPE, bodyParams.get(REPORT_TYPE));
+            if (bodyParams.containsKey(MAIN_REPORT_FILENAME))
+                attr.replace(MAIN_REPORT_FILENAME, bodyParams.get(MAIN_REPORT_FILENAME));
 
-            IReportDefinition rdef = new BasicReportDefinition(id, attr.get("NAME").toString(), attr.get("DESCRIPTION").toString(),
-                    attr.get("REPORT_TYPE").toString(), attr.get("MAIN_REPORT_FILENAME").toString());
+            IReportDefinition rdef = new BasicReportDefinition(id, attr.get(NAME).toString(), attr.get(DESCRIPTION).toString(),
+                    attr.get(REPORT_TYPE).toString(), attr.get(MAIN_REPORT_FILENAME).toString());
 
             return this.reportStoreService.updateReportDefinition(rdef);
         } catch (ReportStoreException e) {
@@ -197,13 +202,13 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
 
         Map<?, ?> resData = res.getRecordValues(0);
         uuid = (String) resData.get("UUID");
-        name = (String) resData.get("NAME");
-        description = (String) resData.get("DESCRIPTION");
-        type = (String) resData.get("REPORT_TYPE");
-        mainReportFilename = (String) resData.get("MAIN_REPORT_FILENAME");
+        name = (String) resData.get(NAME);
+        description = (String) resData.get(DESCRIPTION);
+        type = (String) resData.get(REPORT_TYPE);
+        mainReportFilename = (String) resData.get(MAIN_REPORT_FILENAME);
 
         rDef = new BasicReportDefinition(uuid, name, description, type, mainReportFilename);
-        rDef.setParameters((List<ReportParameter>) resData.get("PARAMETERS"));
+        rDef.setParameters((List<ReportParameter>) resData.get(PARAMETERS));
 
         return rDef;
     }
@@ -211,11 +216,11 @@ public class ReportStoreRestController extends ORestController<IReportStoreServi
     private Map<String, Object> fillResponse(IReportDefinition reportDefinition) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("UUID", reportDefinition.getId());
-        map.put("NAME", reportDefinition.getName());
-        map.put("DESCRIPTION", reportDefinition.getDescription());
-        map.put("MAIN_REPORT_FILENAME", reportDefinition.getMainReportFileName());
-        map.put("REPORT_TYPE", reportDefinition.getType());
-        map.put("PARAMETERS", reportDefinition.getParameters());
+        map.put(NAME, reportDefinition.getName());
+        map.put(DESCRIPTION, reportDefinition.getDescription());
+        map.put(MAIN_REPORT_FILENAME, reportDefinition.getMainReportFileName());
+        map.put(REPORT_TYPE, reportDefinition.getType());
+        map.put(PARAMETERS, reportDefinition.getParameters());
 
         return map;
     }

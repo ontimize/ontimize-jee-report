@@ -422,7 +422,7 @@
 	<modules>
 		<module>ontimize-jee-report-common</module>
 		<module>ontimize-jee-report-server</module>
-		<module>ontimize-jee-report-rest</module>
+		<!--<module>ontimize-jee-report-rest</module>-->
 		<module>ontimize-jee-report-jacoco</module>
 	</modules>
 </project>

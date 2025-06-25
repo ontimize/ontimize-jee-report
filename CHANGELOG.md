@@ -7,6 +7,7 @@
 <!-- ### Security 🛡️-->
 
 ## [Unreleased]
+## [3.6.0] - 2025-06-25
 * **TypeMappingsUtils.java**: Add *FLOAT* and *DOUBLE* as different types.
 * **DynamicJasperHelper.java**: Fix return data for *DOUBLE* or *FLOAT*.
 ## [3.5.0] - 2025-04-28
@@ -68,7 +69,8 @@ public InputStream generateReport(final ReportParamsDto reportParamsDto)
 ### Added ✔️
 * **Report on-demand**: On-demand reports can now be created with the help of Jasper Reports via HTTP requests. The parameters for creating these reports can be stored in preferences for later use.
 
-[unreleased]: https://github.com/ontimize/ontimize-jee-report/compare/3.5.0...HEAD
+[unreleased]: https://github.com/ontimize/ontimize-jee-report/compare/3.6.0...HEAD
+[3.6.0]: https://github.com/ontimize/ontimize-jee-report/compare/3.5.0...3.6.0
 [3.5.0]: https://github.com/ontimize/ontimize-jee-report/compare/3.4.0...3.5.0
 [3.4.0]: https://github.com/ontimize/ontimize-jee-report/compare/3.3.0...3.4.0
 [3.3.0]: https://github.com/ontimize/ontimize-jee-report/compare/3.2.0...3.3.0

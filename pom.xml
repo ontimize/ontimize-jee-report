@@ -87,7 +87,7 @@
 	</scm>
 
 	<properties>
-		<ontimize-jee.version>5.11.0</ontimize-jee.version>
+		<ontimize-jee.version>5.12.1</ontimize-jee.version>
 		<lingala.version>1.3.2</lingala.version>
 		<jasperreports.version>6.17.0</jasperreports.version>
 		<jasperreports-fonts.version>6.17.0</jasperreports-fonts.version>

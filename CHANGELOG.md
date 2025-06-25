@@ -7,6 +7,8 @@
 <!-- ### Security 🛡️-->
 
 ## [Unreleased]
+* **TypeMappingsUtils.java**: Add *FLOAT* and *DOUBLE* as different types.
+* **DynamicJasperHelper.java**: Fix return data for *DOUBLE* or *FLOAT*.
 ## [3.5.0] - 2025-04-28
 ### Fixed 🐛
 * **Report store**: Fixed problems when using parameters of Jasper Report. It was added new `ReportStoreParamsDto` object into `fillReport` API method for allowing customization of parameters as types, formattings, etc.

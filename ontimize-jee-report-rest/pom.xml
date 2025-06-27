@@ -20,12 +20,6 @@
 
 	<developers>
 		<developer>
-			<name>Cristóbal Miguel Vázquez Carde</name>
-			<email>cmiguel.vazquez@imatia.com</email>
-			<organization>Imatia Innovation</organization>
-			<organizationUrl>http://imatia.com</organizationUrl>
-		</developer>
-		<developer>
 			<name>Enrique Álvarez Pereira</name>
 			<email>enrique.alvarez@imatia.com</email>
 			<organization>Imatia Innovation</organization>
@@ -73,7 +67,7 @@
 	<scm>
 		<connection>scm:git:git://github.com/ontimize/ontimize-jee-report.git</connection>
 		<developerConnection>scm:git:ssh://github.com:ontimize/ontimize-jee-report.git</developerConnection>
-		<url>https://github.com/ontimize/ontimize-jee-report/tree/master</url>
+		<url>https://github.com/ontimize/ontimize-jee-report/tree/main</url>
 	</scm>
 
 	<dependencies>

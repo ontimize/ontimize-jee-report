@@ -8,6 +8,67 @@
     </parent>
     <artifactId>ontimize-jee-report-jacoco</artifactId>
 
+	<organization>
+		<name>Imatia Innovation</name>
+		<url>http://imatia.com</url>
+	</organization>
+
+	<name>Ontimize EE Java Code Coverage (Jacoco Module)</name>
+	<description>Ontimize EE Java Code Coverage (Jacoco Module)</description>
+	<url>https://www.ontimize.com</url>
+
+	<developers>
+		<developer>
+			<name>Enrique Álvarez Pereira</name>
+			<email>enrique.alvarez@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Faustino Lage Rego</name>
+			<email>faustino.lage@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Joaquín Romero Riveiro</name>
+			<email>joaquin.romero@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Jorge Díaz Seijo</name>
+			<email>jorge.diaz@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Pablo Martínez Kirsten</name>
+			<email>pablo.martinez@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Tomás Fuentes Facal</name>
+			<email>tomas.fuentes@imatia.com</email>
+			<organization>Imatia Innovation</organization>
+			<organizationUrl>http://imatia.com</organizationUrl>
+		</developer>
+	</developers>
+
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+
+	<scm>
+		<connection>scm:git:git://github.com/ontimize/ontimize-jee-report.git</connection>
+		<developerConnection>scm:git:ssh://github.com:ontimize/ontimize-jee-report.git</developerConnection>
+		<url>https://github.com/ontimize/ontimize-jee-report/tree/main</url>
+	</scm>
+
     <dependencies>
         <dependency>
             <groupId>com.ontimize.jee.report</groupId>
